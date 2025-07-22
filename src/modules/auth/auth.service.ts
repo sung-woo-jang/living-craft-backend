@@ -14,6 +14,14 @@ import { VerifyGuestRequestDto } from './dto/request/verify-guest-request.dto';
 import { LoginResponseDto } from './dto/response/login-response.dto';
 import { PhoneUtil } from '@common/utils/phone.util';
 
+export interface JwtPayload {
+  sub: number;
+  email?: string;
+  role: UserRole;
+  iat?: number;
+  exp?: number;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -89,7 +97,7 @@ export class AuthService {
 
     if (!user) {
       // 신규 사용자 생성
-      const phone = mobile ? PhoneUtil.normalize(mobile) : null;
+      const phone = mobile ? PhoneUtil.normalizeForStorage(mobile) : null;
       user = await this.usersService.create({
         naverId,
         email,
@@ -136,9 +144,9 @@ export class AuthService {
       throw new BadRequestException('존재하지 않는 예약번호입니다.');
     }
 
-    // 전화번호 정규화 후 비교
-    const normalizedInputPhone = PhoneUtil.normalize(phone);
-    const normalizedReservationPhone = PhoneUtil.normalize(
+    // 전화번호 정규화 후 비교 (저장된 형식으로 비교)
+    const normalizedInputPhone = PhoneUtil.normalizeForStorage(phone);
+    const normalizedReservationPhone = PhoneUtil.normalizeForStorage(
       reservation.customerPhone,
     );
 
@@ -161,6 +169,57 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
+  }
+
+  /**
+   * JWT 페이로드 검증 (Strategy에서 사용)
+   */
+  async validateJwtPayload(payload: JwtPayload): Promise<any> {
+    const user = await this.usersService.findById(payload.sub);
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException(
+        '사용자를 찾을 수 없거나 비활성화된 계정입니다.',
+      );
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+    };
+  }
+
+  /**
+   * 사용자 검증 (Local Strategy에서 사용)
+   */
+  async validateUser(email: string, password: string): Promise<any> {
+    // 관리자 계정 확인
+    const adminEmail = this.configService.get<string>('admin.email');
+    const adminPassword = this.configService.get<string>('admin.password');
+
+    if (email === adminEmail) {
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        await this.hashPassword(adminPassword),
+      );
+      if (isPasswordValid || password === adminPassword) {
+        let adminUser = await this.usersService.findByEmail(email);
+        if (!adminUser) {
+          adminUser = await this.usersService.create({
+            email,
+            name: '관리자',
+            phone: '010-0000-0000',
+            role: UserRole.ADMIN,
+          });
+        }
+        const { ...result } = adminUser;
+        return result;
+      }
+    }
+
+    // 일반 사용자는 OAuth만 지원
+    return null;
   }
 
   /**

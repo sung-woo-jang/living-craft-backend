@@ -1,11 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import { UserProfile } from './entities/user-profile.entity';
 import { UserRole } from '@common/enums';
 import { PhoneUtil } from '@common/utils/phone.util';
 import { PaginationRequestDto } from '@common/dto/request/pagination-request.dto';
 import { PaginationMetaDto } from '@common/dto/response/success-base-response.dto';
+import * as bcrypt from 'bcrypt';
 
 export interface CreateUserData {
   email?: string;
@@ -29,15 +35,31 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserProfile)
+    private readonly userProfileRepository: Repository<UserProfile>,
   ) {}
 
   /**
    * 사용자 생성
    */
   async create(userData: CreateUserData): Promise<User> {
+    // 이메일 중복 확인
+    if (userData.email) {
+      const existingUserByEmail = await this.findByEmail(userData.email);
+      if (existingUserByEmail) {
+        throw new ConflictException('이미 사용 중인 이메일입니다.');
+      }
+    }
+
+    // 전화번호 중복 확인
+    const existingUserByPhone = await this.findByPhone(userData.phone);
+    if (existingUserByPhone) {
+      throw new ConflictException('이미 사용 중인 전화번호입니다.');
+    }
+
     const user = this.userRepository.create({
       ...userData,
-      phone: PhoneUtil.normalize(userData.phone),
+      phone: PhoneUtil.normalizeForStorage(userData.phone),
     });
 
     return this.userRepository.save(user);
@@ -47,10 +69,16 @@ export class UsersService {
    * ID로 사용자 조회
    */
   async findById(id: number): Promise<User | null> {
-    return this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { id },
       relations: ['reservations', 'reviews'],
     });
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    return user;
   }
 
   /**
@@ -75,7 +103,7 @@ export class UsersService {
    * 전화번호로 사용자 조회
    */
   async findByPhone(phone: string): Promise<User | null> {
-    const normalizedPhone = PhoneUtil.normalize(phone);
+    const normalizedPhone = PhoneUtil.normalizeForStorage(phone);
     return this.userRepository.findOne({
       where: { phone: normalizedPhone },
     });
@@ -134,14 +162,18 @@ export class UsersService {
    * 사용자 정보 수정
    */
   async update(id: number, updateData: UpdateUserData): Promise<User> {
-    const user = await this.findById(id);
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
 
-    // 전화번호 정규화
-    if (updateData.phone) {
-      updateData.phone = PhoneUtil.normalize(updateData.phone);
+    // 전화번호 변경 시 중복 확인
+    if (updateData.phone && updateData.phone !== user.phone) {
+      const existingUserByPhone = await this.findByPhone(updateData.phone);
+      if (existingUserByPhone && existingUserByPhone.id !== id) {
+        throw new ConflictException('이미 사용 중인 전화번호입니다.');
+      }
+      updateData.phone = PhoneUtil.normalizeForStorage(updateData.phone);
     }
 
     Object.assign(user, updateData);
@@ -217,7 +249,75 @@ export class UsersService {
    * 관리자 권한 확인
    */
   async isAdmin(id: number): Promise<boolean> {
-    const user = await this.findById(id);
-    return user?.role === UserRole.ADMIN ?? false;
+    const user = await this.userRepository.findOne({ where: { id } });
+    return user?.role === UserRole.ADMIN || false;
+  }
+
+  /**
+   * 사용자 프로필 조회
+   */
+  async getProfile(userId: number): Promise<UserProfile> {
+    const profile = await this.userProfileRepository.findOne({
+      where: { userId },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('프로필을 찾을 수 없습니다.');
+    }
+
+    return profile;
+  }
+
+  /**
+   * 사용자 프로필 수정
+   */
+  async updateProfile(
+    userId: number,
+    updateData: Partial<UserProfile>,
+  ): Promise<UserProfile> {
+    const profile = await this.getProfile(userId);
+
+    Object.assign(profile, updateData);
+    return this.userProfileRepository.save(profile);
+  }
+
+  /**
+   * 사용자 삭제
+   */
+  async delete(id: number): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    await this.userRepository.softDelete(id);
+  }
+
+  /**
+   * 사용자 인증 (로그인용)
+   */
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'name', 'phone', 'role', 'isActive', 'password'],
+    });
+
+    if (!user || !user.isActive) {
+      return null;
+    }
+
+    // 패스워드가 없는 경우 (OAuth 전용 사용자)
+    if (!user.password) {
+      return null;
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    // 패스워드 제거 후 반환
+    delete user.password;
+    return user;
   }
 }

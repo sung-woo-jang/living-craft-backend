@@ -90,6 +90,7 @@ describe('UsersService', () => {
       email: 'new@example.com',
       name: '새 사용자',
       phone: '01087654321',
+      role: UserRole.CUSTOMER,
     };
 
     it('should create a user successfully', async () => {

@@ -65,7 +65,7 @@ export class ReservationsService {
       reservationCode,
       serviceId: createDto.serviceId,
       customerName: createDto.customerName,
-      customerPhone: PhoneUtil.normalize(createDto.customerPhone),
+      customerPhone: PhoneUtil.normalizeForStorage(createDto.customerPhone),
       customerEmail: createDto.customerEmail,
       serviceAddress: createDto.serviceAddress,
       serviceDate: new Date(createDto.serviceDate),
@@ -261,7 +261,9 @@ export class ReservationsService {
 
     // 전화번호 정규화
     if (updateData.customerPhone) {
-      updateData.customerPhone = PhoneUtil.normalize(updateData.customerPhone);
+      updateData.customerPhone = PhoneUtil.normalizeForStorage(
+        updateData.customerPhone,
+      );
     }
 
     Object.assign(reservation, updateData);

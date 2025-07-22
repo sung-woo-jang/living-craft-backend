@@ -142,9 +142,17 @@ export class ServicesService {
   /**
    * 서비스 삭제
    */
-  async remove(id: number): Promise<void> {
+  async delete(id: number): Promise<void> {
     const service = await this.findById(id);
     await this.serviceRepository.remove(service);
+  }
+
+  /**
+   * 서비스 삭제 (소프트 삭제)
+   */
+  async remove(id: number): Promise<void> {
+    const service = await this.findById(id);
+    await this.serviceRepository.softDelete(id);
   }
 
   /**
@@ -225,5 +233,40 @@ export class ServicesService {
     const service = await this.findById(id);
     service.displayOrder = displayOrder;
     return this.serviceRepository.save(service);
+  }
+
+  /**
+   * 서비스 통계
+   */
+  async getServiceStats(): Promise<{
+    total: number;
+    fixed: number;
+    custom: number;
+    active: number;
+  }> {
+    const total = await this.serviceRepository.count();
+    const fixed = await this.serviceRepository.count({
+      where: { type: ServiceType.FIXED },
+    });
+    const custom = await this.serviceRepository.count({
+      where: { type: ServiceType.CUSTOM },
+    });
+    const active = await this.serviceRepository.count({
+      where: { isActive: true },
+    });
+
+    return { total, fixed, custom, active };
+  }
+
+  /**
+   * 예약 가능 여부 확인
+   */
+  async isAvailableForReservation(id: number): Promise<boolean> {
+    const service = await this.serviceRepository.findOne({
+      where: { id },
+      select: ['id', 'isActive'],
+    });
+
+    return service?.isActive || false;
   }
 }

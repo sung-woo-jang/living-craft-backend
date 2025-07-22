@@ -134,7 +134,6 @@ export class ServicesRepository {
     serviceId: number,
     imageUrl: string,
     isMain: boolean = false,
-    description?: string,
   ): Promise<ServiceImage> {
     // 메인 이미지가 되는 경우 기존 메인 이미지를 해제
     if (isMain) {
@@ -156,7 +155,6 @@ export class ServicesRepository {
       serviceId,
       imageUrl,
       isMain,
-      description,
       displayOrder,
     });
 

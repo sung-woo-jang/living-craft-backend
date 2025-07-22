@@ -1,121 +1,46 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { ServiceType } from '@common/enums';
-
-export class ServiceImageResponseDto {
-  @ApiProperty({
-    description: 'ID',
-    example: 1,
-  })
-  @Expose()
-  id: number;
-
-  @ApiProperty({
-    description: '이미지 URL',
-    example: '/uploads/services/image.jpg',
-  })
-  @Expose()
-  imageUrl: string;
-
-  @ApiProperty({
-    description: '메인 이미지 여부',
-    example: true,
-  })
-  @Expose()
-  isMain: boolean;
-
-  @ApiProperty({
-    description: '표시 순서',
-    example: 1,
-  })
-  @Expose()
-  displayOrder: number;
-
-  constructor(partial: Partial<ServiceImageResponseDto>) {
-    Object.assign(this, partial);
-  }
-}
+import { Service } from '../../entities/service.entity';
 
 export class ServiceResponseDto {
-  @ApiProperty({
-    description: 'ID',
-    example: 1,
-  })
-  @Expose()
+  @ApiProperty()
   id: number;
 
-  @ApiProperty({
-    description: '서비스명',
-    example: '일반 청소',
-  })
-  @Expose()
+  @ApiProperty()
   name: string;
 
-  @ApiProperty({
-    description: '서비스 설명',
-    example: '일반적인 집 청소 서비스입니다.',
-  })
-  @Expose()
+  @ApiProperty()
   description: string;
 
-  @ApiProperty({
-    description: '서비스 타입',
-    enum: ServiceType,
-    example: ServiceType.FIXED,
-  })
-  @Expose()
+  @ApiProperty({ enum: ServiceType })
   type: ServiceType;
 
-  @ApiProperty({
-    description: '가격 (정찰제만)',
-    example: 50000,
-    required: false,
-  })
-  @Expose()
+  @ApiProperty({ nullable: true })
   price?: number;
 
-  @ApiProperty({
-    description: '예상 소요시간 (분)',
-    example: 120,
-  })
-  @Expose()
+  @ApiProperty()
   duration: number;
 
-  @ApiProperty({
-    description: '활성화 상태',
-    example: true,
-  })
-  @Expose()
+  @ApiProperty()
   isActive: boolean;
 
-  @ApiProperty({
-    description: '표시 순서',
-    example: 1,
-  })
-  @Expose()
+  @ApiProperty()
   displayOrder: number;
 
-  @ApiProperty({
-    description: '서비스 이미지 목록',
-    type: [ServiceImageResponseDto],
-  })
-  @Expose()
-  @Type(() => ServiceImageResponseDto)
-  images: ServiceImageResponseDto[];
-
-  @ApiProperty({
-    description: '생성일시',
-  })
-  @Expose()
+  @ApiProperty()
   createdAt: Date;
 
-  @ApiProperty({
-    description: '수정일시',
-  })
-  @Expose()
+  @ApiProperty()
   updatedAt: Date;
 
-  constructor(partial: Partial<ServiceResponseDto>) {
-    Object.assign(this, partial);
+  constructor() {
+    // 기본 생성자
+  }
+
+  static fromEntity(service: Service): ServiceResponseDto {
+    return plainToClass(ServiceResponseDto, service, {
+      excludeExtraneousValues: false,
+    });
   }
 }

@@ -4,6 +4,7 @@ import { ServicesService } from './services.service';
 import { ServicesRepository } from './services.repository';
 import { ServiceType } from '@/common/enums';
 import { Service } from './entities/service.entity';
+import { SortOrder } from '@common/dto/request/pagination-request.dto';
 
 describe('ServicesService', () => {
   let service: ServicesService;
@@ -18,10 +19,10 @@ describe('ServicesService', () => {
     duration: 120,
     isActive: true,
     displayOrder: 1,
-    mainImageUrl: '/uploads/services/main.jpg',
-    detailContent: '<p>상세 설명</p>',
     createdAt: new Date(),
     updatedAt: new Date(),
+    reservations: [],
+    images: [],
   } as Service;
 
   beforeEach(async () => {
@@ -237,7 +238,7 @@ describe('ServicesService', () => {
         skip: 0,
         take: 10,
         sortBy: 'createdAt',
-        sortOrder: 'DESC' as const,
+        sortOrder: SortOrder.DESC,
       };
 
       repository.findAll.mockResolvedValue([[mockService], 1]);
@@ -245,8 +246,8 @@ describe('ServicesService', () => {
       const result = await service.findAll(filter);
 
       expect(result).toBeDefined();
-      expect(result.data).toHaveLength(1);
-      expect(result.meta.totalItems).toBe(1);
+      expect(result.services).toHaveLength(1);
+      expect(result.meta.total).toBe(1);
       expect(repository.findAll).toHaveBeenCalledWith(filter);
     });
   });
@@ -256,14 +257,13 @@ describe('ServicesService', () => {
       repository.findById.mockResolvedValue(mockService);
       repository.addImage.mockResolvedValue(undefined);
 
-      await service.addImage(1, '/uploads/image.jpg', false, '설명');
+      await service.addImage(1, '/uploads/image.jpg', false);
 
       expect(repository.findById).toHaveBeenCalledWith(1);
       expect(repository.addImage).toHaveBeenCalledWith(
         1,
         '/uploads/image.jpg',
         false,
-        '설명',
       );
     });
 
@@ -278,39 +278,11 @@ describe('ServicesService', () => {
 
   describe('removeImage', () => {
     it('should remove image from service', async () => {
-      const serviceWithImages = {
-        ...mockService,
-        images: [{ id: 1, imageUrl: '/uploads/image.jpg' }],
-      } as any;
-
-      repository.findById.mockResolvedValue(serviceWithImages);
       repository.removeImage.mockResolvedValue(undefined);
 
-      await service.removeImage(1, 1);
+      await service.removeImage(1);
 
-      expect(repository.findById).toHaveBeenCalledWith(1);
       expect(repository.removeImage).toHaveBeenCalledWith(1);
-    });
-
-    it('should throw NotFoundException when service not found', async () => {
-      repository.findById.mockResolvedValue(null);
-
-      await expect(service.removeImage(999, 1)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it('should throw NotFoundException when image not found', async () => {
-      const serviceWithImages = {
-        ...mockService,
-        images: [],
-      } as any;
-
-      repository.findById.mockResolvedValue(serviceWithImages);
-
-      await expect(service.removeImage(1, 999)).rejects.toThrow(
-        NotFoundException,
-      );
     });
   });
 

@@ -1,6 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+
+export enum SortOrder {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
 
 export class PaginationRequestDto {
   @ApiPropertyOptional({
@@ -26,6 +31,22 @@ export class PaginationRequestDto {
   @Min(1)
   @Max(100)
   limit?: number = 10;
+
+  @ApiPropertyOptional({
+    description: '정렬 기준 필드',
+    example: 'createdAt',
+  })
+  @IsOptional()
+  sortBy?: string;
+
+  @ApiPropertyOptional({
+    description: '정렬 순서',
+    enum: SortOrder,
+    example: SortOrder.DESC,
+  })
+  @IsOptional()
+  @IsEnum(SortOrder)
+  sortOrder?: SortOrder = SortOrder.DESC;
 
   get skip(): number {
     return (this.page - 1) * this.limit;

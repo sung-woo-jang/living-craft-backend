@@ -5,6 +5,7 @@ import { BaseEntity } from '@common/entities/base.entity';
 import { UserRole } from '@common/enums';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 import { Review } from '../../reviews/entities/review.entity';
+import { OAuthAccount } from './oauth-account.entity';
 
 @Entity('users')
 @Index(['email'], { unique: true, where: 'email IS NOT NULL' })
@@ -30,6 +31,14 @@ export class User extends BaseEntity {
   })
   @Column({ length: 20 })
   phone: string;
+
+  @ApiProperty({
+    description: '비밀번호 (관리자용)',
+    required: false,
+  })
+  @Column({ nullable: true, select: false })
+  @Exclude()
+  password?: string;
 
   @ApiProperty({
     description: '사용자 역할',
@@ -88,12 +97,24 @@ export class User extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   lastReservationAt?: Date;
 
+  @ApiProperty({
+    description: '마지막 로그인일',
+    required: false,
+  })
+  @Column({ type: 'timestamp', nullable: true })
+  lastLoginAt?: Date;
+
   // Relations
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   reservations: Reservation[];
 
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
+
+  @OneToMany(() => OAuthAccount, (oauthAccount) => oauthAccount.user, {
+    cascade: true,
+  })
+  oauthAccounts: OAuthAccount[];
 
   constructor(partial: Partial<User> = {}) {
     super();

@@ -45,10 +45,11 @@ export class UsersController {
     const userData = await this.usersService.findById(user.sub);
 
     // 전화번호 마스킹
-    const responseData = new UserResponseDto({
+    const maskedUser = {
       ...userData,
       phone: PhoneUtil.mask(userData.phone),
-    });
+    };
+    const responseData = UserResponseDto.fromEntity(maskedUser);
 
     return new SuccessBaseResponseDto(
       '사용자 정보를 조회했습니다.',
@@ -72,10 +73,11 @@ export class UsersController {
   ): Promise<SuccessBaseResponseDto<UserResponseDto>> {
     const updatedUser = await this.usersService.update(user.sub, updateData);
 
-    const responseData = new UserResponseDto({
+    const maskedUser = {
       ...updatedUser,
       phone: PhoneUtil.mask(updatedUser.phone),
-    });
+    };
+    const responseData = UserResponseDto.fromEntity(maskedUser);
 
     return new SuccessBaseResponseDto(
       '사용자 정보를 수정했습니다.',
@@ -101,7 +103,7 @@ export class UsersController {
     const { users, meta } =
       await this.usersService.findCustomers(paginationDto);
 
-    const responseData = users.map((user) => new UserResponseDto(user));
+    const responseData = users.map((user) => UserResponseDto.fromEntity(user));
 
     return new PaginatedResponseDto(
       '고객 목록을 조회했습니다.',
@@ -131,7 +133,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SuccessBaseResponseDto<UserResponseDto>> {
     const user = await this.usersService.findById(id);
-    const responseData = new UserResponseDto(user);
+    const responseData = UserResponseDto.fromEntity(user);
 
     return new SuccessBaseResponseDto(
       '사용자 정보를 조회했습니다.',
@@ -161,7 +163,7 @@ export class UsersController {
     @Body() updateData: UpdateUserData,
   ): Promise<SuccessBaseResponseDto<UserResponseDto>> {
     const updatedUser = await this.usersService.update(id, updateData);
-    const responseData = new UserResponseDto(updatedUser);
+    const responseData = UserResponseDto.fromEntity(updatedUser);
 
     return new SuccessBaseResponseDto(
       '사용자 정보를 수정했습니다.',
@@ -190,7 +192,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SuccessBaseResponseDto<UserResponseDto>> {
     const user = await this.usersService.deactivate(id);
-    const responseData = new UserResponseDto(user);
+    const responseData = UserResponseDto.fromEntity(user);
 
     return new SuccessBaseResponseDto(
       '사용자를 비활성화했습니다.',
@@ -219,7 +221,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SuccessBaseResponseDto<UserResponseDto>> {
     const user = await this.usersService.activate(id);
-    const responseData = new UserResponseDto(user);
+    const responseData = UserResponseDto.fromEntity(user);
 
     return new SuccessBaseResponseDto('사용자를 활성화했습니다.', responseData);
   }

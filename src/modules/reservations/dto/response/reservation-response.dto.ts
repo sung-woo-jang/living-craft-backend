@@ -1,8 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { Expose, Type, plainToClass } from 'class-transformer';
 import { ReservationStatus } from '@common/enums';
-import { ServiceResponseDto } from '../../services/dto/response/service-response.dto';
-import { UserResponseDto } from '../../users/dto/response/user-response.dto';
+import { ServiceResponseDto } from '../../../services/dto/response/service-response.dto';
+import { UserResponseDto } from '../../../users/dto/response/user-response.dto';
+import { Reservation } from '../../entities/reservation.entity';
 
 export class ReservationResponseDto {
   @ApiProperty({
@@ -121,7 +122,25 @@ export class ReservationResponseDto {
   @Expose()
   updatedAt: Date;
 
-  constructor(partial: Partial<ReservationResponseDto>) {
+  constructor(partial: Partial<ReservationResponseDto> = {}) {
     Object.assign(this, partial);
+  }
+
+  static fromEntity(reservation: Reservation): ReservationResponseDto {
+    return plainToClass(
+      ReservationResponseDto,
+      {
+        ...reservation,
+        service: reservation.service
+          ? plainToClass(ServiceResponseDto, reservation.service)
+          : undefined,
+        user: reservation.user
+          ? plainToClass(UserResponseDto, reservation.user)
+          : undefined,
+      },
+      {
+        excludeExtraneousValues: true,
+      },
+    );
   }
 }

@@ -1,44 +1,31 @@
 export class PhoneUtil {
   /**
-   * 전화번호 형식 정규화 (010-1234-5678 형태로 변환)
-   * @param phone 전화번호
-   * @returns 정규화된 전화번호
+   * 전화번호에서 하이픈 제거
+   */
+  static removeHyphen(phone: string): string {
+    return phone.replace(/-/g, '');
+  }
+
+  /**
+   * 전화번호 정규화 (표준 하이픈 형식으로 변환)
    */
   static normalize(phone: string): string {
     // 숫자만 추출
-    const digits = phone.replace(/\D/g, '');
+    const digitsOnly = phone.replace(/[^\d]/g, '');
 
-    // 010으로 시작하는 휴대폰 번호 처리
-    if (digits.length === 11 && digits.startsWith('010')) {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+    // 휴대폰 번호 (11자리, 010으로 시작)
+    if (digitsOnly.length === 11 && digitsOnly.startsWith('010')) {
+      return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 7)}-${digitsOnly.slice(7)}`;
     }
 
-    // 02로 시작하는 서울 지역번호 처리 (10자리)
-    if (digits.length === 10 && digits.startsWith('02')) {
-      return `${digits.slice(0, 2)}-${digits.slice(2, 6)}-${digits.slice(6)}`;
+    // 서울 지역번호 (10자리, 02로 시작)
+    if (digitsOnly.length === 10 && digitsOnly.startsWith('02')) {
+      return `${digitsOnly.slice(0, 2)}-${digitsOnly.slice(2, 6)}-${digitsOnly.slice(6)}`;
     }
 
-    // 기타 지역번호 처리 (11자리)
-    if (
-      digits.length === 11 &&
-      (digits.startsWith('031') ||
-        digits.startsWith('032') ||
-        digits.startsWith('033') ||
-        digits.startsWith('041') ||
-        digits.startsWith('042') ||
-        digits.startsWith('043') ||
-        digits.startsWith('044') ||
-        digits.startsWith('051') ||
-        digits.startsWith('052') ||
-        digits.startsWith('053') ||
-        digits.startsWith('054') ||
-        digits.startsWith('055') ||
-        digits.startsWith('061') ||
-        digits.startsWith('062') ||
-        digits.startsWith('063') ||
-        digits.startsWith('064'))
-    ) {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+    // 기타 지역번호 (11자리, 03~06으로 시작)
+    if (digitsOnly.length === 11 && /^0[3-6]/.test(digitsOnly)) {
+      return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 7)}-${digitsOnly.slice(7)}`;
     }
 
     // 변환할 수 없는 경우 원본 반환
@@ -46,52 +33,74 @@ export class PhoneUtil {
   }
 
   /**
-   * 전화번호 유효성 검사
-   * @param phone 전화번호
-   * @returns 유효성 여부
+   * 데이터베이스 저장용 정규화 (하이픈 제거)
    */
-  static isValid(phone: string): boolean {
-    const normalized = this.normalize(phone);
-
-    // 정규화된 전화번호가 올바른 형식인지 확인
-    const patterns = [
-      /^010-\d{4}-\d{4}$/, // 휴대폰
-      /^02-\d{4}-\d{4}$/, // 서울
-      /^0\d{2}-\d{4}-\d{4}$/, // 기타 지역
-    ];
-
-    return patterns.some((pattern) => pattern.test(normalized));
+  static normalizeForStorage(phone: string): string {
+    // 공백, 하이픈, 괄호 등 특수문자 제거
+    return phone.replace(/[\s\-\(\)]/g, '');
   }
 
   /**
    * 전화번호 마스킹 (개인정보 보호)
-   * @param phone 전화번호
-   * @returns 마스킹된 전화번호 (예: 010-****-5678)
+   * 010-1234-5678 -> 010-****-5678
    */
   static mask(phone: string): string {
-    const normalized = this.normalize(phone);
+    // 하이픈이 없는 경우 먼저 정규화 시도
+    const normalized = phone.includes('-') ? phone : this.normalize(phone);
 
-    if (normalized.match(/^010-\d{4}-\d{4}$/)) {
-      return normalized.replace(/(\d{3})-(\d{4})-(\d{4})/, '$1-****-$3');
+    // 정규화된 형식인지 확인 (하이픈 포함)
+    if (normalized.includes('-')) {
+      const parts = normalized.split('-');
+      if (parts.length === 3) {
+        return `${parts[0]}-****-${parts[2]}`;
+      }
     }
 
-    if (normalized.match(/^02-\d{4}-\d{4}$/)) {
-      return normalized.replace(/(\d{2})-(\d{4})-(\d{4})/, '$1-****-$3');
-    }
-
-    if (normalized.match(/^0\d{2}-\d{4}-\d{4}$/)) {
-      return normalized.replace(/(\d{3})-(\d{4})-(\d{4})/, '$1-****-$3');
-    }
-
+    // 마스킹할 수 없는 경우 원본 반환
     return phone;
   }
 
   /**
-   * 하이픈 제거
-   * @param phone 전화번호
-   * @returns 하이픈이 제거된 전화번호
+   * 전화번호 형식 검증
    */
-  static removeHyphen(phone: string): string {
-    return phone.replace(/-/g, '');
+  static isValid(phone: string): boolean {
+    // 정규화 시도
+    const normalized = this.normalize(phone);
+
+    // 정규화가 성공했는지 확인 (하이픈이 포함되어야 함)
+    if (!normalized.includes('-')) {
+      return false;
+    }
+
+    const parts = normalized.split('-');
+    if (parts.length !== 3) {
+      return false;
+    }
+
+    const [area, middle, last] = parts;
+
+    // 휴대폰 번호 검증 (010-XXXX-XXXX)
+    if (area === '010') {
+      return middle.length === 4 && last.length === 4;
+    }
+
+    // 서울 지역번호 검증 (02-XXXX-XXXX)
+    if (area === '02') {
+      return middle.length === 4 && last.length === 4;
+    }
+
+    // 기타 지역번호 검증 (0XX-XXXX-XXXX)
+    if (area.length === 3 && /^0[3-6]\d$/.test(area)) {
+      return middle.length === 4 && last.length === 4;
+    }
+
+    return false;
+  }
+
+  /**
+   * 전화번호 포맷팅 (표시용) - normalize와 동일
+   */
+  static format(phone: string): string {
+    return this.normalize(phone);
   }
 }
