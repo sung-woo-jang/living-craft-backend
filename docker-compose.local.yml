@@ -1,56 +1,89 @@
+# 개발환경용 Docker Compose
 version: '3.8'
 
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database (개발용)
   postgres:
     image: postgres:15-alpine
-    container_name: reservation_postgres_local
+    container_name: reservation_postgres_dev
     restart: unless-stopped
     environment:
-      POSTGRES_DB: reservation_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: ${DATABASE_NAME:-reservation_dev}
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password123}
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data_local:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
+      # init.sql이 있다면 자동 실행
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - reservation_network
+      - reservation_dev_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Redis for Bull Queue
+  # Redis for Bull Queue (개발용)
   redis:
-    image: redis:7-alpine
-    container_name: reservation_redis_local
+    image: redis:7.2-alpine  # 구체적인 버전 지정
+    container_name: reservation_redis_dev
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data_local:/data
+      - redis_data_dev:/data
     networks:
-      - reservation_network
+      - reservation_dev_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   # pgAdmin for database management
   pgadmin:
-    image: dpage/pgadmin4
-    container_name: reservation_pgadmin_local
+    image: dpage/pgadmin4:latest
+    container_name: reservation_pgadmin_dev
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@reservation.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@reservation.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5050:80"
     volumes:
-      - pgadmin_data_local:/var/lib/pgadmin
+      - pgadmin_data_dev:/var/lib/pgadmin
     networks:
-      - reservation_network
+      - reservation_dev_network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+  # Redis Commander (개발 편의를 위한 Redis 관리 도구)
+  redis-commander:
+    image: rediscommander/redis-commander:0.8.1  # 안정적인 버전 지정
+    container_name: reservation_redis_commander_dev
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8081:8081"
+    networks:
+      - reservation_dev_network
+    depends_on:
+      redis:
+        condition: service_healthy
 
 volumes:
-  postgres_data_local:
-  redis_data_local:
-  pgadmin_data_local:
+  postgres_data_dev:
+  redis_data_dev:
+  pgadmin_data_dev:
 
 networks:
-  reservation_network:
+  reservation_dev_network:
     driver: bridge
