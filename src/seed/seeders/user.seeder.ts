@@ -49,9 +49,11 @@ export class UserSeeder {
     ];
 
     for (const customerData of customers) {
-      const existingCustomer = customerData.email 
+      const existingCustomer = customerData.email
         ? await userRepository.findOne({ where: { email: customerData.email } })
-        : await userRepository.findOne({ where: { phone: customerData.phone } });
+        : await userRepository.findOne({
+            where: { phone: customerData.phone },
+          });
 
       if (!existingCustomer) {
         const customer = userRepository.create({

@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne, OneToOne, OneToMany, JoinColumn, Index } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
 import { ReservationStatus } from '@common/enums';
@@ -99,24 +106,24 @@ export class Reservation extends BaseEntity {
   isPaid: boolean;
 
   // Relations
-  @ManyToOne(() => User, user => user.reservations, { nullable: true })
+  @ManyToOne(() => User, (user) => user.reservations, { nullable: true })
   @JoinColumn({ name: 'userId' })
   user?: User;
 
   @Column({ nullable: true })
   userId?: number;
 
-  @ManyToOne(() => Service, service => service.reservations)
+  @ManyToOne(() => Service, (service) => service.reservations)
   @JoinColumn({ name: 'serviceId' })
   service: Service;
 
   @Column()
   serviceId: number;
 
-  @OneToOne(() => Quote, quote => quote.reservation, { cascade: true })
+  @OneToOne(() => Quote, (quote) => quote.reservation, { cascade: true })
   quote?: Quote;
 
-  @OneToOne(() => Review, review => review.reservation)
+  @OneToOne(() => Review, (review) => review.reservation)
   review?: Review;
 
   constructor(partial: Partial<Reservation> = {}) {

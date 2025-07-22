@@ -3,17 +3,17 @@ import { IsEmail, IsString, MinLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class LoginDto {
-  @ApiProperty({ 
-    description: '이메일', 
-    example: 'admin@example.com' 
+  @ApiProperty({
+    description: '이메일',
+    example: 'admin@example.com',
   })
   @IsEmail({}, { message: '올바른 이메일 형식이 아닙니다.' })
   @Transform(({ value }) => value?.toLowerCase().trim())
   email: string;
 
-  @ApiProperty({ 
-    description: '비밀번호', 
-    example: 'password123' 
+  @ApiProperty({
+    description: '비밀번호',
+    example: 'password123',
   })
   @IsString({ message: '비밀번호는 문자열이어야 합니다.' })
   @MinLength(6, { message: '비밀번호는 6자 이상이어야 합니다.' })

@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { 
-  IsNotEmpty, 
-  IsString, 
-  IsNumber, 
-  IsOptional, 
+import {
   IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
   Matches,
-  Min 
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -34,7 +34,9 @@ export class CreateQuoteRequestDto {
   })
   @IsNotEmpty({ message: '견적 시간을 입력해주세요.' })
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '올바른 시간 형식이 아닙니다.' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: '올바른 시간 형식이 아닙니다.',
+  })
   quotedTime: string;
 
   @ApiProperty({

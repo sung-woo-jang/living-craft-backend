@@ -63,10 +63,10 @@ export class Service extends BaseEntity {
   displayOrder: number;
 
   // Relations
-  @OneToMany(() => Reservation, reservation => reservation.service)
+  @OneToMany(() => Reservation, (reservation) => reservation.service)
   reservations: Reservation[];
 
-  @OneToMany(() => ServiceImage, image => image.service, { cascade: true })
+  @OneToMany(() => ServiceImage, (image) => image.service, { cascade: true })
   images: ServiceImage[];
 
   constructor(partial: Partial<Service> = {}) {

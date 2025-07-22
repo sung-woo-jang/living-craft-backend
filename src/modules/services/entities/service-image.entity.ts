@@ -27,7 +27,9 @@ export class ServiceImage extends BaseEntity {
   displayOrder: number;
 
   // Relations
-  @ManyToOne(() => Service, service => service.images, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Service, (service) => service.images, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'serviceId' })
   service: Service;
 

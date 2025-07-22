@@ -41,13 +41,13 @@ export class CalendarService {
     });
 
     const blockedDateSet = new Set(
-      blockedDates.map(bd => moment(bd.blockedDate).format('YYYY-MM-DD'))
+      blockedDates.map((bd) => moment(bd.blockedDate).format('YYYY-MM-DD')),
     );
 
     // 영업시간 설정 조회
     const calendarSettings = await this.calendarSettingRepository.find();
     const settingsMap = new Map(
-      calendarSettings.map(setting => [setting.dayOfWeek, setting])
+      calendarSettings.map((setting) => [setting.dayOfWeek, setting]),
     );
 
     // 날짜별 가용성 확인
@@ -72,7 +72,12 @@ export class CalendarService {
       // 영업시간 설정 확인
       else {
         const setting = settingsMap.get(dayOfWeek);
-        if (!setting || setting.isHoliday || !setting.openTime || !setting.closeTime) {
+        if (
+          !setting ||
+          setting.isHoliday ||
+          !setting.openTime ||
+          !setting.closeTime
+        ) {
           available = false;
           reason = '휴무일';
         }
@@ -102,7 +107,12 @@ export class CalendarService {
       where: { dayOfWeek },
     });
 
-    if (!setting || setting.isHoliday || !setting.openTime || !setting.closeTime) {
+    if (
+      !setting ||
+      setting.isHoliday ||
+      !setting.openTime ||
+      !setting.closeTime
+    ) {
       return [];
     }
 
@@ -119,11 +129,11 @@ export class CalendarService {
     const slots: AvailableSlot[] = [];
     const openTime = moment(`${dateStr} ${setting.openTime}`);
     const closeTime = moment(`${dateStr} ${setting.closeTime}`);
-    
+
     const current = openTime.clone();
     while (current.isBefore(closeTime)) {
       const timeStr = current.format('HH:mm');
-      
+
       // 현재 시간 이후만 예약 가능
       const isAvailable = moment(`${dateStr} ${timeStr}`).isAfter(moment());
 
@@ -156,7 +166,12 @@ export class CalendarService {
       where: { dayOfWeek },
     });
 
-    if (!setting || setting.isHoliday || !setting.openTime || !setting.closeTime) {
+    if (
+      !setting ||
+      setting.isHoliday ||
+      !setting.openTime ||
+      !setting.closeTime
+    ) {
       return false;
     }
 
@@ -192,7 +207,7 @@ export class CalendarService {
     dayOfWeek: number,
     openTime?: string,
     closeTime?: string,
-    isHoliday?: boolean
+    isHoliday?: boolean,
   ): Promise<CalendarSetting> {
     let setting = await this.calendarSettingRepository.findOne({
       where: { dayOfWeek },
@@ -280,7 +295,7 @@ export class CalendarService {
 
       if (!existing) {
         await this.calendarSettingRepository.save(
-          this.calendarSettingRepository.create(setting)
+          this.calendarSettingRepository.create(setting),
         );
       }
     }

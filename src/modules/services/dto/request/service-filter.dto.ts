@@ -1,21 +1,21 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsBoolean } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { ServiceType } from '../../../../common/enums';
-import { PaginationRequestDto } from '../../../../common/dto/request/pagination-request.dto';
+import { ServiceType } from '@common/enums';
+import { PaginationRequestDto } from '@common/dto/request/pagination-request.dto';
 
 export class ServiceFilterDto extends PaginationRequestDto {
-  @ApiPropertyOptional({ 
-    description: '서비스 타입', 
-    enum: ServiceType 
+  @ApiPropertyOptional({
+    description: '서비스 타입',
+    enum: ServiceType,
   })
   @IsOptional()
   @IsEnum(ServiceType, { message: '유효한 서비스 타입을 선택해주세요.' })
   type?: ServiceType;
 
-  @ApiPropertyOptional({ 
-    description: '활성 상태', 
-    example: true 
+  @ApiPropertyOptional({
+    description: '활성 상태',
+    example: true,
   })
   @IsOptional()
   @Transform(({ value }) => {
@@ -26,9 +26,9 @@ export class ServiceFilterDto extends PaginationRequestDto {
   @IsBoolean({ message: '활성 상태는 불린 값이어야 합니다.' })
   isActive?: boolean;
 
-  @ApiPropertyOptional({ 
-    description: '검색 키워드 (서비스명, 설명)', 
-    example: '청소' 
+  @ApiPropertyOptional({
+    description: '검색 키워드 (서비스명, 설명)',
+    example: '청소',
   })
   @IsOptional()
   @Transform(({ value }) => value?.trim())

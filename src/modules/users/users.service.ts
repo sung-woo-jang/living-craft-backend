@@ -98,7 +98,7 @@ export class UsersService {
     });
 
     // 전화번호 마스킹 처리
-    const maskedUsers = users.map(user => ({
+    const maskedUsers = users.map((user) => ({
       ...user,
       phone: PhoneUtil.mask(user.phone),
     }));
@@ -185,11 +185,12 @@ export class UsersService {
 
     if (user) {
       user.totalReservations = user.reservations.length;
-      
+
       // 가장 최근 예약일 계산
-      const lastReservation = user.reservations
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-      
+      const lastReservation = user.reservations.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      )[0];
+
       if (lastReservation) {
         user.lastReservationAt = lastReservation.createdAt;
       }

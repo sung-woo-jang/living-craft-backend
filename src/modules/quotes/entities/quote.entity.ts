@@ -66,7 +66,9 @@ export class Quote extends BaseEntity {
   rejectedReason?: string;
 
   // Relations
-  @OneToOne(() => Reservation, reservation => reservation.quote, { onDelete: 'CASCADE' })
+  @OneToOne(() => Reservation, (reservation) => reservation.quote, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'reservationId' })
   reservation: Reservation;
 

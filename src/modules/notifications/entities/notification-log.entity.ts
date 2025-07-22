@@ -1,7 +1,10 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
-import { NotificationType, NotificationChannel } from './notification-template.entity';
+import {
+  NotificationChannel,
+  NotificationType,
+} from './notification-template.entity';
 import { Reservation } from '../../reservations/entities/reservation.entity';
 
 export enum NotificationStatus {

@@ -1,6 +1,6 @@
-import { Entity, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseEntity } from '../../../common/entities/base.entity';
+import { BaseEntity } from '@common/entities/base.entity';
 import { User } from './user.entity';
 
 @Entity('user_profiles')
@@ -25,7 +25,7 @@ export class UserProfile extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true })
   lastReservationAt?: Date;
 
-  @OneToOne(() => User, user => user.id)
+  @OneToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'userId' })
   user: User;
 }

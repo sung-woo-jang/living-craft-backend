@@ -26,7 +26,7 @@ export class ReservationCodeUtil {
 
     const dateStr = match[1];
     const date = moment(dateStr, 'YYYYMMDD');
-    
+
     return date.isValid() ? date.toDate() : null;
   }
 
@@ -67,15 +67,17 @@ export class ReservationCodeUtil {
    */
   static getNextSequence(date: Date, existingCodes: string[] = []): number {
     const targetDateStr = moment(date).format('YYYYMMDD');
-    const todayCodes = existingCodes.filter(code => code.startsWith(targetDateStr));
-    
+    const todayCodes = existingCodes.filter((code) =>
+      code.startsWith(targetDateStr),
+    );
+
     if (todayCodes.length === 0) {
       return 1;
     }
 
     const sequences = todayCodes
-      .map(code => this.extractSequence(code))
-      .filter(seq => seq !== null) as number[];
+      .map((code) => this.extractSequence(code))
+      .filter((seq) => seq !== null) as number[];
 
     return Math.max(...sequences) + 1;
   }

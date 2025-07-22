@@ -7,9 +7,9 @@ import { Public } from '@common/decorators/public.decorator';
 export class HealthController {
   @Get()
   @Public()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '헬스체크',
-    description: '서버 상태를 확인합니다.'
+    description: '서버 상태를 확인합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -34,9 +34,9 @@ export class HealthController {
 
   @Get('detailed')
   @Public()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '상세 헬스체크',
-    description: '서버의 상세한 상태 정보를 확인합니다.'
+    description: '서버의 상세한 상태 정보를 확인합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -50,8 +50,12 @@ export class HealthController {
       environment: process.env.NODE_ENV || 'development',
       version: '1.0.0',
       memory: {
-        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024 * 100) / 100,
-        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024 * 100) / 100,
+        used:
+          Math.round((process.memoryUsage().heapUsed / 1024 / 1024) * 100) /
+          100,
+        total:
+          Math.round((process.memoryUsage().heapTotal / 1024 / 1024) * 100) /
+          100,
       },
       cpu: {
         usage: process.cpuUsage(),

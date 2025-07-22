@@ -19,11 +19,7 @@ export class PaginationMetaDto {
   @ApiProperty({ description: '이전 페이지 존재 여부', example: false })
   hasPreviousPage: boolean;
 
-  constructor(
-    currentPage: number,
-    itemsPerPage: number,
-    totalItems: number,
-  ) {
+  constructor(currentPage: number, itemsPerPage: number, totalItems: number) {
     this.currentPage = currentPage;
     this.itemsPerPage = itemsPerPage;
     this.totalItems = totalItems;
@@ -37,16 +33,25 @@ export class PaginatedResponseDto<T> {
   @ApiProperty({ description: '성공 여부', example: true })
   success: boolean;
 
-  @ApiProperty({ description: '메시지', example: '데이터를 성공적으로 조회했습니다.' })
+  @ApiProperty({
+    description: '메시지',
+    example: '데이터를 성공적으로 조회했습니다.',
+  })
   message: string;
 
   @ApiProperty({ description: '데이터 배열' })
   data: T[];
 
-  @ApiProperty({ description: '페이지네이션 메타 정보', type: PaginationMetaDto })
+  @ApiProperty({
+    description: '페이지네이션 메타 정보',
+    type: PaginationMetaDto,
+  })
   meta: PaginationMetaDto;
 
-  @ApiProperty({ description: '타임스탬프', example: '2024-01-01T00:00:00.000Z' })
+  @ApiProperty({
+    description: '타임스탬프',
+    example: '2024-01-01T00:00:00.000Z',
+  })
   timestamp: string;
 
   constructor(

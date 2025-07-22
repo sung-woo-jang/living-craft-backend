@@ -6,11 +6,7 @@ import { UsersModule } from '../users/users.module';
 import { ReservationsModule } from '../reservations/reservations.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    UsersModule,
-    ReservationsModule,
-  ],
+  imports: [ConfigModule, UsersModule, ReservationsModule],
   providers: [AuthService],
   controllers: [AuthController],
   exports: [AuthService],

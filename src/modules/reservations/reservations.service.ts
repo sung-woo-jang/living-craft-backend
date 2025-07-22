@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation } from './entities/reservation.entity';
@@ -26,9 +30,12 @@ export class ReservationsService {
   /**
    * 예약 생성
    */
-  async create(createDto: CreateReservationRequestDto, userId?: number): Promise<Reservation> {
+  async create(
+    createDto: CreateReservationRequestDto,
+    userId?: number,
+  ): Promise<Reservation> {
     const service = await this.servicesService.findById(createDto.serviceId);
-    
+
     // 서비스 활성화 상태 확인
     if (!service.isActive) {
       throw new BadRequestException('비활성화된 서비스입니다.');
@@ -37,7 +44,7 @@ export class ReservationsService {
     // 예약 가능한 날짜/시간인지 확인
     const isAvailable = await this.calendarService.isAvailable(
       new Date(createDto.serviceDate),
-      createDto.serviceTime
+      createDto.serviceTime,
     );
 
     if (!isAvailable) {
@@ -47,7 +54,10 @@ export class ReservationsService {
     // 예약번호 생성
     const serviceDate = new Date(createDto.serviceDate);
     const existingCodes = await this.getTodayReservationCodes(serviceDate);
-    const sequence = ReservationCodeUtil.getNextSequence(serviceDate, existingCodes);
+    const sequence = ReservationCodeUtil.getNextSequence(
+      serviceDate,
+      existingCodes,
+    );
     const reservationCode = ReservationCodeUtil.generate(serviceDate, sequence);
 
     // 예약 데이터 생성
@@ -127,7 +137,7 @@ export class ReservationsService {
     paginationDto: PaginationRequestDto,
     status?: ReservationStatus,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
   ): Promise<{
     reservations: Reservation[];
     meta: PaginationMetaDto;
@@ -147,7 +157,9 @@ export class ReservationsService {
 
     // 날짜 필터
     if (startDate) {
-      queryBuilder.andWhere('reservation.serviceDate >= :startDate', { startDate });
+      queryBuilder.andWhere('reservation.serviceDate >= :startDate', {
+        startDate,
+      });
     }
     if (endDate) {
       queryBuilder.andWhere('reservation.serviceDate <= :endDate', { endDate });
@@ -169,19 +181,24 @@ export class ReservationsService {
   /**
    * 사용자의 예약 목록 조회
    */
-  async findByUserId(userId: number, paginationDto: PaginationRequestDto): Promise<{
+  async findByUserId(
+    userId: number,
+    paginationDto: PaginationRequestDto,
+  ): Promise<{
     reservations: Reservation[];
     meta: PaginationMetaDto;
   }> {
     const { page, limit, skip } = paginationDto;
 
-    const [reservations, total] = await this.reservationRepository.findAndCount({
-      where: { userId },
-      skip,
-      take: limit,
-      order: { serviceDate: 'DESC', serviceTime: 'ASC' },
-      relations: ['service', 'service.images', 'quote', 'review'],
-    });
+    const [reservations, total] = await this.reservationRepository.findAndCount(
+      {
+        where: { userId },
+        skip,
+        take: limit,
+        order: { serviceDate: 'DESC', serviceTime: 'ASC' },
+        relations: ['service', 'service.images', 'quote', 'review'],
+      },
+    );
 
     const meta = new PaginationMetaDto(page, limit, total);
 
@@ -204,10 +221,13 @@ export class ReservationsService {
   /**
    * 예약 상태 변경
    */
-  async updateStatus(id: number, status: ReservationStatus): Promise<Reservation> {
+  async updateStatus(
+    id: number,
+    status: ReservationStatus,
+  ): Promise<Reservation> {
     const reservation = await this.findById(id);
     reservation.status = status;
-    
+
     await this.reservationRepository.save(reservation);
     return this.findById(id);
   }
@@ -216,21 +236,26 @@ export class ReservationsService {
    * 예약 수정
    */
   async update(
-    id: number, 
-    updateData: Partial<CreateReservationRequestDto>
+    id: number,
+    updateData: Partial<CreateReservationRequestDto>,
   ): Promise<Reservation> {
     const reservation = await this.findById(id);
 
     // 날짜/시간 변경 시 가용성 확인
     if (updateData.serviceDate || updateData.serviceTime) {
-      const serviceDate = updateData.serviceDate 
-        ? new Date(updateData.serviceDate) 
+      const serviceDate = updateData.serviceDate
+        ? new Date(updateData.serviceDate)
         : reservation.serviceDate;
       const serviceTime = updateData.serviceTime || reservation.serviceTime;
 
-      const isAvailable = await this.calendarService.isAvailable(serviceDate, serviceTime);
+      const isAvailable = await this.calendarService.isAvailable(
+        serviceDate,
+        serviceTime,
+      );
       if (!isAvailable) {
-        throw new BadRequestException('선택한 날짜/시간에는 예약할 수 없습니다.');
+        throw new BadRequestException(
+          '선택한 날짜/시간에는 예약할 수 없습니다.',
+        );
       }
     }
 
@@ -241,7 +266,7 @@ export class ReservationsService {
 
     Object.assign(reservation, updateData);
     await this.reservationRepository.save(reservation);
-    
+
     return this.findById(id);
   }
 
@@ -278,7 +303,7 @@ export class ReservationsService {
       where: { serviceDate: new Date(dateStr) },
     });
 
-    return reservations.map(r => r.reservationCode);
+    return reservations.map((r) => r.reservationCode);
   }
 
   /**

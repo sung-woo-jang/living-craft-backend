@@ -52,7 +52,8 @@ export class NotificationTemplate extends BaseEntity {
 
   @ApiProperty({
     description: '내용 템플릿',
-    example: '안녕하세요 {{customerName}}님, 예약번호 {{reservationCode}}가 확정되었습니다.',
+    example:
+      '안녕하세요 {{customerName}}님, 예약번호 {{reservationCode}}가 확정되었습니다.',
   })
   @Column({ type: 'text' })
   content: string;

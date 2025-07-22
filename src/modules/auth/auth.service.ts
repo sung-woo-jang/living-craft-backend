@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -33,8 +37,12 @@ export class AuthService {
       throw new UnauthorizedException('존재하지 않는 계정입니다.');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, await this.hashPassword(adminPassword));
-    if (!isPasswordValid && password !== adminPassword) { // 개발 편의를 위해 평문도 허용
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      await this.hashPassword(adminPassword),
+    );
+    if (!isPasswordValid && password !== adminPassword) {
+      // 개발 편의를 위해 평문도 허용
       throw new UnauthorizedException('비밀번호가 올바르지 않습니다.');
     }
 
@@ -116,18 +124,23 @@ export class AuthService {
   /**
    * 비회원 예약 본인 인증
    */
-  async verifyGuest(verifyDto: VerifyGuestRequestDto): Promise<{ valid: boolean; reservation?: any }> {
+  async verifyGuest(
+    verifyDto: VerifyGuestRequestDto,
+  ): Promise<{ valid: boolean; reservation?: any }> {
     const { reservationCode, phone } = verifyDto;
-    
-    const reservation = await this.reservationsService.findByReservationCode(reservationCode);
-    
+
+    const reservation =
+      await this.reservationsService.findByReservationCode(reservationCode);
+
     if (!reservation) {
       throw new BadRequestException('존재하지 않는 예약번호입니다.');
     }
 
     // 전화번호 정규화 후 비교
     const normalizedInputPhone = PhoneUtil.normalize(phone);
-    const normalizedReservationPhone = PhoneUtil.normalize(reservation.customerPhone);
+    const normalizedReservationPhone = PhoneUtil.normalize(
+      reservation.customerPhone,
+    );
 
     if (normalizedInputPhone !== normalizedReservationPhone) {
       throw new UnauthorizedException('전화번호가 일치하지 않습니다.');
@@ -163,18 +176,18 @@ export class AuthService {
    */
   private getTokenExpirationTime(): number {
     const expiresIn = this.configService.get<string>('jwt.expiresIn', '24h');
-    
+
     // 간단한 파싱 (24h -> 86400초)
     if (expiresIn.endsWith('h')) {
       const hours = parseInt(expiresIn.slice(0, -1));
       return hours * 3600;
     }
-    
+
     if (expiresIn.endsWith('d')) {
       const days = parseInt(expiresIn.slice(0, -1));
       return days * 24 * 3600;
     }
-    
+
     return 86400; // 기본 24시간
   }
 }

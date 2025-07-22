@@ -111,6 +111,7 @@ describe('UsersService', () => {
       await expect(service.create(createUserDto)).rejects.toThrow(
         ConflictException,
       );
+
       expect(repository.findByEmail).toHaveBeenCalledWith(createUserDto.email);
     });
 

@@ -89,10 +89,10 @@ export class User extends BaseEntity {
   lastReservationAt?: Date;
 
   // Relations
-  @OneToMany(() => Reservation, reservation => reservation.user)
+  @OneToMany(() => Reservation, (reservation) => reservation.user)
   reservations: Reservation[];
 
-  @OneToMany(() => Review, review => review.user)
+  @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
 
   constructor(partial: Partial<User> = {}) {

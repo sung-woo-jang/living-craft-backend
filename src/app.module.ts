@@ -42,7 +42,8 @@ import { HealthModule } from './modules/health/health.module';
     // Database
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => configService.get('database'),
+      useFactory: (configService: ConfigService) =>
+        configService.get('database'),
       inject: [ConfigService],
     }),
 

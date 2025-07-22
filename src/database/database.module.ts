@@ -14,14 +14,15 @@ import { SessionEntity } from '@/common/entities/session.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [
-          __dirname + '/../**/*.entity{.ts,.js}',
-        ],
+        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: configService.get('DB_SYNCHRONIZE', false),
         logging: configService.get('NODE_ENV') === 'development',
-        ssl: configService.get('NODE_ENV') === 'production' ? {
-          rejectUnauthorized: false,
-        } : false,
+        ssl:
+          configService.get('NODE_ENV') === 'production'
+            ? {
+                rejectUnauthorized: false,
+              }
+            : false,
         retryAttempts: 3,
         retryDelay: 3000,
         autoLoadEntities: true,

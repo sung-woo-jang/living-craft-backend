@@ -3,7 +3,10 @@ import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UpdateProfileDto {
-  @ApiPropertyOptional({ description: '주소', example: '서울시 강남구 테헤란로 123' })
+  @ApiPropertyOptional({
+    description: '주소',
+    example: '서울시 강남구 테헤란로 123',
+  })
   @IsOptional()
   @IsString({ message: '주소는 문자열이어야 합니다.' })
   @Transform(({ value }) => value?.trim())

@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { 
-  IsNotEmpty, 
-  IsString, 
-  IsEmail, 
-  IsOptional, 
-  IsNumber, 
+import {
   IsDateString,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
   Matches,
-  Length 
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -68,7 +68,9 @@ export class CreateReservationRequestDto {
   })
   @IsNotEmpty({ message: '서비스 시간을 입력해주세요.' })
   @IsString()
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: '올바른 시간 형식이 아닙니다.' })
+  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+    message: '올바른 시간 형식이 아닙니다.',
+  })
   serviceTime: string;
 
   @ApiProperty({

@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import { AppModule } from '../app.module';
+import { AppModule } from '@/app.module';
 
 // Seeders
 import { UserSeeder } from './seeders/user.seeder';
@@ -12,13 +12,13 @@ import { NotificationTemplateSeeder } from './seeders/notification-template.seed
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  
+
   try {
     const dataSource = app.get(DataSource);
     const configService = app.get(ConfigService);
-    
+
     console.log('🌱 Starting database seeding...');
-    
+
     // 시드 데이터 실행 순서 (의존성 고려)
     const seeders = [
       UserSeeder,

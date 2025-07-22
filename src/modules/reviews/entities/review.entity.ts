@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne, OneToOne, JoinColumn, Index } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
@@ -54,14 +61,16 @@ export class Review extends BaseEntity {
   adminReplyAt?: Date;
 
   // Relations
-  @ManyToOne(() => User, user => user.reviews, { nullable: true })
+  @ManyToOne(() => User, (user) => user.reviews, { nullable: true })
   @JoinColumn({ name: 'userId' })
   user?: User;
 
   @Column({ nullable: true })
   userId?: number;
 
-  @OneToOne(() => Reservation, reservation => reservation.review, { onDelete: 'CASCADE' })
+  @OneToOne(() => Reservation, (reservation) => reservation.review, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'reservationId' })
   reservation: Reservation;
 

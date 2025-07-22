@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service } from './entities/service.entity';
@@ -28,7 +32,9 @@ export class ServicesService {
 
     // 견적제인 경우 가격이 있으면 안됨
     if (createDto.type === ServiceType.CUSTOM && createDto.price) {
-      throw new BadRequestException('견적제 서비스는 가격을 설정할 수 없습니다.');
+      throw new BadRequestException(
+        '견적제 서비스는 가격을 설정할 수 없습니다.',
+      );
     }
 
     const service = this.serviceRepository.create(createDto);
@@ -97,15 +103,25 @@ export class ServicesService {
   /**
    * 서비스 수정
    */
-  async update(id: number, updateDto: Partial<CreateServiceRequestDto>): Promise<Service> {
+  async update(
+    id: number,
+    updateDto: Partial<CreateServiceRequestDto>,
+  ): Promise<Service> {
     const service = await this.findById(id);
 
     // 타입 변경 시 가격 검증
     if (updateDto.type) {
-      if (updateDto.type === ServiceType.FIXED && !updateDto.price && !service.price) {
+      if (
+        updateDto.type === ServiceType.FIXED &&
+        !updateDto.price &&
+        !service.price
+      ) {
         throw new BadRequestException('정찰제 서비스는 가격이 필수입니다.');
       }
-      if (updateDto.type === ServiceType.CUSTOM && (updateDto.price || service.price)) {
+      if (
+        updateDto.type === ServiceType.CUSTOM &&
+        (updateDto.price || service.price)
+      ) {
         updateDto.price = null; // 견적제로 변경 시 가격 제거
       }
     }
@@ -134,14 +150,18 @@ export class ServicesService {
   /**
    * 서비스 이미지 추가
    */
-  async addImage(serviceId: number, imageUrl: string, isMain = false): Promise<ServiceImage> {
+  async addImage(
+    serviceId: number,
+    imageUrl: string,
+    isMain = false,
+  ): Promise<ServiceImage> {
     const service = await this.findById(serviceId);
 
     // 메인 이미지로 설정하는 경우 기존 메인 이미지를 일반 이미지로 변경
     if (isMain) {
       await this.serviceImageRepository.update(
         { serviceId, isMain: true },
-        { isMain: false }
+        { isMain: false },
       );
     }
 
@@ -172,7 +192,10 @@ export class ServicesService {
   /**
    * 서비스 이미지 메인으로 설정
    */
-  async setMainImage(serviceId: number, imageId: number): Promise<ServiceImage> {
+  async setMainImage(
+    serviceId: number,
+    imageId: number,
+  ): Promise<ServiceImage> {
     const service = await this.findById(serviceId);
 
     // 해당 이미지가 서비스에 속하는지 확인
@@ -187,7 +210,7 @@ export class ServicesService {
     // 기존 메인 이미지를 일반 이미지로 변경
     await this.serviceImageRepository.update(
       { serviceId, isMain: true },
-      { isMain: false }
+      { isMain: false },
     );
 
     // 새로운 메인 이미지 설정

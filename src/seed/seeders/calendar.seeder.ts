@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { CalendarSetting } from '../../modules/calendar/entities/calendar-setting.entity';
+import { CalendarSetting } from '@modules/calendar/entities/calendar-setting.entity';
 
 export class CalendarSeeder {
   async run(dataSource: DataSource): Promise<void> {
@@ -23,7 +23,9 @@ export class CalendarSeeder {
       if (!existing) {
         const setting = calendarSettingRepository.create(settingData);
         await calendarSettingRepository.save(setting);
-        console.log(`✅ Calendar setting created for day ${settingData.dayOfWeek}`);
+        console.log(
+          `✅ Calendar setting created for day ${settingData.dayOfWeek}`,
+        );
       }
     }
   }

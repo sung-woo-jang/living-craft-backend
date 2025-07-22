@@ -29,7 +29,10 @@ export class TransformInterceptor<T>
         }
 
         // 기본 성공 응답 변환
-        return new SuccessResponseDto('요청이 성공적으로 처리되었습니다.', data);
+        return new SuccessResponseDto(
+          '요청이 성공적으로 처리되었습니다.',
+          data,
+        );
       }),
     );
   }

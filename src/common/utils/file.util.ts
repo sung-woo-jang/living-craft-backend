@@ -28,13 +28,13 @@ export class FileUtil {
   static sanitizeFilename(filename: string): string {
     const extension = this.getExtension(filename);
     const basename = this.removeExtension(filename);
-    
+
     // 특수문자를 언더스코어로 변경, 한글과 영숫자만 유지
     const sanitized = basename
       .replace(/[^\w\sㄱ-ㅎ가-힣-]/gi, '_')
       .replace(/\s+/g, '_')
       .slice(0, 100); // 길이 제한
-    
+
     return `${sanitized}${extension}`;
   }
 
@@ -47,7 +47,7 @@ export class FileUtil {
     const extension = this.getExtension(originalFilename);
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
-    
+
     return `${timestamp}_${random}${extension}`;
   }
 
@@ -69,11 +69,11 @@ export class FileUtil {
    */
   static formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
@@ -103,11 +103,13 @@ export class FileUtil {
       '.svg': 'image/svg+xml',
       '.pdf': 'application/pdf',
       '.doc': 'application/msword',
-      '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.docx':
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       '.xls': 'application/vnd.ms-excel',
-      '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      '.xlsx':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     };
-    
+
     return mimeTypes[extension] || 'application/octet-stream';
   }
 
