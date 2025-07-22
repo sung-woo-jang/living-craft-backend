@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: reservation_postgres_local
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: reservation_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_local:/var/lib/postgresql/data
+    networks:
+      - reservation_network
+
+  # Redis for Bull Queue
+  redis:
+    image: redis:7-alpine
+    container_name: reservation_redis_local
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_local:/data
+    networks:
+      - reservation_network
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: reservation_pgadmin_local
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@reservation.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data_local:/var/lib/pgadmin
+    networks:
+      - reservation_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data_local:
+  redis_data_local:
+  pgadmin_data_local:
+
+networks:
+  reservation_network:
+    driver: bridge

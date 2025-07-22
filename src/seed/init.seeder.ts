@@ -1,0 +1,47 @@
+import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
+import { AppModule } from '../app.module';
+
+// Seeders
+import { UserSeeder } from './seeders/user.seeder';
+import { ServiceSeeder } from './seeders/service.seeder';
+import { CalendarSeeder } from './seeders/calendar.seeder';
+import { FaqSeeder } from './seeders/faq.seeder';
+import { NotificationTemplateSeeder } from './seeders/notification-template.seeder';
+
+async function bootstrap() {
+  const app = await NestFactory.createApplicationContext(AppModule);
+  
+  try {
+    const dataSource = app.get(DataSource);
+    const configService = app.get(ConfigService);
+    
+    console.log('🌱 Starting database seeding...');
+    
+    // 시드 데이터 실행 순서 (의존성 고려)
+    const seeders = [
+      UserSeeder,
+      ServiceSeeder,
+      CalendarSeeder,
+      FaqSeeder,
+      NotificationTemplateSeeder,
+    ];
+
+    for (const SeederClass of seeders) {
+      console.log(`📊 Running ${SeederClass.name}...`);
+      const seeder = new SeederClass();
+      await seeder.run(dataSource);
+      console.log(`✅ ${SeederClass.name} completed`);
+    }
+
+    console.log('🎉 Database seeding completed successfully!');
+  } catch (error) {
+    console.error('❌ Database seeding failed:', error);
+    process.exit(1);
+  } finally {
+    await app.close();
+  }
+}
+
+bootstrap();
