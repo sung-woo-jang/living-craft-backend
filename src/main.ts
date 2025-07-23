@@ -1,12 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as session from 'express-session';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -103,26 +102,6 @@ async function bootstrap() {
 
     console.log('📚 Swagger UI available at: http://localhost:3000/api/docs');
   }
-
-  // 헬스체크 엔드포인트
-  app.use('/health', (req, res) => {
-    res.status(200).json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment,
-    });
-  });
-
-  // 루트 경로
-  app.use('/', (req, res) => {
-    res.status(200).json({
-      message: '예약 서비스 플랫폼 API',
-      version: '1.0.0',
-      environment,
-      docs: environment === 'development' ? '/api/docs' : undefined,
-    });
-  });
 
   await app.listen(port, '0.0.0.0');
 

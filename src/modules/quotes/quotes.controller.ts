@@ -25,7 +25,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('견적')
-@Controller('api/quotes')
+@Controller('quotes')
 @SwaggerBaseApply()
 export class QuotesController {
   constructor(private readonly quotesService: QuotesService) {}

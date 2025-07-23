@@ -26,7 +26,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole, ServiceType } from '@common/enums';
 
 @ApiTags('서비스')
-@Controller('api/services')
+@Controller('services')
 @SwaggerBaseApply()
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}
@@ -47,6 +47,7 @@ export class ServicesController {
     const responseData = services.map((service) =>
       ServiceResponseDto.fromEntity(service),
     );
+    console.log({ services, responseData });
     return new SuccessBaseResponseDto(
       '서비스 목록을 조회했습니다.',
       responseData,

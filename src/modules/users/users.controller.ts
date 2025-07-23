@@ -24,7 +24,7 @@ import { UserRole } from '@common/enums';
 import { PhoneUtil } from '@common/utils/phone.util';
 
 @ApiTags('사용자')
-@Controller('api/users')
+@Controller('users')
 @SwaggerBaseApply()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

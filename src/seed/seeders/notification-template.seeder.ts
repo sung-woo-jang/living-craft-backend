@@ -3,7 +3,7 @@ import {
   NotificationTemplate,
   NotificationType,
   NotificationChannel,
-} from '../../modules/notifications/entities/notification-template.entity';
+} from '@modules/notifications/entities/notification-template.entity';
 
 export class NotificationTemplateSeeder {
   async run(dataSource: DataSource): Promise<void> {

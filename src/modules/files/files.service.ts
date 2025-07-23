@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
-import { existsSync, mkdirSync, unlinkSync } from 'fs';
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { FileUtil } from '@common/utils/file.util';
 import * as sharp from 'sharp';
 
@@ -150,6 +150,39 @@ export class FilesService {
       const dirPath = join(this.uploadPath, dir);
       FileUtil.ensureDirectoryExists(dirPath);
     });
+  }
+
+  /**
+   * 문서 파일 업로드 (리사이징 없이 원본 그대로 저장)
+   */
+  async uploadDocument(
+    file: Express.Multer.File,
+  ): Promise<{ filename: string; path: string; url: string }> {
+    const allowedDocTypes = ['.pdf', '.doc', '.docx', '.hwp', '.txt'];
+    const extension = FileUtil.getExtension(file.originalname);
+    
+    if (!allowedDocTypes.includes(extension.toLowerCase())) {
+      throw new BadRequestException('지원되지 않는 문서 파일 형식입니다.');
+    }
+
+    const uploadDir = join(this.uploadPath, 'documents');
+    FileUtil.ensureDirectoryExists(uploadDir);
+
+    const filename = FileUtil.generateUniqueFilename(file.originalname);
+    const filepath = join(uploadDir, filename);
+
+    try {
+      // 문서 파일은 리사이징 없이 원본 그대로 저장
+      writeFileSync(filepath, file.buffer);
+
+      return {
+        filename,
+        path: filepath,
+        url: `/uploads/documents/${filename}`,
+      };
+    } catch (error) {
+      throw new BadRequestException(`문서 파일 저장 중 오류가 발생했습니다: ${error.message}`);
+    }
   }
 
   /**

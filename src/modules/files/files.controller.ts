@@ -24,7 +24,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('파일')
-@Controller('api/files')
+@Controller('files')
 @SwaggerBaseApply()
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
@@ -142,15 +142,43 @@ export class FilesController {
       throw new BadRequestException('파일이 선택되지 않았습니다.');
     }
 
-    // 문서는 리사이징하지 않고 원본 그대로 저장
-    const fileInfo = this.filesService.getFileInfo(file);
-    const url = `/uploads/documents/${file.filename}`;
+    // 문서 파일 형식 검증
+    const allowedDocTypes = ['.pdf', '.doc', '.docx', '.hwp', '.txt'];
+    const fileExtension = file.originalname.toLowerCase().split('.').pop();
+    
+    if (!allowedDocTypes.includes(`.${fileExtension}`)) {
+      throw new BadRequestException('지원되지 않는 문서 형식입니다. 지원 형식: PDF, DOC, DOCX, HWP, TXT');
+    }
 
-    return new SuccessBaseResponseDto('문서를 업로드했습니다.', {
-      ...fileInfo,
-      url,
-      filename: file.filename,
-    });
+    try {
+      // 실제 파일 저장 로직
+      const result = await this.filesService.uploadDocument(file);
+      
+      return new SuccessBaseResponseDto('문서를 성공적으로 업로드했습니다.', {
+        originalName: file.originalname,
+        filename: result.filename,
+        url: result.url,
+        size: this.formatFileSize(file.size),
+        mimeType: file.mimetype,
+        extension: `.${fileExtension}`,
+        uploadedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      throw new BadRequestException(`문서 업로드 중 오류가 발생했습니다: ${error.message}`);
+    }
+  }
+
+  /**
+   * 파일 크기를 사람이 읽기 쉽은 형식으로 변환
+   */
+  private formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   @Delete(':category/:filename')

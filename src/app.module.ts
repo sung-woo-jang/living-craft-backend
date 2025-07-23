@@ -17,18 +17,19 @@ import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 
 // Modules
-import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { ServicesModule } from './modules/services/services.module';
-import { ReservationsModule } from './modules/reservations/reservations.module';
-import { QuotesModule } from './modules/quotes/quotes.module';
-import { ReviewsModule } from './modules/reviews/reviews.module';
-import { CalendarModule } from './modules/calendar/calendar.module';
-import { PortfolioModule } from './modules/portfolio/portfolio.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
-import { FaqModule } from './modules/faq/faq.module';
-import { FilesModule } from './modules/files/files.module';
-import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { UsersModule } from '@modules/users/users.module';
+import { ServicesModule } from '@modules/services/services.module';
+import { ReservationsModule } from '@modules/reservations/reservations.module';
+import { QuotesModule } from '@modules/quotes/quotes.module';
+import { ReviewsModule } from '@modules/reviews/reviews.module';
+import { CalendarModule } from '@modules/calendar/calendar.module';
+import { PortfolioModule } from '@modules/portfolio/portfolio.module';
+import { NotificationsModule } from '@modules/notifications/notifications.module';
+import { FaqModule } from '@modules/faq/faq.module';
+import { FilesModule } from '@modules/files/files.module';
+import { HealthModule } from '@modules/health/health.module';
+import { StatsModule } from '@modules/stats/stats.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { HealthModule } from './modules/health/health.module';
     FaqModule,
     FilesModule,
     HealthModule,
+    StatsModule,
   ],
   providers: [
     // Global JWT Guard

@@ -13,6 +13,7 @@ lerna-debug.log*
 *.swo
 *~
 
+
 # Tests
 coverage/
 .nyc_output/
@@ -72,3 +73,7 @@ ssl/
 # Backup files
 *.backup
 *.bak
+
+
+CLAUDE.md
+.claude/*

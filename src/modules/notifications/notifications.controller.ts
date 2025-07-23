@@ -24,7 +24,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('알림')
-@Controller('api/notifications')
+@Controller('notifications')
 @SwaggerBaseApply()
 @UseGuards(RolesGuard)
 @Roles(UserRole.ADMIN)

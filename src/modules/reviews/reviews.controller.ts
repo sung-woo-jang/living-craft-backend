@@ -29,7 +29,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('리뷰')
-@Controller('api/reviews')
+@Controller('reviews')
 @SwaggerBaseApply()
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}

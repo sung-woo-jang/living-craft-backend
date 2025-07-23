@@ -20,7 +20,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('캘린더')
-@Controller('api/calendar')
+@Controller('calendar')
 @SwaggerBaseApply()
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}

@@ -24,7 +24,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('포트폴리오')
-@Controller('api/portfolio')
+@Controller('portfolio')
 @SwaggerBaseApply()
 export class PortfolioController {
   constructor(private readonly portfolioService: PortfolioService) {}

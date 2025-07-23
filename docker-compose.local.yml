@@ -27,7 +27,7 @@ services:
 
   # Redis for Bull Queue (개발용)
   redis:
-    image: redis:7.2-alpine  # 구체적인 버전 지정
+    image: redis:7.2-alpine
     container_name: reservation_redis_dev
     restart: unless-stopped
     ports:
@@ -64,7 +64,8 @@ services:
 
   # Redis Commander (개발 편의를 위한 Redis 관리 도구)
   redis-commander:
-    image: rediscommander/redis-commander:0.8.1  # 안정적인 버전 지정
+    image: rediscommander/redis-commander:latest
+    platform: linux/amd64  # M1 Mac에서 명시적으로 AMD64 플랫폼 지정
     container_name: reservation_redis_commander_dev
     restart: unless-stopped
     environment:

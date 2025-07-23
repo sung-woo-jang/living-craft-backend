@@ -24,7 +24,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 
 @ApiTags('FAQ')
-@Controller('api/faq')
+@Controller('faq')
 @SwaggerBaseApply()
 export class FaqController {
   constructor(private readonly faqService: FaqService) {}

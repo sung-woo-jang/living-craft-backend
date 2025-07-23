@@ -22,7 +22,12 @@
     "seed:run": "ts-node -r tsconfig-paths/register src/seed/init.seeder.ts",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/typeorm.config.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts",
+    "docker:dev:up": "docker-compose -f docker-compose.local.yml up -d",
+    "docker:dev:down": "docker-compose -f docker-compose.local.yml down",
+    "docker:dev:logs": "docker-compose -f docker-compose.local.yml logs",
+    "docker:dev:status": "docker-compose -f docker-compose.local.yml ps",
+    "dev:full": "yarn docker:dev:up && yarn start:dev"
   },
   "dependencies": {
     "@nestjs/bull": "^10.1.1",

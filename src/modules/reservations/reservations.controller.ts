@@ -27,7 +27,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole, ReservationStatus } from '@common/enums';
 
 @ApiTags('예약')
-@Controller('api/reservations')
+@Controller('reservations')
 @SwaggerBaseApply()
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}

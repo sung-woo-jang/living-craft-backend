@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "health-collection-001",
+		"name": "Reservation Service - Health",
+		"description": "헬스 체크 API 컬렉션 (시스템 상태 모니터링)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "기본 헬스 체크",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('응답 시간 확인', function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							"",
+							"pm.test('상태 코드 확인', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('응답 구조 확인', function () {",
+							"    const response = pm.response.json();",
+							"    pm.expect(response).to.have.property('status');",
+							"    pm.expect(response.status).to.eql('ok');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/health",
+					"host": ["{{API_URL}}"],
+					"path": ["health"]
+				},
+				"description": "애플리케이션의 기본 상태를 확인합니다."
+			},
+			"response": [
+				{
+					"name": "헬스 체크 성공",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/health",
+							"host": ["{{API_URL}}"],
+							"path": ["health"]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": \"ok\",\n    \"info\": {\n        \"database\": {\n            \"status\": \"up\"\n        },\n        \"redis\": {\n            \"status\": \"up\"\n        }\n    },\n    \"error\": {},\n    \"details\": {\n        \"database\": {\n            \"status\": \"up\"\n        },\n        \"redis\": {\n            \"status\": \"up\"\n        }\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "상세 헬스 체크",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_URL}}/api/health/detailed",
+					"host": ["{{API_URL}}"],
+					"path": ["api", "health", "detailed"]
+				},
+				"description": "시스템의 상세한 상태 정보를 확인합니다. (관리자 전용)"
+			},
+			"response": [
+				{
+					"name": "상세 헬스 체크 성공",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/health/detailed",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "health", "detailed"]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"success\": true,\n    \"data\": {\n        \"status\": \"healthy\",\n        \"timestamp\": \"2025-07-23T08:00:00.000Z\",\n        \"uptime\": 3600,\n        \"environment\": \"development\",\n        \"version\": \"1.0.0\",\n        \"database\": {\n            \"status\": \"connected\",\n            \"responseTime\": \"5ms\"\n        },\n        \"redis\": {\n            \"status\": \"connected\",\n            \"responseTime\": \"2ms\"\n        },\n        \"memory\": {\n            \"used\": \"150MB\",\n            \"total\": \"512MB\",\n            \"percentage\": \"29%\"\n        },\n        \"cpu\": {\n            \"usage\": \"15%\"\n        }\n    },\n    \"message\": \"시스템이 정상적으로 작동 중입니다.\",\n    \"statusCode\": 200\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "API_URL",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "ACCESS_TOKEN",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

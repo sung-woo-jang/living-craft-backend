@@ -1,0 +1,176 @@
+{
+	"info": {
+		"_postman_id": "47c2aeaa-1389-4fa3-b709-1a394016e1ca",
+		"name": "Common",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43846641"
+	},
+	"item": [
+		{
+			"name": "권한",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful PUT request\", function () {",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "value",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						},
+						{
+							"key": "key",
+							"value": "authorization",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_URL}}/v3/auth/permission",
+					"host": [
+						"{{API_URL}}"
+					],
+					"path": [
+						"v3",
+						"auth",
+						"permission"
+					]
+				},
+				"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+			},
+			"response": [
+				{
+					"name": "권한 - 성공",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"businessNumber\": \"0000000000\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_URL}}/v3/auth/permission",
+							"host": [
+								"{{API_URL}}"
+							],
+							"path": [
+								"v3",
+								"auth",
+								"permission"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "nginx/1.18.0 (Ubuntu)"
+						},
+						{
+							"key": "Date",
+							"value": "Tue, 10 Jun 2025 05:55:04 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Vary",
+							"value": "Access-Control-Request-Method"
+						},
+						{
+							"key": "Vary",
+							"value": "Access-Control-Request-Headers"
+						},
+						{
+							"key": "Version-Customer",
+							"value": "1.6.8.0"
+						},
+						{
+							"key": "Version-Company",
+							"value": "1.4.3.0"
+						},
+						{
+							"key": "Version-Admin",
+							"value": "1.0.0.1"
+						},
+						{
+							"key": "Access-Control-Expose-Headers",
+							"value": "Content-Disposition, Version-Customer, Version-Company, Version-Admin"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "0"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "Expires",
+							"value": "0"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "DENY"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"status\": \"success\",\n    \"code\": \"\",\n    \"message\": \"\",\n    \"token\": \"\",\n    \"data\": {\n        \"pageList\": [\n            {\n                \"code\": \"MANAGE_QUOTE\",\n                \"value\": \"READ\"\n            },\n            {\n                \"code\": \"MANAGE_ORDER\",\n                \"value\": \"NONE\"\n            },\n            {\n                \"code\": \"UNSIGNED\",\n                \"value\": \"READ\"\n            },\n            {\n                \"code\": \"SIGNED\",\n                \"value\": \"NONE\"\n            },\n            {\n                \"code\": \"PUBLIC\",\n                \"value\": \"READ\"\n            },\n            {\n                \"code\": \"CUSTOMER\",\n                \"value\": \"NONE\"\n            },\n            {\n                \"code\": \"PROVIDER\",\n                \"value\": \"NONE\"\n            }\n        ],\n        \"featureList\": [\n            {\n                \"code\": \"MANAGE_QUOTE_ONETIME\",\n                \"value\": \"NONE\"\n            },\n            {\n                \"code\": \"MANAGE_QUOTE_CONTRACT\",\n                \"value\": \"NONE\"\n            },\n            {\n                \"code\": \"MANAGE_QUOTE_URGENT\",\n                \"value\": \"NONE\"\n            }\n        ]\n    }\n}"
+				}
+			]
+		}
+	]
+}
