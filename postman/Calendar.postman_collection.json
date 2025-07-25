@@ -1,0 +1,421 @@
+{
+	"info": {
+		"_postman_id": "calendar-collection-001",
+		"name": "Reservation Service - Calendar",
+		"description": "캘린더 및 일정 관리 API 컬렉션 (예약 가능 시간, 영업시간 설정)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "공개 API",
+			"item": [
+				{
+					"name": "예약 가능 날짜 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/available?months=2",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "available"],
+							"query": [
+								{
+									"key": "months",
+									"value": "2",
+									"description": "조회할 개월 수 (기본값: 1)"
+								}
+							]
+						},
+						"description": "예약 가능한 날짜들을 조회합니다. 영업일 기준으로 예약이 가능한 날짜를 반환합니다."
+					},
+					"response": [
+						{
+							"name": "예약 가능 날짜 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/available?months=2",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "available"],
+									"query": [
+										{
+											"key": "months",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"availableDates\": [\n            \"2025-07-24\",\n            \"2025-07-25\",\n            \"2025-07-26\"\n        ],\n        \"businessHours\": {\n            \"monday\": { \"open\": \"09:00\", \"close\": \"18:00\" },\n            \"tuesday\": { \"open\": \"09:00\", \"close\": \"18:00\" },\n            \"wednesday\": { \"open\": \"09:00\", \"close\": \"18:00\" },\n            \"thursday\": { \"open\": \"09:00\", \"close\": \"18:00\" },\n            \"friday\": { \"open\": \"09:00\", \"close\": \"18:00\" },\n            \"saturday\": { \"open\": \"09:00\", \"close\": \"15:00\" },\n            \"sunday\": { \"isHoliday\": true }\n        }\n    },\n    \"message\": \"예약 가능 날짜를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "예약 가능 시간 슬롯 조회",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/slots?date=2025-07-24",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "slots"],
+							"query": [
+								{
+									"key": "date",
+									"value": "2025-07-24",
+									"description": "조회할 날짜 (YYYY-MM-DD 형식)"
+								}
+							]
+						},
+						"description": "특정 날짜의 예약 가능한 시간 슬롯을 조회합니다."
+					},
+					"response": [
+						{
+							"name": "시간 슬롯 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/slots?date=2025-07-24",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "slots"],
+									"query": [
+										{
+											"key": "date",
+											"value": "2025-07-24"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"date\": \"2025-07-24\",\n        \"availableSlots\": [\n            { \"time\": \"09:00\", \"available\": true },\n            { \"time\": \"10:00\", \"available\": true },\n            { \"time\": \"11:00\", \"available\": false },\n            { \"time\": \"14:00\", \"available\": true },\n            { \"time\": \"15:00\", \"available\": true },\n            { \"time\": \"16:00\", \"available\": true }\n        ]\n    },\n    \"message\": \"예약 가능 시간을 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "관리자 API",
+			"item": [
+				{
+					"name": "영업시간 설정 조회",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/settings",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "settings"]
+						},
+						"description": "모든 요일의 영업시간 설정을 조회합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "영업시간 설정 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/settings",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "settings"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": [\n        { \"dayOfWeek\": 0, \"openTime\": null, \"closeTime\": null, \"isHoliday\": true },\n        { \"dayOfWeek\": 1, \"openTime\": \"09:00\", \"closeTime\": \"18:00\", \"isHoliday\": false },\n        { \"dayOfWeek\": 2, \"openTime\": \"09:00\", \"closeTime\": \"18:00\", \"isHoliday\": false },\n        { \"dayOfWeek\": 3, \"openTime\": \"09:00\", \"closeTime\": \"18:00\", \"isHoliday\": false },\n        { \"dayOfWeek\": 4, \"openTime\": \"09:00\", \"closeTime\": \"18:00\", \"isHoliday\": false },\n        { \"dayOfWeek\": 5, \"openTime\": \"09:00\", \"closeTime\": \"18:00\", \"isHoliday\": false },\n        { \"dayOfWeek\": 6, \"openTime\": \"09:00\", \"closeTime\": \"15:00\", \"isHoliday\": false }\n    ],\n    \"message\": \"영업시간 설정을 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "영업시간 설정 수정",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"openTime\": \"09:00\",\n    \"closeTime\": \"17:00\",\n    \"isHoliday\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/settings/1",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "settings", "1"]
+						},
+						"description": "특정 요일의 영업시간을 수정합니다. dayOfWeek: 0(일) ~ 6(토)"
+					},
+					"response": [
+						{
+							"name": "영업시간 설정 수정 성공",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"openTime\": \"09:00\",\n    \"closeTime\": \"17:00\",\n    \"isHoliday\": false\n}"
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/settings/1",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "settings", "1"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"dayOfWeek\": 1,\n        \"openTime\": \"09:00\",\n        \"closeTime\": \"17:00\",\n        \"isHoliday\": false,\n        \"updatedAt\": \"2025-07-23T23:00:00.000Z\"\n    },\n    \"message\": \"영업시간 설정이 수정되었습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "차단된 날짜 목록 조회",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/blocked",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "blocked"]
+						},
+						"description": "관리자가 차단한 날짜 목록을 조회합니다."
+					},
+					"response": [
+						{
+							"name": "차단된 날짜 목록 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/blocked",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "blocked"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"date\": \"2025-07-30\",\n            \"reason\": \"개인 사정으로 인한 휴무\",\n            \"createdAt\": \"2025-07-23T10:00:00.000Z\"\n        },\n        {\n            \"date\": \"2025-08-15\",\n            \"reason\": \"광복절 공휴일\",\n            \"createdAt\": \"2025-07-23T10:00:00.000Z\"\n        }\n    ],\n    \"message\": \"차단된 날짜 목록을 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "날짜 차단",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"date\": \"2025-08-10\",\n    \"reason\": \"개인 사정으로 인한 휴무\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/block",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "block"]
+						},
+						"description": "특정 날짜를 예약 불가능하게 차단합니다."
+					},
+					"response": [
+						{
+							"name": "날짜 차단 성공",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"date\": \"2025-08-10\",\n    \"reason\": \"개인 사정으로 인한 휴무\"\n}"
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/block",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "block"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"date\": \"2025-08-10\",\n        \"reason\": \"개인 사정으로 인한 휴무\",\n        \"createdAt\": \"2025-07-23T23:00:00.000Z\"\n    },\n    \"message\": \"날짜가 차단되었습니다.\",\n    \"statusCode\": 201\n}"
+						}
+					]
+				},
+				{
+					"name": "날짜 차단 해제",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/calendar/block/2025-08-10",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "calendar", "block", "2025-08-10"]
+						},
+						"description": "차단된 날짜를 해제하여 다시 예약 가능하게 만듭니다."
+					},
+					"response": [
+						{
+							"name": "날짜 차단 해제 성공",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/calendar/block/2025-08-10",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "calendar", "block", "2025-08-10"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": null,\n    \"message\": \"날짜 차단이 해제되었습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "API_URL",
+			"value": "{{API_URL}}",
+			"type": "string"
+		},
+		{
+			"key": "ACCESS_TOKEN",
+			"value": "{{ACCESS_TOKEN}}",
+			"type": "string"
+		}
+	]
+}

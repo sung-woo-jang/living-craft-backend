@@ -1,0 +1,589 @@
+{
+	"info": {
+		"_postman_id": "files-collection-001",
+		"name": "Reservation Service - Files",
+		"description": "파일 업로드 및 관리 API 컬렉션 (이미지 업로드, 문서 업로드, 파일 삭제)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "관리자 파일 업로드",
+			"item": [
+				{
+					"name": "일반 이미지 업로드",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "업로드할 이미지 파일 (jpg, jpeg, png, gif, webp)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/files/upload/image",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "upload", "image"]
+						},
+						"description": "일반 이미지를 업로드합니다. 최대 5MB까지 지원합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "이미지 업로드 성공",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "sample-image.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/files/upload/image",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "upload", "image"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"image_1721774400000_abc123.jpg\",\n        \"originalName\": \"sample-image.jpg\",\n        \"path\": \"/uploads/images/image_1721774400000_abc123.jpg\",\n        \"size\": 245760,\n        \"mimeType\": \"image/jpeg\",\n        \"url\": \"{{API_URL}}/uploads/images/image_1721774400000_abc123.jpg\"\n    },\n    \"message\": \"이미지가 업로드되었습니다.\",\n    \"statusCode\": 201\n}"
+						}
+					]
+				},
+				{
+					"name": "서비스 이미지 업로드",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "업로드할 서비스 이미지 파일"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/files/upload/service-image",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "upload", "service-image"]
+						},
+						"description": "서비스 관련 이미지를 업로드합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "서비스 이미지 업로드 성공",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "service-cleaning.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/files/upload/service-image",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "upload", "service-image"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"service_1721774500000_def456.jpg\",\n        \"originalName\": \"service-cleaning.jpg\",\n        \"path\": \"/uploads/services/service_1721774500000_def456.jpg\",\n        \"size\": 512000,\n        \"mimeType\": \"image/jpeg\",\n        \"url\": \"{{API_URL}}/uploads/services/service_1721774500000_def456.jpg\"\n    },\n    \"message\": \"서비스 이미지가 업로드되었습니다.\",\n    \"statusCode\": 201\n}"
+						}
+					]
+				},
+				{
+					"name": "포트폴리오 이미지 업로드",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": [],
+									"description": "업로드할 포트폴리오 이미지 파일"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/files/upload/portfolio-image",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "upload", "portfolio-image"]
+						},
+						"description": "포트폴리오 관련 이미지를 업로드합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "포트폴리오 이미지 업로드 성공",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "portfolio-work.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/files/upload/portfolio-image",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "upload", "portfolio-image"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"portfolio_1721774600000_ghi789.jpg\",\n        \"originalName\": \"portfolio-work.jpg\",\n        \"path\": \"/uploads/portfolio/portfolio_1721774600000_ghi789.jpg\",\n        \"size\": 768000,\n        \"mimeType\": \"image/jpeg\",\n        \"url\": \"{{API_URL}}/uploads/portfolio/portfolio_1721774600000_ghi789.jpg\"\n    },\n    \"message\": \"포트폴리오 이미지가 업로드되었습니다.\",\n    \"statusCode\": 201\n}"
+						}
+					]
+				},
+				{
+					"name": "문서 파일 업로드",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "document",
+									"type": "file",
+									"src": [],
+									"description": "업로드할 문서 파일 (pdf, doc, docx, xls, xlsx)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/files/upload/document",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "upload", "document"]
+						},
+						"description": "문서 파일을 업로드합니다. 최대 10MB까지 지원합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "문서 파일 업로드 성공",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "document",
+											"type": "file",
+											"src": "service-contract.pdf"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/files/upload/document",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "upload", "document"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"document_1721774700000_jkl012.pdf\",\n        \"originalName\": \"service-contract.pdf\",\n        \"path\": \"/uploads/documents/document_1721774700000_jkl012.pdf\",\n        \"size\": 1024000,\n        \"mimeType\": \"application/pdf\",\n        \"url\": \"{{API_URL}}/uploads/documents/document_1721774700000_jkl012.pdf\"\n    },\n    \"message\": \"문서가 업로드되었습니다.\",\n    \"statusCode\": 201\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "공개 파일 업로드",
+			"item": [
+				{
+					"name": "리뷰 이미지 업로드 (다중)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": [],
+									"description": "업로드할 리뷰 이미지 파일들 (최대 5개)"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": [],
+									"description": "두 번째 이미지 (선택사항)"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": [],
+									"description": "세 번째 이미지 (선택사항)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{API_URL}}/api/files/upload/review-images",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "upload", "review-images"]
+						},
+						"description": "리뷰 작성 시 사용할 이미지를 업로드합니다. 최대 5개까지 동시 업로드 가능합니다. (인증 불필요)"
+					},
+					"response": [
+						{
+							"name": "리뷰 이미지 업로드 성공",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "images",
+											"type": "file",
+											"src": "review-before.jpg"
+										},
+										{
+											"key": "images",
+											"type": "file",
+											"src": "review-after.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{API_URL}}/api/files/upload/review-images",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "upload", "review-images"]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"uploadedFiles\": [\n            {\n                \"filename\": \"review_1721774800000_mno345.jpg\",\n                \"originalName\": \"review-before.jpg\",\n                \"path\": \"/uploads/reviews/review_1721774800000_mno345.jpg\",\n                \"size\": 345600,\n                \"mimeType\": \"image/jpeg\",\n                \"url\": \"{{API_URL}}/uploads/reviews/review_1721774800000_mno345.jpg\"\n            },\n            {\n                \"filename\": \"review_1721774801000_pqr678.jpg\",\n                \"originalName\": \"review-after.jpg\",\n                \"path\": \"/uploads/reviews/review_1721774801000_pqr678.jpg\",\n                \"size\": 298000,\n                \"mimeType\": \"image/jpeg\",\n                \"url\": \"{{API_URL}}/uploads/reviews/review_1721774801000_pqr678.jpg\"\n            }\n        ],\n        \"totalFiles\": 2,\n        \"totalSize\": 643600\n    },\n    \"message\": \"리뷰 이미지가 업로드되었습니다.\",\n    \"statusCode\": 201\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "파일 관리",
+			"item": [
+				{
+					"name": "파일 삭제",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/files/images/image_1721774400000_abc123.jpg",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "images", "image_1721774400000_abc123.jpg"]
+						},
+						"description": "업로드된 파일을 삭제합니다. 카테고리별로 경로가 구분됩니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "파일 삭제 성공",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/files/images/image_1721774400000_abc123.jpg",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "images", "image_1721774400000_abc123.jpg"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"image_1721774400000_abc123.jpg\",\n        \"category\": \"images\",\n        \"deletedAt\": \"2025-07-23T23:30:00.000Z\"\n    },\n    \"message\": \"파일이 삭제되었습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "서비스 파일 삭제",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/files/services/service_1721774500000_def456.jpg",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "services", "service_1721774500000_def456.jpg"]
+						},
+						"description": "서비스 카테고리의 파일을 삭제합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "서비스 파일 삭제 성공",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/files/services/service_1721774500000_def456.jpg",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "services", "service_1721774500000_def456.jpg"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"service_1721774500000_def456.jpg\",\n        \"category\": \"services\",\n        \"deletedAt\": \"2025-07-23T23:32:00.000Z\"\n    },\n    \"message\": \"서비스 파일이 삭제되었습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "포트폴리오 파일 삭제",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/files/portfolio/portfolio_1721774600000_ghi789.jpg",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "portfolio", "portfolio_1721774600000_ghi789.jpg"]
+						},
+						"description": "포트폴리오 카테고리의 파일을 삭제합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "포트폴리오 파일 삭제 성공",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/files/portfolio/portfolio_1721774600000_ghi789.jpg",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "portfolio", "portfolio_1721774600000_ghi789.jpg"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"portfolio_1721774600000_ghi789.jpg\",\n        \"category\": \"portfolio\",\n        \"deletedAt\": \"2025-07-23T23:34:00.000Z\"\n    },\n    \"message\": \"포트폴리오 파일이 삭제되었습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "문서 파일 삭제",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/files/documents/document_1721774700000_jkl012.pdf",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "files", "documents", "document_1721774700000_jkl012.pdf"]
+						},
+						"description": "문서 카테고리의 파일을 삭제합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "문서 파일 삭제 성공",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/files/documents/document_1721774700000_jkl012.pdf",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "files", "documents", "document_1721774700000_jkl012.pdf"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"filename\": \"document_1721774700000_jkl012.pdf\",\n        \"category\": \"documents\",\n        \"deletedAt\": \"2025-07-23T23:36:00.000Z\"\n    },\n    \"message\": \"문서 파일이 삭제되었습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "API_URL",
+			"value": "{{API_URL}}",
+			"type": "string"
+		},
+		{
+			"key": "ACCESS_TOKEN",
+			"value": "{{ACCESS_TOKEN}}",
+			"type": "string"
+		}
+	]
+}

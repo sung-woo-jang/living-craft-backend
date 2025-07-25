@@ -1,0 +1,655 @@
+{
+	"info": {
+		"_postman_id": "stats-collection-001",
+		"name": "Reservation Service - Statistics",
+		"description": "통계 및 분석 API 컬렉션 (대시보드 통계, 월별 리포트, 서비스별 분석)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "대시보드 통계",
+			"item": [
+				{
+					"name": "대시보드 개요 통계",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/dashboard",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "dashboard"]
+						},
+						"description": "관리자 대시보드에 표시할 주요 통계 정보를 조회합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "대시보드 통계 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/dashboard",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "dashboard"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"overview\": {\n            \"totalReservations\": 245,\n            \"totalRevenue\": 12350000,\n            \"averageServicePrice\": 85000,\n            \"customerCount\": 156\n        },\n        \"thisMonth\": {\n            \"reservations\": 45,\n            \"revenue\": 3850000,\n            \"newCustomers\": 12,\n            \"completedServices\": 38\n        },\n        \"recentActivity\": {\n            \"pendingReservations\": 8,\n            \"todayReservations\": 3,\n            \"pendingQuotes\": 5,\n            \"failedNotifications\": 2\n        },\n        \"popularServices\": [\n            {\n                \"serviceId\": 1,\n                \"serviceName\": \"일반 청소\",\n                \"reservationCount\": 89,\n                \"revenue\": 4450000\n            },\n            {\n                \"serviceId\": 3,\n                \"serviceName\": \"대청소\",\n                \"reservationCount\": 67,\n                \"revenue\": 6700000\n            }\n        ]\n    },\n    \"message\": \"대시보드 통계를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "실시간 통계",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/realtime",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "realtime"]
+						},
+						"description": "실시간 업데이트되는 통계 정보를 조회합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "실시간 통계 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/realtime",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "realtime"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"today\": {\n            \"newReservations\": 5,\n            \"completedServices\": 3,\n            \"revenue\": 275000,\n            \"newCustomers\": 2\n        },\n        \"thisWeek\": {\n            \"reservations\": 18,\n            \"revenue\": 1530000,\n            \"averageRating\": 4.6,\n            \"completionRate\": 94.4\n        },\n        \"alerts\": [\n            {\n                \"type\": \"pending_quotes\",\n                \"count\": 5,\n                \"message\": \"5개의 견적 요청이 대기 중입니다.\"\n            },\n            {\n                \"type\": \"failed_notifications\",\n                \"count\": 2,\n                \"message\": \"2건의 알림 발송이 실패했습니다.\"\n            }\n        ],\n        \"lastUpdated\": \"2025-07-23T23:45:00.000Z\"\n    },\n    \"message\": \"실시간 통계를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "예약 통계",
+			"item": [
+				{
+					"name": "월별 예약 통계",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/reservations/monthly?year=2025&months=6",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "reservations", "monthly"],
+							"query": [
+								{
+									"key": "year",
+									"value": "2025",
+									"description": "조회할 연도"
+								},
+								{
+									"key": "months",
+									"value": "6",
+									"description": "조회할 개월 수 (기본값: 12)"
+								}
+							]
+						},
+						"description": "월별 예약 현황 통계를 조회합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "월별 예약 통계 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/reservations/monthly?year=2025&months=6",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "reservations", "monthly"],
+									"query": [
+										{
+											"key": "year",
+											"value": "2025"
+										},
+										{
+											"key": "months",
+											"value": "6"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"period\": {\n            \"year\": 2025,\n            \"months\": 6\n        },\n        \"monthlyData\": [\n            {\n                \"month\": \"2025-02\",\n                \"totalReservations\": 32,\n                \"completedReservations\": 28,\n                \"cancelledReservations\": 4,\n                \"revenue\": 2450000,\n                \"averageServicePrice\": 76563,\n                \"completionRate\": 87.5\n            },\n            {\n                \"month\": \"2025-03\",\n                \"totalReservations\": 41,\n                \"completedReservations\": 38,\n                \"cancelledReservations\": 3,\n                \"revenue\": 3280000,\n                \"averageServicePrice\": 80000,\n                \"completionRate\": 92.7\n            },\n            {\n                \"month\": \"2025-04\",\n                \"totalReservations\": 38,\n                \"completedReservations\": 36,\n                \"cancelledReservations\": 2,\n                \"revenue\": 3150000,\n                \"averageServicePrice\": 82895,\n                \"completionRate\": 94.7\n            },\n            {\n                \"month\": \"2025-05\",\n                \"totalReservations\": 45,\n                \"completedReservations\": 42,\n                \"cancelledReservations\": 3,\n                \"revenue\": 3780000,\n                \"averageServicePrice\": 84000,\n                \"completionRate\": 93.3\n            },\n            {\n                \"month\": \"2025-06\",\n                \"totalReservations\": 52,\n                \"completedReservations\": 48,\n                \"cancelledReservations\": 4,\n                \"revenue\": 4320000,\n                \"averageServicePrice\": 83077,\n                \"completionRate\": 92.3\n            },\n            {\n                \"month\": \"2025-07\",\n                \"totalReservations\": 37,\n                \"completedReservations\": 28,\n                \"cancelledReservations\": 2,\n                \"revenue\": 2380000,\n                \"averageServicePrice\": 64324,\n                \"completionRate\": 75.7\n            }\n        ],\n        \"summary\": {\n            \"totalReservations\": 245,\n            \"totalRevenue\": 19360000,\n            \"averageMonthlyRevenue\": 3226667,\n            \"overallCompletionRate\": 89.4\n        }\n    },\n    \"message\": \"월별 예약 통계를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "예약 상태별 통계",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/reservations/status?period=30",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "reservations", "status"],
+							"query": [
+								{
+									"key": "period",
+									"value": "30",
+									"description": "조회 기간 (일 단위, 기본값: 30일)"
+								}
+							]
+						},
+						"description": "예약 상태별 분포 통계를 조회합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "예약 상태별 통계 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/reservations/status?period=30",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "reservations", "status"],
+									"query": [
+										{
+											"key": "period",
+											"value": "30"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"period\": {\n            \"days\": 30,\n            \"startDate\": \"2025-06-23\",\n            \"endDate\": \"2025-07-23\"\n        },\n        \"statusDistribution\": [\n            {\n                \"status\": \"completed\",\n                \"count\": 42,\n                \"percentage\": 72.4,\n                \"revenue\": 3570000\n            },\n            {\n                \"status\": \"confirmed\",\n                \"count\": 8,\n                \"percentage\": 13.8,\n                \"revenue\": 680000\n            },\n            {\n                \"status\": \"pending\",\n                \"count\": 5,\n                \"percentage\": 8.6,\n                \"revenue\": 425000\n            },\n            {\n                \"status\": \"cancelled\",\n                \"count\": 3,\n                \"percentage\": 5.2,\n                \"revenue\": 0\n            }\n        ],\n        \"trends\": {\n            \"completionRate\": 72.4,\n            \"cancellationRate\": 5.2,\n            \"averageProcessingTime\": \"2.5 hours\",\n            \"customerSatisfactionRate\": 4.6\n        }\n    },\n    \"message\": \"예약 상태별 통계를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "서비스 통계",
+			"item": [
+				{
+					"name": "서비스별 인기도 통계",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/services/popularity?period=90&limit=10",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "services", "popularity"],
+							"query": [
+								{
+									"key": "period",
+									"value": "90",
+									"description": "조회 기간 (일 단위, 기본값: 30일)"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "조회할 서비스 수 (기본값: 5)"
+								}
+							]
+						},
+						"description": "서비스별 예약 건수와 인기도를 분석합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "서비스 인기도 통계 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/services/popularity?period=90&limit=10",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "services", "popularity"],
+									"query": [
+										{
+											"key": "period",
+											"value": "90"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"period\": {\n            \"days\": 90,\n            \"startDate\": \"2025-04-24\",\n            \"endDate\": \"2025-07-23\"\n        },\n        \"services\": [\n            {\n                \"serviceId\": 1,\n                \"serviceName\": \"일반 청소\",\n                \"reservationCount\": 89,\n                \"revenue\": 4450000,\n                \"averagePrice\": 50000,\n                \"marketShare\": 36.3,\n                \"trend\": \"increasing\",\n                \"customerRating\": 4.7\n            },\n            {\n                \"serviceId\": 3,\n                \"serviceName\": \"대청소\",\n                \"reservationCount\": 67,\n                \"revenue\": 6700000,\n                \"averagePrice\": 100000,\n                \"marketShare\": 27.3,\n                \"trend\": \"stable\",\n                \"customerRating\": 4.8\n            },\n            {\n                \"serviceId\": 2,\n                \"serviceName\": \"사무실 청소\",\n                \"reservationCount\": 45,\n                \"revenue\": 3150000,\n                \"averagePrice\": 70000,\n                \"marketShare\": 18.4,\n                \"trend\": \"increasing\",\n                \"customerRating\": 4.5\n            },\n            {\n                \"serviceId\": 5,\n                \"serviceName\": \"이사 청소\",\n                \"reservationCount\": 28,\n                \"revenue\": 4200000,\n                \"averagePrice\": 150000,\n                \"marketShare\": 11.4,\n                \"trend\": \"decreasing\",\n                \"customerRating\": 4.9\n            },\n            {\n                \"serviceId\": 4,\n                \"serviceName\": \"정기 청소\",\n                \"reservationCount\": 16,\n                \"revenue\": 720000,\n                \"averagePrice\": 45000,\n                \"marketShare\": 6.5,\n                \"trend\": \"stable\",\n                \"customerRating\": 4.6\n            }\n        ],\n        \"summary\": {\n            \"totalServices\": 5,\n            \"totalReservations\": 245,\n            \"totalRevenue\": 19220000,\n            \"averageRating\": 4.7\n        }\n    },\n    \"message\": \"서비스별 인기도 통계를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "서비스 수익성 분석",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/services/profitability?serviceId=1",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "services", "profitability"],
+							"query": [
+								{
+									"key": "serviceId",
+									"value": "1",
+									"description": "분석할 서비스 ID (선택사항)"
+								}
+							]
+						},
+						"description": "특정 서비스 또는 전체 서비스의 수익성을 분석합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "서비스 수익성 분석 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/services/profitability?serviceId=1",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "services", "profitability"],
+									"query": [
+										{
+											"key": "serviceId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"service\": {\n            \"id\": 1,\n            \"name\": \"일반 청소\",\n            \"type\": \"FIXED_PRICE\"\n        },\n        \"profitability\": {\n            \"totalRevenue\": 4450000,\n            \"totalReservations\": 89,\n            \"averageRevenue\": 50000,\n            \"monthlyGrowth\": 12.5,\n            \"profitMargin\": 68.2,\n            \"breakEvenPoint\": 15\n        },\n        \"performance\": {\n            \"completionRate\": 94.4,\n            \"customerRetentionRate\": 78.5,\n            \"averageRating\": 4.7,\n            \"repeatCustomerRate\": 42.3\n        },\n        \"trends\": {\n            \"lastSixMonths\": [\n                { \"month\": \"2025-02\", \"revenue\": 650000, \"reservations\": 13 },\n                { \"month\": \"2025-03\", \"revenue\": 700000, \"reservations\": 14 },\n                { \"month\": \"2025-04\", \"revenue\": 750000, \"reservations\": 15 },\n                { \"month\": \"2025-05\", \"revenue\": 800000, \"reservations\": 16 },\n                { \"month\": \"2025-06\", \"revenue\": 850000, \"reservations\": 17 },\n                { \"month\": \"2025-07\", \"revenue\": 700000, \"reservations\": 14 }\n            ]\n        },\n        \"insights\": [\n            \"일반 청소는 가장 인기 있는 서비스로 안정적인 수익을 보장합니다.\",\n            \"고객 만족도가 높아 재예약률이 42.3%에 달합니다.\",\n            \"7월에 소폭 감소했지만 전반적으로 성장 추세입니다.\"\n        ]\n    },\n    \"message\": \"서비스 수익성 분석을 완료했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "고객 통계",
+			"item": [
+				{
+					"name": "고객 분석 리포트",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/customers/analysis?period=180",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "customers", "analysis"],
+							"query": [
+								{
+									"key": "period",
+									"value": "180",
+									"description": "분석 기간 (일 단위, 기본값: 90일)"
+								}
+							]
+						},
+						"description": "고객 행동 패턴과 충성도를 분석합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "고객 분석 리포트 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/customers/analysis?period=180",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "customers", "analysis"],
+									"query": [
+										{
+											"key": "period",
+											"value": "180"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"period\": {\n            \"days\": 180,\n            \"startDate\": \"2025-01-25\",\n            \"endDate\": \"2025-07-23\"\n        },\n        \"overview\": {\n            \"totalCustomers\": 156,\n            \"newCustomers\": 45,\n            \"returningCustomers\": 67,\n            \"customerRetentionRate\": 72.5,\n            \"averageOrderValue\": 85000\n        },\n        \"segmentation\": {\n            \"byFrequency\": [\n                { \"segment\": \"일회성 고객\", \"count\": 89, \"percentage\": 57.1 },\n                { \"segment\": \"단골 고객 (2-3회)\", \"count\": 45, \"percentage\": 28.8 },\n                { \"segment\": \"VIP 고객 (4회+)\", \"count\": 22, \"percentage\": 14.1 }\n            ],\n            \"byValue\": [\n                { \"segment\": \"저가 고객 (<50k)\", \"count\": 62, \"percentage\": 39.7, \"avgSpend\": 35000 },\n                { \"segment\": \"중가 고객 (50k-100k)\", \"count\": 67, \"percentage\": 43.0, \"avgSpend\": 75000 },\n                { \"segment\": \"고가 고객 (100k+)\", \"count\": 27, \"percentage\": 17.3, \"avgSpend\": 145000 }\n            ]\n        },\n        \"behaviorPattern\": {\n            \"preferredDays\": [\n                { \"day\": \"토요일\", \"reservations\": 67, \"percentage\": 27.3 },\n                { \"day\": \"일요일\", \"reservations\": 58, \"percentage\": 23.7 },\n                { \"day\": \"금요일\", \"reservations\": 45, \"percentage\": 18.4 }\n            ],\n            \"preferredTimes\": [\n                { \"timeSlot\": \"14:00-16:00\", \"reservations\": 78, \"percentage\": 31.8 },\n                { \"timeSlot\": \"10:00-12:00\", \"reservations\": 65, \"percentage\": 26.5 },\n                { \"timeSlot\": \"09:00-10:00\", \"reservations\": 42, \"percentage\": 17.1 }\n            ],\n            \"averageBookingLeadTime\": \"5.2 days\",\n            \"mostCommonServiceCombination\": \"일반 청소 + 화장실 청소\"\n        },\n        \"satisfaction\": {\n            \"averageRating\": 4.6,\n            \"responseRate\": 78.5,\n            \"recommendationRate\": 85.2,\n            \"complaintRate\": 2.4\n        }\n    },\n    \"message\": \"고객 분석 리포트를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "고객 생애 가치 (LTV) 분석",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/customers/ltv?segment=all",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "customers", "ltv"],
+							"query": [
+								{
+									"key": "segment",
+									"value": "all",
+									"description": "고객 세그먼트 (all, new, returning, vip)"
+								}
+							]
+						},
+						"description": "고객별 생애 가치(LTV)와 수익성을 분석합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "고객 LTV 분석 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/customers/ltv?segment=all",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "customers", "ltv"],
+									"query": [
+										{
+											"key": "segment",
+											"value": "all"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"overview\": {\n            \"totalCustomers\": 156,\n            \"averageLTV\": 245000,\n            \"medianLTV\": 180000,\n            \"totalCustomerValue\": 38220000\n        },\n        \"segments\": [\n            {\n                \"segment\": \"VIP 고객\",\n                \"customerCount\": 22,\n                \"averageLTV\": 680000,\n                \"totalValue\": 14960000,\n                \"retentionRate\": 95.5,\n                \"averageOrderFrequency\": 6.8\n            },\n            {\n                \"segment\": \"단골 고객\",\n                \"customerCount\": 45,\n                \"averageLTV\": 185000,\n                \"totalValue\": 8325000,\n                \"retentionRate\": 78.5,\n                \"averageOrderFrequency\": 2.4\n            },\n            {\n                \"segment\": \"일회성 고객\",\n                \"customerCount\": 89,\n                \"averageLTV\": 65000,\n                \"totalValue\": 5785000,\n                \"retentionRate\": 18.2,\n                \"averageOrderFrequency\": 1.0\n            }\n        ],\n        \"predictions\": {\n            \"nextMonthRevenue\": 3250000,\n            \"quarterlyGrowthRate\": 15.8,\n            \"churnRisk\": {\n                \"high\": 12,\n                \"medium\": 28,\n                \"low\": 116\n            }\n        },\n        \"recommendations\": [\n            \"VIP 고객에게 프리미엄 서비스 패키지를 제안하세요.\",\n            \"단골 고객의 재예약률을 높이기 위해 할인 쿠폰을 제공하세요.\",\n            \"일회성 고객의 재방문을 유도하기 위한 후속 마케팅을 강화하세요.\"\n        ]\n    },\n    \"message\": \"고객 생애 가치 분석을 완료했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "매출 분석",
+			"item": [
+				{
+					"name": "매출 트렌드 분석",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/revenue/trends?period=365&granularity=monthly",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "revenue", "trends"],
+							"query": [
+								{
+									"key": "period",
+									"value": "365",
+									"description": "분석 기간 (일 단위)"
+								},
+								{
+									"key": "granularity",
+									"value": "monthly",
+									"description": "데이터 세분화 (daily, weekly, monthly)"
+								}
+							]
+						},
+						"description": "매출 트렌드와 성장률을 분석합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "매출 트렌드 분석 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/revenue/trends?period=365&granularity=monthly",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "revenue", "trends"],
+									"query": [
+										{
+											"key": "period",
+											"value": "365"
+										},
+										{
+											"key": "granularity",
+											"value": "monthly"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"period\": {\n            \"days\": 365,\n            \"granularity\": \"monthly\",\n            \"startDate\": \"2024-07-24\",\n            \"endDate\": \"2025-07-23\"\n        },\n        \"summary\": {\n            \"totalRevenue\": 28450000,\n            \"averageMonthlyRevenue\": 2370833,\n            \"growthRate\": 18.5,\n            \"highestMonth\": \"2025-06\",\n            \"lowestMonth\": \"2024-12\"\n        },\n        \"monthlyData\": [\n            { \"month\": \"2024-08\", \"revenue\": 1850000, \"growth\": 0 },\n            { \"month\": \"2024-09\", \"revenue\": 2100000, \"growth\": 13.5 },\n            { \"month\": \"2024-10\", \"revenue\": 2350000, \"growth\": 11.9 },\n            { \"month\": \"2024-11\", \"revenue\": 2200000, \"growth\": -6.4 },\n            { \"month\": \"2024-12\", \"revenue\": 1650000, \"growth\": -25.0 },\n            { \"month\": \"2025-01\", \"revenue\": 2000000, \"growth\": 21.2 },\n            { \"month\": \"2025-02\", \"revenue\": 2450000, \"growth\": 22.5 },\n            { \"month\": \"2025-03\", \"revenue\": 2800000, \"growth\": 14.3 },\n            { \"month\": \"2025-04\", \"revenue\": 3150000, \"growth\": 12.5 },\n            { \"month\": \"2025-05\", \"revenue\": 3780000, \"growth\": 20.0 },\n            { \"month\": \"2025-06\", \"revenue\": 4320000, \"growth\": 14.3 },\n            { \"month\": \"2025-07\", \"revenue\": 3800000, \"growth\": -12.0 }\n        ],\n        \"insights\": {\n            \"seasonality\": \"겨울철(12-2월) 매출 감소, 봄-여름철(3-6월) 매출 증가 패턴\",\n            \"peakSeason\": \"5-6월\",\n            \"lowSeason\": \"12-1월\",\n            \"yearOverYearGrowth\": 18.5,\n            \"quarterlyTrend\": \"상승세 유지\"\n        },\n        \"forecasting\": {\n            \"nextMonth\": {\n                \"predictedRevenue\": 3950000,\n                \"confidenceInterval\": \"3600000 - 4300000\"\n            },\n            \"nextQuarter\": {\n                \"predictedRevenue\": 11250000,\n                \"expectedGrowth\": 8.5\n            }\n        }\n    },\n    \"message\": \"매출 트렌드 분석을 완료했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				},
+				{
+					"name": "수익성 분석 리포트",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{ACCESS_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{API_URL}}/api/stats/revenue/profitability",
+							"host": ["{{API_URL}}"],
+							"path": ["api", "stats", "revenue", "profitability"]
+						},
+						"description": "전체 비즈니스의 수익성과 비용 구조를 분석합니다. (관리자 전용)"
+					},
+					"response": [
+						{
+							"name": "수익성 분석 리포트 조회 성공",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{ACCESS_TOKEN}}"
+									}
+								],
+								"url": {
+									"raw": "{{API_URL}}/api/stats/revenue/profitability",
+									"host": ["{{API_URL}}"],
+									"path": ["api", "stats", "revenue", "profitability"]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"overview\": {\n            \"totalRevenue\": 28450000,\n            \"grossProfit\": 19515000,\n            \"netProfit\": 15260000,\n            \"profitMargin\": 53.6,\n            \"grossMargin\": 68.6\n        },\n        \"costBreakdown\": {\n            \"materialCosts\": 4935000,\n            \"laborCosts\": 3950000,\n            \"operationalCosts\": 2850000,\n            \"marketingCosts\": 1450000,\n            \"otherCosts\": 985000\n        },\n        \"profitabilityByService\": [\n            {\n                \"serviceName\": \"일반 청소\",\n                \"revenue\": 4450000,\n                \"profit\": 3115000,\n                \"profitMargin\": 70.0\n            },\n            {\n                \"serviceName\": \"대청소\",\n                \"revenue\": 6700000,\n                \"profit\": 4288000,\n                \"profitMargin\": 64.0\n            },\n            {\n                \"serviceName\": \"사무실 청소\",\n                \"revenue\": 3150000,\n                \"profit\": 1890000,\n                \"profitMargin\": 60.0\n            }\n        ],\n        \"efficiency\": {\n            \"revenuePerHour\": 85000,\n            \"revenuePerCustomer\": 182372,\n            \"costPerAcquisition\": 12500,\n            \"returnOnInvestment\": 386.5\n        },\n        \"trends\": {\n            \"profitGrowthRate\": 22.8,\n            \"costOptimizationRate\": 8.5,\n            \"marginImprovement\": 3.2\n        }\n    },\n    \"message\": \"수익성 분석 리포트를 조회했습니다.\",\n    \"statusCode\": 200\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "API_URL",
+			"value": "{{API_URL}}",
+			"type": "string"
+		},
+		{
+			"key": "ACCESS_TOKEN",
+			"value": "{{ACCESS_TOKEN}}",
+			"type": "string"
+		}
+	]
+}
