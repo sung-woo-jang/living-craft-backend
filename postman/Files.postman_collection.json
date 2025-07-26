@@ -24,7 +24,7 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "image",
+									"key": "file",
 									"type": "file",
 									"src": [],
 									"description": "업로드할 이미지 파일 (jpg, jpeg, png, gif, webp)"
@@ -234,10 +234,10 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "document",
+									"key": "file",
 									"type": "file",
 									"src": [],
-									"description": "업로드할 문서 파일 (pdf, doc, docx, xls, xlsx)"
+									"description": "업로드할 문서 파일 (pdf, doc, docx, hwp, txt)"
 								}
 							]
 						},
@@ -303,19 +303,19 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "images",
+									"key": "files",
 									"type": "file",
 									"src": [],
 									"description": "업로드할 리뷰 이미지 파일들 (최대 5개)"
 								},
 								{
-									"key": "images",
+									"key": "files",
 									"type": "file",
 									"src": [],
 									"description": "두 번째 이미지 (선택사항)"
 								},
 								{
-									"key": "images",
+									"key": "files",
 									"type": "file",
 									"src": [],
 									"description": "세 번째 이미지 (선택사항)"
