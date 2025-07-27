@@ -75,5 +75,4 @@ ssl/
 *.bak
 
 
-CLAUDE.md
 .claude/*

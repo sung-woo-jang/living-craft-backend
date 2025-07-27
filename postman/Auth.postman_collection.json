@@ -429,6 +429,23 @@
 		},
 		{
 			"name": "네이버 OAuth 인증 URL 조회",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    if (response.data && response.data.url) {",
+							"        console.log('네이버 로그인 URL:', response.data.url);",
+							"        // 실제 테스트에서는 이 URL로 브라우저에서 접속해야 함",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -437,7 +454,7 @@
 					"host": ["{{API_URL}}"],
 					"path": ["api", "auth", "naver"]
 				},
-				"description": "네이버 OAuth 인증 URL을 반환합니다."
+				"description": "네이버 OAuth 인증 URL을 반환합니다. 응답받은 URL로 브라우저에서 접속하여 네이버 로그인을 진행하세요."
 			},
 			"response": [
 				{
@@ -461,33 +478,50 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"success\": true,\n    \"data\": {\n        \"url\": \"https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=CALLBACK_URL&state=STATE\"\n    },\n    \"message\": \"네이버 인증 URL을 반환했습니다.\",\n    \"statusCode\": 200\n}"
+					"body": "{\n    \"success\": true,\n    \"data\": {\n        \"url\": \"https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=TlVTw_nfik1JB5syT8b2&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Fauth%2Fcallback%2Fnaver&state=abc123def456\"\n    },\n    \"message\": \"네이버 인증 URL을 반환했습니다.\",\n    \"statusCode\": 200\n}"
 				}
 			]
 		},
 		{
 			"name": "네이버 OAuth 콜백",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {",
+							"    const response = pm.response.json();",
+							"    if (response.data && response.data.accessToken) {",
+							"        pm.environment.set('ACCESS_TOKEN', response.data.accessToken);",
+							"        console.log('네이버 로그인 성공, 토큰 저장됨:', response.data.accessToken);",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{API_URL}}/api/auth/callback/naver?code=AUTHORIZATION_CODE&state=STATE_VALUE",
+					"raw": "{{API_URL}}/api/auth/callback/naver?code={{NAVER_AUTH_CODE}}&state={{NAVER_STATE}}",
 					"host": ["{{API_URL}}"],
 					"path": ["api", "auth", "callback", "naver"],
 					"query": [
 						{
 							"key": "code",
-							"value": "AUTHORIZATION_CODE",
-							"description": "네이버에서 전달받은 인증 코드"
+							"value": "{{NAVER_AUTH_CODE}}",
+							"description": "네이버에서 전달받은 인증 코드 (환경변수에서 설정)"
 						},
 						{
 							"key": "state",
-							"value": "STATE_VALUE",
-							"description": "CSRF 보호를 위한 상태값"
+							"value": "{{NAVER_STATE}}",
+							"description": "CSRF 보호를 위한 상태값 (환경변수에서 설정)"
 						}
 					]
 				},
-				"description": "네이버 OAuth 인증 완료 후 콜백을 처리합니다."
+				"description": "네이버 OAuth 인증 완료 후 콜백을 처리합니다. 실제 테스트를 위해서는 브라우저에서 네이버 로그인 후 리다이렉트된 URL의 code와 state 파라미터를 사용하세요."
 			},
 			"response": [
 				{
@@ -496,17 +530,17 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{API_URL}}/api/auth/callback/naver?code=AUTHORIZATION_CODE&state=STATE_VALUE",
+							"raw": "{{API_URL}}/api/auth/callback/naver?code=SAMPLE_AUTH_CODE&state=abc123def456",
 							"host": ["{{API_URL}}"],
 							"path": ["api", "auth", "callback", "naver"],
 							"query": [
 								{
 									"key": "code",
-									"value": "AUTHORIZATION_CODE"
+									"value": "SAMPLE_AUTH_CODE"
 								},
 								{
 									"key": "state",
-									"value": "STATE_VALUE"
+									"value": "abc123def456"
 								}
 							]
 						}
@@ -521,7 +555,7 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n    \"success\": true,\n    \"data\": {\n        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"user\": {\n            \"id\": 5,\n            \"email\": \"naver_user@naver.com\",\n            \"name\": \"네이버사용자\",\n            \"role\": \"customer\",\n            \"provider\": \"naver\"\n        }\n    },\n    \"message\": \"네이버 로그인이 완료되었습니다.\",\n    \"statusCode\": 200\n}"
+					"body": "{\n    \"success\": true,\n    \"data\": {\n        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n        \"expiresIn\": \"7d\",\n        \"user\": {\n            \"id\": 5,\n            \"email\": \"naver_user@naver.com\",\n            \"name\": \"네이버사용자\",\n            \"role\": \"customer\"\n        }\n    },\n    \"message\": \"네이버 로그인이 완료되었습니다.\",\n    \"statusCode\": 200\n}"
 				}
 			]
 		},
@@ -595,13 +629,25 @@
 	"variable": [
 		{
 			"key": "API_URL",
-			"value": "http://localhost:3000",
+			"value": "http://localhost:8000",
 			"type": "string"
 		},
 		{
 			"key": "ACCESS_TOKEN",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "NAVER_AUTH_CODE",
+			"value": "",
+			"type": "string",
+			"description": "네이버 OAuth 인증 코드 (브라우저에서 네이버 로그인 후 콜백 URL에서 복사)"
+		},
+		{
+			"key": "NAVER_STATE",
+			"value": "",
+			"type": "string",
+			"description": "네이버 OAuth state 값 (브라우저에서 네이버 로그인 후 콜백 URL에서 복사)"
 		}
 	]
 }
