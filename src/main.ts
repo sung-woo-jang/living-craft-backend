@@ -11,7 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('app.port', 3000);
+  const port = configService.get<number>('app.port', 8000);
   const environment = configService.get<string>('app.environment');
 
   // CORS 설정
@@ -100,7 +100,7 @@ async function bootstrap() {
       customSiteTitle: '예약 서비스 플랫폼 API 문서',
     });
 
-    console.log('📚 Swagger UI available at: http://localhost:3000/api/docs');
+    console.log('📚 Swagger UI available at: http://localhost:8000/api/docs');
   }
 
   await app.listen(port, '0.0.0.0');

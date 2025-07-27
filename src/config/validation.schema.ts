@@ -31,7 +31,7 @@ export const validationSchema = Joi.object({
   ADMIN_PASSWORD: Joi.string().min(6).required(),
 
   // 애플리케이션 설정
-  PORT: Joi.number().default(3000),
+  PORT: Joi.number().default(8000),
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),
