@@ -90,7 +90,7 @@
 			]
 		},
 		{
-			"name": "마스터키 로그인 (0000)",
+			"name": "마스터키 로그인 (wkrwjs#12)",
 			"event": [
 				{
 					"listen": "test",
@@ -118,7 +118,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"0000\"\n}",
+					"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"wkrwjs#12\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -130,7 +130,7 @@
 					"host": ["{{API_URL}}"],
 					"path": ["api", "auth", "login"]
 				},
-				"description": "개발용 마스터키(0000)로 관리자 권한 로그인. 어떤 이메일이든 0000 비밀번호로 로그인 가능합니다."
+				"description": "개발용 마스터키(wkrwjs#12)로 관리자 권한 로그인. 어떤 이메일이든 wkrwjs#12 비밀번호로 로그인 가능합니다."
 			},
 			"response": [
 				{
@@ -145,7 +145,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"0000\"\n}",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"wkrwjs#12\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

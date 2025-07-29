@@ -11,7 +11,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly configService: ConfigService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // 쿠키와 Bearer 토큰 모두 지원
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // Authorization: Bearer <token>
+        (request) => {
+          // HttpOnly 쿠키에서 JWT 추출
+          return request?.cookies?.accessToken;
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('jwt.secret'),
     });

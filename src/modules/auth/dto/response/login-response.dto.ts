@@ -17,8 +17,15 @@ export class LoginResponseDto {
   tokenType: string = 'Bearer';
 
   @ApiProperty({
+    description: '리프레시 토큰 (HttpOnly 쿠키에 저장됨)',
+    required: false,
+  })
+  @Expose()
+  refreshToken?: string;
+
+  @ApiProperty({
     description: '토큰 만료 시간 (초)',
-    example: 86400,
+    example: 900, // 15분
   })
   @Expose()
   expiresIn: number;

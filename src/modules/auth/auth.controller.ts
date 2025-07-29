@@ -7,7 +7,8 @@ import {
   HttpStatus,
   Post,
   Query,
-  Redirect,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -108,15 +109,95 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: '로그아웃',
-    description: '현재 세션을 종료합니다.',
+    description: '현재 세션을 종료하고 쿠키를 삭제합니다.',
   })
   @ApiResponse({
     status: 200,
     description: '로그아웃 성공',
   })
-  async logout(): Promise<SuccessBaseResponseDto<null>> {
-    // JWT는 stateless이므로 클라이언트에서 토큰 삭제
-    return new SuccessBaseResponseDto('로그아웃되었습니다.', null);
+  async logout(@Req() req: any, @Res() res: any): Promise<void> {
+    // DB에서 refresh token 무효화
+    const refreshToken = req.cookies?.refreshToken;
+    if (refreshToken) {
+      try {
+        await this.authService.revokeUserTokens(req.user?.id, 'logout');
+      } catch (error) {
+        console.error('로그아웃 시 refresh token 무효화 오류:', error);
+      }
+    }
+
+    // HttpOnly 쿠키 삭제
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+    
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/auth',
+    });
+    
+    // 성공 응답
+    res.json(new SuccessBaseResponseDto('로그아웃되었습니다.', null));
+  }
+
+  @Post('refresh')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Access Token 갱신',
+    description: 'Refresh Token을 사용하여 새로운 Access Token을 발급합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '토큰 갱신 성공',
+  })
+  async refreshToken(@Req() req: any, @Res() res: any): Promise<void> {
+    const refreshToken = req.cookies?.refreshToken;
+    
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token이 없습니다.',
+        statusCode: 401,
+      });
+    }
+
+    try {
+      const tokens = await this.authService.refreshAccessToken(refreshToken);
+
+      // 새 Access Token 쿠키 설정
+      res.cookie('accessToken', tokens.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 15 * 60 * 1000, // 15분
+        path: '/',
+      });
+
+      // 새 Refresh Token 쿠키 설정
+      res.cookie('refreshToken', tokens.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+        path: '/api/auth',
+      });
+
+      res.json(new SuccessBaseResponseDto('토큰이 갱신되었습니다.', {
+        message: 'Access token 갱신 성공',
+      }));
+    } catch (error) {
+      res.status(401).json({
+        success: false,
+        message: error.message,
+        statusCode: 401,
+      });
+    }
   }
 
   @Get('naver')
@@ -164,10 +245,9 @@ export class AuthController {
 
   @Get('callback/naver')
   @Public()
-  @Redirect()
   @ApiOperation({
     summary: '네이버 OAuth 콜백',
-    description: '네이버 OAuth 인증 완료 후 콜백을 처리하고 프론트엔드로 리다이렉트합니다.',
+    description: '네이버 OAuth 인증 완료 후 콜백을 처리하고 HTML 폼으로 안전하게 토큰을 전달합니다.',
   })
   @ApiQuery({
     name: 'code',
@@ -180,54 +260,82 @@ export class AuthController {
     required: true,
   })
   @ApiResponse({
-    status: 302,
-    description: '네이버 OAuth 로그인 후 프론트엔드로 리다이렉트',
+    status: 200,
+    description: '네이버 OAuth 로그인 후 HTML 폼으로 안전한 토큰 전달',
   })
   async naverCallback(
     @Query('code') code: string,
     @Query('state') state: string,
+    @Req() req: any,
+    @Res() res: any,
     @Query('error') error?: string,
   ) {
+    const frontendUrl = 'http://localhost:3000';
+    
     try {
-      // 에러가 있는 경우 프론트엔드 에러 페이지로 리다이렉트
+      // 에러가 있는 경우 에러 페이지로 리다이렉트
       if (error) {
-        const frontendUrl = 'http://localhost:3000';
-        return {
-          url: `${frontendUrl}/auth/callback?error=${encodeURIComponent(error)}`,
-        };
+        return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error)}`);
       }
 
       if (!code) {
-        const frontendUrl = 'http://localhost:3000';
-        return {
-          url: `${frontendUrl}/auth/callback?error=${encodeURIComponent('인증 코드가 없습니다.')}`,
-        };
+        return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent('인증 코드가 없습니다.')}`);
       }
 
       // 네이버 API로부터 액세스 토큰 획득
+      console.log('🔑 네이버 액세스 토큰 요청 시작:', { code: code?.substring(0, 10) + '...', state });
       const accessToken = await this.getNaverAccessToken(code, state);
+      console.log('✅ 네이버 액세스 토큰 획득 성공');
 
       // 액세스 토큰으로 사용자 정보 획득
+      console.log('👤 네이버 사용자 정보 요청 시작');
       const userProfile = await this.getNaverUserProfile(accessToken);
+      console.log('✅ 네이버 사용자 정보 획득 성공:', { id: userProfile.id, email: userProfile.email });
 
-      // 사용자 로그인 처리
-      const result = await this.authService.naverLogin(userProfile);
+      // 사용자 로그인 처리 (클라이언트 정보 포함)
+      const clientInfo = {
+        userAgent: req.get('User-Agent'),
+        ipAddress: req.ip || req.connection.remoteAddress,
+      };
+      const result = await this.authService.naverLogin(userProfile, clientInfo);
 
-      // 성공시 프론트엔드로 토큰과 함께 리다이렉트
-      const frontendUrl = 'http://localhost:3000';
+      // Access Token: HttpOnly 쿠키 (짧은 만료시간)
+      res.cookie('accessToken', result.accessToken, {
+        httpOnly: true, // XSS 방지
+        secure: process.env.NODE_ENV === 'production', // HTTPS에서만
+        sameSite: 'lax', // CSRF 방지
+        maxAge: 15 * 60 * 1000, // 15분
+        path: '/', // 전체 경로에서 사용
+      });
+
+      // Refresh Token: HttpOnly 쿠키 (긴 만료시간)
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true, // XSS 방지
+        secure: process.env.NODE_ENV === 'production', // HTTPS에서만
+        sameSite: 'lax', // CSRF 방지
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+        path: '/api/auth', // refresh 엔드포인트에서만 사용
+      });
+
+      // 성공시 프론트엔드로 리다이렉트
       const redirectUrl = result.user.role === 'admin' 
-        ? `${frontendUrl}/admin` 
-        : `${frontendUrl}/`;
-
-      return {
-        url: `${redirectUrl}?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`,
-      };
+        ? `${frontendUrl}/admin?loginSuccess=true` 
+        : `${frontendUrl}/?loginSuccess=true`;
+      
+      return res.redirect(redirectUrl);
+      
     } catch (error) {
-      console.error('네이버 콜백 처리 오류:', error);
-      const frontendUrl = 'http://localhost:3000';
-      return {
-        url: `${frontendUrl}/auth/callback?error=${encodeURIComponent('네이버 로그인 처리 중 오류가 발생했습니다.')}`,
-      };
+      console.error('❌ 네이버 콜백 처리 오류:', {
+        message: error.message,
+        stack: error.stack,
+        code,
+        state,
+        error: error
+      });
+      
+      // 상세한 에러 메시지
+      const errorMessage = error.message || '네이버 로그인 처리 중 오류가 발생했습니다.';
+      return res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(errorMessage)}`);
     }
   }
 

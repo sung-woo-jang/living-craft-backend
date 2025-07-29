@@ -163,11 +163,21 @@ describe('AuthController', () => {
 
   describe('logout', () => {
     it('로그아웃 성공', async () => {
-      const result = await controller.logout();
+      const mockReq = { user: { id: 1 }, cookies: { refreshToken: 'test-token' } };
+      const mockRes = {
+        clearCookie: jest.fn(),
+        json: jest.fn(),
+      };
 
-      expect(result.success).toBe(true);
-      expect(result.data).toBe(null);
-      expect(result.message).toBe('로그아웃되었습니다.');
+      await controller.logout(mockReq, mockRes);
+
+      expect(mockRes.clearCookie).toHaveBeenCalledWith('accessToken', expect.any(Object));
+      expect(mockRes.clearCookie).toHaveBeenCalledWith('refreshToken', expect.any(Object));
+      expect(mockRes.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: true,
+        data: null,
+        message: '로그아웃되었습니다.',
+      }));
     });
   });
 });
