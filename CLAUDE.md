@@ -92,7 +92,6 @@ npm run format
 ### 핵심 기술 스택
 - **Backend**: NestJS with TypeScript
 - **Database**: PostgreSQL with TypeORM ORM
-- **Cache/Queue**: Redis with Bull Queue
 - **Authentication**: JWT + Passport (Local, Naver OAuth)
 
 ### 모듈 구조
@@ -147,7 +146,7 @@ src/modules/
 
 **알림 시스템**:
 - 템플릿 기반 알림 시스템
-- Bull Queue를 통한 비동기 처리
+- 스케줄러를 통한 비동기 처리
 - SMS(네이버 클라우드 플랫폼) 및 이메일 지원
 
 ## 개발 환경 설정
@@ -158,7 +157,7 @@ src/modules/
 
 ### 로컬 개발 환경
 1. 하이브리드 접근법 사용: Docker는 인프라용, 로컬 Node.js는 앱용
-2. 데이터베이스, Redis, pgAdmin은 컨테이너에서 실행 (설정 간편화)
+2. 데이터베이스, pgAdmin은 컨테이너에서 실행 (설정 간편화)
 3. NestJS 앱은 로컬에서 실행 (디버깅 경험 향상)
 
 ### 환경 변수 설정
@@ -172,7 +171,6 @@ src/modules/
 - Swagger API 문서: http://localhost:8000/api/docs
 - 헬스 체크: http://localhost:8000/health
 - pgAdmin: http://localhost:5050 (admin@reservation.com / admin123)
-- Redis Commander: http://localhost:8081
 - 프론트엔드: http://localhost:3000
 
 ## 코딩 컨벤션 및 스타일 가이드
@@ -646,12 +644,6 @@ POST /api/reviews            // 리뷰 작성
    npm run migration:run
    ```
 
-4. **Redis 연결 문제**
-   ```bash
-   # Redis 상태 확인
-   docker exec -it reservation_redis_dev redis-cli ping
-   ```
-
 ### 로그 확인 방법
 
 ```bash
@@ -661,5 +653,4 @@ tail -f logs/combined.log
 
 # Docker 서비스 로그
 npm run docker:dev:logs postgres
-npm run docker:dev:logs redis
 ```

@@ -25,24 +25,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis for Bull Queue (개발용)
-  redis:
-    image: redis:7.2-alpine
-    container_name: reservation_redis_dev
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data_dev:/data
-    networks:
-      - reservation_dev_network
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
   # pgAdmin for database management
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -62,27 +44,8 @@ services:
       postgres:
         condition: service_healthy
 
-  # Redis Commander (개발 편의를 위한 Redis 관리 도구)
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    platform: linux/amd64  # M1 Mac에서 명시적으로 AMD64 플랫폼 지정
-    container_name: reservation_redis_commander_dev
-    restart: unless-stopped
-    environment:
-      REDIS_HOSTS: local:redis:6379
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    ports:
-      - "8081:8081"
-    networks:
-      - reservation_dev_network
-    depends_on:
-      redis:
-        condition: service_healthy
-
 volumes:
   postgres_data_dev:
-  redis_data_dev:
   pgadmin_data_dev:
 
 networks:
