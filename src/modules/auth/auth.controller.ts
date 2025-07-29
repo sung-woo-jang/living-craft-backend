@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Post,
   Query,
+  Redirect,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -29,6 +30,25 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Post('login')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '사용자 로그인',
+    description: '이메일과 비밀번호로 사용자 로그인을 수행합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '로그인 성공',
+    type: SuccessBaseResponseDto<LoginResponseDto>,
+  })
+  async login(
+    @Body() loginDto: LoginRequestDto,
+  ): Promise<SuccessBaseResponseDto<LoginResponseDto>> {
+    const result = await this.authService.login(loginDto);
+    return new SuccessBaseResponseDto('로그인되었습니다.', result);
+  }
 
   @Post('admin/login')
   @Public()
@@ -127,10 +147,8 @@ export class AuthController {
     },
   })
   async getNaverAuthUrl(): Promise<SuccessBaseResponseDto<{ url: string }>> {
-    const clientId = this.configService.get<string>('naver.oauth.clientId');
-    const callbackUrl = this.configService.get<string>(
-      'naver.oauth.callbackUrl',
-    );
+    const clientId = process.env.NAVER_CLIENT_ID;
+    const callbackUrl = process.env.NAVER_CALLBACK_URL || 'http://localhost:8000/api/auth/callback/naver';
     const state = this.generateState(); // CSRF 보호를 위한 state 값
 
     const url = new URL('https://nid.naver.com/oauth2.0/authorize');
@@ -146,9 +164,10 @@ export class AuthController {
 
   @Get('callback/naver')
   @Public()
+  @Redirect()
   @ApiOperation({
     summary: '네이버 OAuth 콜백',
-    description: '네이버 OAuth 인증 완료 후 콜백을 처리합니다.',
+    description: '네이버 OAuth 인증 완료 후 콜백을 처리하고 프론트엔드로 리다이렉트합니다.',
   })
   @ApiQuery({
     name: 'code',
@@ -161,31 +180,55 @@ export class AuthController {
     required: true,
   })
   @ApiResponse({
-    status: 200,
-    description: '네이버 OAuth 로그인 성공',
-    type: SuccessBaseResponseDto<LoginResponseDto>,
+    status: 302,
+    description: '네이버 OAuth 로그인 후 프론트엔드로 리다이렉트',
   })
   async naverCallback(
     @Query('code') code: string,
     @Query('state') state: string,
-  ): Promise<SuccessBaseResponseDto<LoginResponseDto>> {
-    if (!code) {
-      throw new BadRequestException('인증 코드가 없습니다.');
+    @Query('error') error?: string,
+  ) {
+    try {
+      // 에러가 있는 경우 프론트엔드 에러 페이지로 리다이렉트
+      if (error) {
+        const frontendUrl = 'http://localhost:3000';
+        return {
+          url: `${frontendUrl}/auth/callback?error=${encodeURIComponent(error)}`,
+        };
+      }
+
+      if (!code) {
+        const frontendUrl = 'http://localhost:3000';
+        return {
+          url: `${frontendUrl}/auth/callback?error=${encodeURIComponent('인증 코드가 없습니다.')}`,
+        };
+      }
+
+      // 네이버 API로부터 액세스 토큰 획득
+      const accessToken = await this.getNaverAccessToken(code, state);
+
+      // 액세스 토큰으로 사용자 정보 획득
+      const userProfile = await this.getNaverUserProfile(accessToken);
+
+      // 사용자 로그인 처리
+      const result = await this.authService.naverLogin(userProfile);
+
+      // 성공시 프론트엔드로 토큰과 함께 리다이렉트
+      const frontendUrl = 'http://localhost:3000';
+      const redirectUrl = result.user.role === 'admin' 
+        ? `${frontendUrl}/admin` 
+        : `${frontendUrl}/`;
+
+      return {
+        url: `${redirectUrl}?token=${result.accessToken}&user=${encodeURIComponent(JSON.stringify(result.user))}`,
+      };
+    } catch (error) {
+      console.error('네이버 콜백 처리 오류:', error);
+      const frontendUrl = 'http://localhost:3000';
+      return {
+        url: `${frontendUrl}/auth/callback?error=${encodeURIComponent('네이버 로그인 처리 중 오류가 발생했습니다.')}`,
+      };
     }
-
-    // 네이버 API로부터 액세스 토큰 획득
-    const accessToken = await this.getNaverAccessToken(code, state);
-
-    // 액세스 토큰으로 사용자 정보 획득
-    const userProfile = await this.getNaverUserProfile(accessToken);
-
-    // 사용자 로그인 처리
-    const result = await this.authService.naverLogin(userProfile);
-
-    return new SuccessBaseResponseDto(
-      '네이버 로그인이 완료되었습니다.',
-      result,
-    );
   }
 
   /**
@@ -205,10 +248,8 @@ export class AuthController {
     code: string,
     state: string,
   ): Promise<string> {
-    const clientId = this.configService.get<string>('naver.oauth.clientId');
-    const clientSecret = this.configService.get<string>(
-      'naver.oauth.clientSecret',
-    );
+    const clientId = process.env.NAVER_CLIENT_ID;
+    const clientSecret = process.env.NAVER_CLIENT_SECRET;
 
     const url = 'https://nid.naver.com/oauth2.0/token';
     const params = new URLSearchParams({

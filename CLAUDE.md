@@ -173,6 +173,7 @@ src/modules/
 - 헬스 체크: http://localhost:8000/health
 - pgAdmin: http://localhost:5050 (admin@reservation.com / admin123)
 - Redis Commander: http://localhost:8081
+- 프론트엔드: http://localhost:3000
 
 ## 코딩 컨벤션 및 스타일 가이드
 

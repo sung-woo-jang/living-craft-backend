@@ -630,7 +630,8 @@
 		{
 			"key": "API_URL",
 			"value": "http://localhost:8000",
-			"type": "string"
+			"type": "string",
+			"description": "백엔드 API 서버 주소"
 		},
 		{
 			"key": "ACCESS_TOKEN",
