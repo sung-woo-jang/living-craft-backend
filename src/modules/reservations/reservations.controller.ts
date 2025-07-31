@@ -5,7 +5,6 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -194,7 +193,7 @@ export class ReservationsController {
     );
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -220,7 +219,7 @@ export class ReservationsController {
     return new SuccessBaseResponseDto('예약을 수정했습니다.', responseData);
   }
 
-  @Put(':id/status')
+  @Post(':id/status/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -249,7 +248,7 @@ export class ReservationsController {
     );
   }
 
-  @Put(':id/cancel')
+  @Post(':id/cancel')
   @ApiOperation({
     summary: '예약 취소',
     description: '예약을 취소합니다.',

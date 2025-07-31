@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -109,7 +107,7 @@ export class PortfolioController {
     return new SuccessBaseResponseDto('포트폴리오를 등록했습니다.', portfolio);
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -133,7 +131,7 @@ export class PortfolioController {
     return new SuccessBaseResponseDto('포트폴리오를 수정했습니다.', portfolio);
   }
 
-  @Put(':id/toggle')
+  @Post(':id/toggle')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -157,7 +155,7 @@ export class PortfolioController {
     );
   }
 
-  @Put(':id/order')
+  @Post(':id/order/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -187,7 +185,7 @@ export class PortfolioController {
     );
   }
 
-  @Delete(':id')
+  @Post(':id/delete')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

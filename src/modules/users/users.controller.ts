@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  Put,
+  Post,
   Param,
   Body,
   Query,
@@ -57,7 +57,7 @@ export class UsersController {
     );
   }
 
-  @Put('me')
+  @Post('me/update')
   @ApiOperation({
     summary: '내 정보 수정',
     description: '현재 로그인된 사용자의 정보를 수정합니다.',
@@ -141,7 +141,7 @@ export class UsersController {
     );
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -171,7 +171,7 @@ export class UsersController {
     );
   }
 
-  @Put(':id/deactivate')
+  @Post(':id/deactivate')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -200,7 +200,7 @@ export class UsersController {
     );
   }
 
-  @Put(':id/activate')
+  @Post(':id/activate')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

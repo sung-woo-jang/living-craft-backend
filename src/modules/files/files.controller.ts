@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Delete,
   UploadedFile,
   UploadedFiles,
   UseInterceptors,
@@ -181,7 +180,7 @@ export class FilesController {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  @Delete(':category/:filename')
+  @Post(':category/:filename/delete')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

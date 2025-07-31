@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -157,7 +155,7 @@ export class ServicesController {
     return new SuccessBaseResponseDto('서비스를 생성했습니다.', responseData);
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -183,7 +181,7 @@ export class ServicesController {
     return new SuccessBaseResponseDto('서비스를 수정했습니다.', responseData);
   }
 
-  @Put(':id/toggle')
+  @Post(':id/toggle')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -211,7 +209,7 @@ export class ServicesController {
     );
   }
 
-  @Delete(':id')
+  @Post(':id/delete')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

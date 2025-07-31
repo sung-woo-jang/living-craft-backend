@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -143,7 +141,7 @@ export class ReviewsController {
     return new SuccessBaseResponseDto('리뷰를 작성했습니다.', review);
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @ApiOperation({
     summary: '리뷰 수정',
     description: '리뷰를 수정합니다.',
@@ -189,7 +187,7 @@ export class ReviewsController {
     return new SuccessBaseResponseDto('답글을 작성했습니다.', review);
   }
 
-  @Put(':id/toggle')
+  @Post(':id/toggle')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -210,7 +208,7 @@ export class ReviewsController {
     return new SuccessBaseResponseDto('리뷰 상태를 변경했습니다.', review);
   }
 
-  @Delete(':id')
+  @Post(':id/delete')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

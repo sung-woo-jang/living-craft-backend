@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -75,7 +73,7 @@ export class CalendarController {
     );
   }
 
-  @Put('settings/:dayOfWeek')
+  @Post('settings/:dayOfWeek/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -148,7 +146,7 @@ export class CalendarController {
     return new SuccessBaseResponseDto('날짜를 차단했습니다.', blockedDate);
   }
 
-  @Delete('block/:date')
+  @Post('block/:date/remove')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

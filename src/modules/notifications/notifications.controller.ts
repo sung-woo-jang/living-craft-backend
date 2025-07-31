@@ -1,7 +1,7 @@
 import {
   Controller,
   Get,
-  Put,
+  Post,
   Body,
   Param,
   Query,
@@ -45,7 +45,7 @@ export class NotificationsController {
     return new SuccessBaseResponseDto('알림 템플릿을 조회했습니다.', templates);
   }
 
-  @Put('templates/:type/:channel')
+  @Post('templates/:type/:channel/update')
   @ApiOperation({
     summary: '알림 템플릿 수정',
     description: '특정 알림 템플릿을 수정합니다.',

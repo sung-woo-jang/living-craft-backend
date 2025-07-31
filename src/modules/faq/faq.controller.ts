@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -114,7 +112,7 @@ export class FaqController {
     return new SuccessBaseResponseDto('FAQ를 등록했습니다.', faq);
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -138,7 +136,7 @@ export class FaqController {
     return new SuccessBaseResponseDto('FAQ를 수정했습니다.', faq);
   }
 
-  @Put(':id/toggle')
+  @Post(':id/toggle')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
@@ -159,7 +157,7 @@ export class FaqController {
     return new SuccessBaseResponseDto('FAQ 상태를 변경했습니다.', faq);
   }
 
-  @Delete(':id')
+  @Post(':id/delete')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({

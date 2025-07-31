@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Body,
   Param,
   Query,
@@ -182,7 +181,7 @@ export class QuotesController {
     return new SuccessBaseResponseDto('견적을 거절했습니다.', responseData);
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({
