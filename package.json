@@ -27,7 +27,17 @@
     "docker:dev:down": "docker-compose -f docker-compose.local.yml down",
     "docker:dev:logs": "docker-compose -f docker-compose.local.yml logs",
     "docker:dev:status": "docker-compose -f docker-compose.local.yml ps",
-    "dev:full": "yarn docker:dev:up && yarn start:dev"
+    "dev:full": "yarn docker:dev:up && yarn start:dev",
+    "docker:staging:up": "docker-compose -f docker-compose.staging.yml up -d",
+    "docker:staging:down": "docker-compose -f docker-compose.staging.yml down",
+    "docker:staging:logs": "docker-compose -f docker-compose.staging.yml logs",
+    "docker:staging:status": "docker-compose -f docker-compose.staging.yml ps",
+    "start:staging": "NODE_ENV=staging nest start --watch",
+    "staging:full": "yarn docker:staging:up && yarn start:staging",
+    "migration:staging": "NODE_ENV=staging typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
+    "migration:generate:staging": "NODE_ENV=staging typeorm-ts-node-commonjs migration:generate -d src/config/typeorm.config.ts",
+    "migration:revert:staging": "NODE_ENV=staging typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts",
+    "seed:staging": "NODE_ENV=staging ts-node -r tsconfig-paths/register src/seed/init.seeder.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.8",
@@ -39,7 +49,6 @@
     "@nestjs/schedule": "^4.0.2",
     "@nestjs/swagger": "^7.3.1",
     "@nestjs/typeorm": "^10.0.2",
-    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
