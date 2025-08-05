@@ -59,7 +59,8 @@ export class UserSeeder {
       address: `서울시 ${district} ${street} ${(index + 1) * 123}`,
       marketingAgree: Math.random() > 0.5,
       // 테스트용 비밀번호 (기본: test123, 일부는 다른 패스워드)
-      plainPassword: index % 3 === 0 ? 'admin123' : index % 2 === 0 ? 'user456' : 'test123',
+      plainPassword:
+        index % 3 === 0 ? 'admin123' : index % 2 === 0 ? 'user456' : 'test123',
     };
   }
 
@@ -77,13 +78,13 @@ export class UserSeeder {
 
     if (!existing) {
       // 비밀번호가 있으면 해싱 처리
-      const hashedPassword = userData.plainPassword 
+      const hashedPassword = userData.plainPassword
         ? await this.hashPassword(userData.plainPassword)
         : null;
 
       // plainPassword는 제거하고 password 필드로 저장
       const { plainPassword, ...userDataWithoutPlainPassword } = userData;
-      
+
       const user = userRepository.create({
         ...userDataWithoutPlainPassword,
         ...(hashedPassword && { password: hashedPassword }),
@@ -92,7 +93,9 @@ export class UserSeeder {
       });
 
       await userRepository.save(user);
-      console.log(`✅ ${role} created: ${userData.name}${userData.plainPassword ? ` (password: ${userData.plainPassword})` : ''}`);
+      console.log(
+        `✅ ${role} created: ${userData.name}${userData.plainPassword ? ` (password: ${userData.plainPassword})` : ''}`,
+      );
     } else {
       console.log(`⚠️  ${role} already exists: ${userData.name}`);
     }

@@ -119,10 +119,7 @@ export class UsersController {
   ): Promise<SuccessBaseResponseDto<any>> {
     const settings = await this.usersService.getUserSettings(user.sub);
 
-    return new SuccessBaseResponseDto(
-      '설정 정보를 조회했습니다.',
-      settings,
-    );
+    return new SuccessBaseResponseDto('설정 정보를 조회했습니다.', settings);
   }
 
   @Post('me/settings/update')

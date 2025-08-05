@@ -5,12 +5,15 @@ import { UserRole } from '@common/enums';
 import * as bcrypt from 'bcrypt';
 
 export default class UserSeeder implements Seeder {
-  async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<any> {
+  async run(
+    dataSource: DataSource,
+    factoryManager: SeederFactoryManager,
+  ): Promise<any> {
     const userRepository = dataSource.getRepository(User);
 
     // 관리자 계정이 없으면 생성
     const adminExists = await userRepository.findOne({
-      where: { email: 'admin@example.com' }
+      where: { email: 'admin@example.com' },
     });
 
     if (!adminExists) {
@@ -27,20 +30,22 @@ export default class UserSeeder implements Seeder {
       });
 
       await userRepository.save(adminUser);
-      console.log('✅ Admin user created: admin@example.com (password: admin123)');
+      console.log(
+        '✅ Admin user created: admin@example.com (password: admin123)',
+      );
     }
 
     // 기존 고객 수 확인
     const existingCustomersCount = await userRepository.count({
-      where: { role: UserRole.CUSTOMER }
+      where: { role: UserRole.CUSTOMER },
     });
 
     // 최소 10명의 고객이 없으면 추가 생성
     const customersToCreate = Math.max(0, 10 - existingCustomersCount);
-    
+
     if (customersToCreate > 0) {
       await factoryManager.get(User).saveMany(customersToCreate, {
-        role: UserRole.CUSTOMER
+        role: UserRole.CUSTOMER,
       });
       console.log(`✅ Created ${customersToCreate} customer users`);
     }
@@ -48,9 +53,11 @@ export default class UserSeeder implements Seeder {
     // 추가로 3-5명의 고객 생성 (매번 실행 시)
     const additionalCustomers = await factoryManager.get(User).saveMany(
       Math.floor(Math.random() * 3) + 3, // 3-5명
-      { role: UserRole.CUSTOMER }
+      { role: UserRole.CUSTOMER },
     );
-    
-    console.log(`✅ Created ${additionalCustomers.length} additional customer users`);
+
+    console.log(
+      `✅ Created ${additionalCustomers.length} additional customer users`,
+    );
   }
 }

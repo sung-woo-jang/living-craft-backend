@@ -3,7 +3,10 @@ import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto/response/user-response.dto';
 import { ApiResponseOptions } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { swaggerBaseApplyDecorator } from '@common/decorators/swagger-base-apply.decorator';
-import { SuccessBaseResponseDto, PaginatedResponseDto } from '@common/dto/response/success-base-response.dto';
+import {
+  SuccessBaseResponseDto,
+  PaginatedResponseDto,
+} from '@common/dto/response/success-base-response.dto';
 
 const apiMyProfileResponse: ApiResponseOptions = {
   status: 200,
@@ -29,28 +32,36 @@ const apiUserDetailResponse: ApiResponseOptions = {
   type: SuccessBaseResponseDto,
 };
 
-export const GetMyProfileSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const GetMyProfileSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
-    ApiResponse(apiMyProfileResponse)
+    ApiResponse(apiMyProfileResponse),
   );
 };
 
-export const GetMySettingsSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const GetMySettingsSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
-    ApiResponse(apiMySettingsResponse)
+    ApiResponse(apiMySettingsResponse),
   );
 };
 
-export const GetCustomersSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const GetCustomersSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
-    ApiResponse(apiPaginatedResponse)
+    ApiResponse(apiPaginatedResponse),
   );
 };
 
-export const GetUserByIdSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const GetUserByIdSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiParam({
@@ -58,6 +69,6 @@ export const GetUserByIdSwaggerDecorator = (apiOperation: ApiOperationOptions) =
       description: '사용자 ID',
       example: 1,
     }),
-    ApiResponse(apiUserDetailResponse)
+    ApiResponse(apiUserDetailResponse),
   );
 };

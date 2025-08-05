@@ -12,8 +12,8 @@ import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
-    ConfigModule, 
-    UsersModule, 
+    ConfigModule,
+    UsersModule,
     ReservationsModule,
     TypeOrmModule.forFeature([RefreshToken]),
   ],

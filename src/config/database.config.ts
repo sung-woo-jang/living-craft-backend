@@ -12,8 +12,12 @@ export default registerAs(
     database: process.env.DB_DATABASE || 'reservation_dev',
     entities: [__dirname + '/../modules/**/*.entity.{js,ts}'],
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
-    synchronize: process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging',
-    logging: process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging',
+    synchronize:
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'staging',
+    logging:
+      process.env.NODE_ENV === 'development' ||
+      process.env.NODE_ENV === 'staging',
     autoLoadEntities: true,
     retryAttempts: 10,
     retryDelay: 3000,

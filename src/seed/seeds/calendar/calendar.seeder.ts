@@ -4,7 +4,10 @@ import { CalendarSetting } from '@modules/calendar/entities/calendar-setting.ent
 import { BlockedDate } from '@modules/calendar/entities/blocked-date.entity';
 
 export default class CalendarSeeder implements Seeder {
-  async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<any> {
+  async run(
+    dataSource: DataSource,
+    factoryManager: SeederFactoryManager,
+  ): Promise<any> {
     const calendarSettingRepository = dataSource.getRepository(CalendarSetting);
     const blockedDateRepository = dataSource.getRepository(BlockedDate);
 
@@ -22,13 +25,15 @@ export default class CalendarSeeder implements Seeder {
     // 기본 영업시간 설정
     for (const settingData of defaultSettings) {
       const existingSetting = await calendarSettingRepository.findOne({
-        where: { dayOfWeek: settingData.dayOfWeek }
+        where: { dayOfWeek: settingData.dayOfWeek },
       });
 
       if (!existingSetting) {
         const setting = new CalendarSetting(settingData);
         await calendarSettingRepository.save(setting);
-        console.log(`✅ Calendar setting created for day ${settingData.dayOfWeek}`);
+        console.log(
+          `✅ Calendar setting created for day ${settingData.dayOfWeek}`,
+        );
       }
     }
 
@@ -37,7 +42,7 @@ export default class CalendarSeeder implements Seeder {
 
     // 최소 5개의 차단된 날짜가 없으면 추가 생성
     const blockedDatesToCreate = Math.max(0, 5 - existingBlockedDatesCount);
-    
+
     if (blockedDatesToCreate > 0) {
       try {
         await factoryManager.get(BlockedDate).saveMany(blockedDatesToCreate);
@@ -52,9 +57,13 @@ export default class CalendarSeeder implements Seeder {
     try {
       const additionalBlockedDates = Math.floor(Math.random() * 3) + 1; // 1-3개
       await factoryManager.get(BlockedDate).saveMany(additionalBlockedDates);
-      console.log(`✅ Created ${additionalBlockedDates} additional blocked dates`);
+      console.log(
+        `✅ Created ${additionalBlockedDates} additional blocked dates`,
+      );
     } catch (error) {
-      console.log('⚠️ Some additional blocked dates already exist, skipping duplicates');
+      console.log(
+        '⚠️ Some additional blocked dates already exist, skipping duplicates',
+      );
     }
   }
 }

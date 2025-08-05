@@ -10,13 +10,7 @@ import { Service } from '@modules/services/entities/service.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Reservation,
-      Quote,
-      Review,
-      User,
-      Service,
-    ]),
+    TypeOrmModule.forFeature([Reservation, Quote, Review, User, Service]),
   ],
   controllers: [StatsController],
   providers: [StatsService],

@@ -387,10 +387,10 @@ export class UsersService {
    */
   async getUserSettings(userId: number) {
     const user = await this.findById(userId);
-    
+
     return {
       emailNotifications: true, // TODO: 실제 설정 필드 추가시 변경
-      smsNotifications: true,   // TODO: 실제 설정 필드 추가시 변경
+      smsNotifications: true, // TODO: 실제 설정 필드 추가시 변경
       marketingAgree: user.marketingAgree,
       naverConnected: !!user.naverId,
       hasPassword: !!user.password,

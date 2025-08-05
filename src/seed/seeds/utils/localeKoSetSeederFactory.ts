@@ -4,7 +4,7 @@ import { ObjectType, EntitySchema } from 'typeorm';
 
 export const localeKoSetSeederFactory = <T>(
   entity: ObjectType<T> | EntitySchema<T>,
-  factoryFunction: (faker: Faker) => T
+  factoryFunction: (faker: Faker) => T,
 ) => {
   return setSeederFactory(entity, () => {
     const faker = new Faker({ locale: [ko] });

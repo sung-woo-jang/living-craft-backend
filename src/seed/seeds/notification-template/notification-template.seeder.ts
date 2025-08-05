@@ -1,10 +1,18 @@
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
-import { NotificationTemplate, NotificationType, NotificationChannel } from '@modules/notifications/entities/notification-template.entity';
+import {
+  NotificationTemplate,
+  NotificationType,
+  NotificationChannel,
+} from '@modules/notifications/entities/notification-template.entity';
 
 export default class NotificationTemplateSeeder implements Seeder {
-  async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<any> {
-    const notificationTemplateRepository = dataSource.getRepository(NotificationTemplate);
+  async run(
+    dataSource: DataSource,
+    factoryManager: SeederFactoryManager,
+  ): Promise<any> {
+    const notificationTemplateRepository =
+      dataSource.getRepository(NotificationTemplate);
 
     // 기본 알림 템플릿 데이터 (모든 타입 x 채널 조합)
     const baseTemplates = [
@@ -13,7 +21,8 @@ export default class NotificationTemplateSeeder implements Seeder {
         type: NotificationType.RESERVATION_CONFIRMED,
         channel: NotificationChannel.SMS,
         subject: null,
-        content: '안녕하세요 {{customerName}}님, 예약번호 {{reservationCode}}가 확정되었습니다. 서비스일: {{serviceDate}}',
+        content:
+          '안녕하세요 {{customerName}}님, 예약번호 {{reservationCode}}가 확정되었습니다. 서비스일: {{serviceDate}}',
       },
       // 예약 확정 이메일
       {
@@ -35,7 +44,8 @@ export default class NotificationTemplateSeeder implements Seeder {
         type: NotificationType.REMINDER,
         channel: NotificationChannel.SMS,
         subject: null,
-        content: '{{customerName}}님, 내일 {{serviceTime}}에 {{serviceName}} 서비스가 예정되어 있습니다.',
+        content:
+          '{{customerName}}님, 내일 {{serviceTime}}에 {{serviceName}} 서비스가 예정되어 있습니다.',
       },
       // 알림 이메일
       {
@@ -56,7 +66,8 @@ export default class NotificationTemplateSeeder implements Seeder {
         type: NotificationType.QUOTE_SENT,
         channel: NotificationChannel.SMS,
         subject: null,
-        content: '{{customerName}}님, 요청하신 견적서가 발송되었습니다. 확인 후 연락 주세요.',
+        content:
+          '{{customerName}}님, 요청하신 견적서가 발송되었습니다. 확인 후 연락 주세요.',
       },
       // 견적서 발송 이메일
       {
@@ -76,49 +87,90 @@ export default class NotificationTemplateSeeder implements Seeder {
         type: NotificationType.QUOTE_APPROVED,
         channel: NotificationChannel.SMS,
         subject: null,
-        content: '견적이 승인되었습니다. 예약번호 {{reservationCode}}로 서비스가 확정되었습니다.',
+        content:
+          '견적이 승인되었습니다. 예약번호 {{reservationCode}}로 서비스가 확정되었습니다.',
       },
       // 서비스 완료 SMS
       {
         type: NotificationType.SERVICE_COMPLETED,
         channel: NotificationChannel.SMS,
         subject: null,
-        content: '{{customerName}}님, 서비스가 완료되었습니다. 이용해주셔서 감사합니다.',
+        content:
+          '{{customerName}}님, 서비스가 완료되었습니다. 이용해주셔서 감사합니다.',
       },
       // 리뷰 요청 SMS
       {
         type: NotificationType.REVIEW_REQUEST,
         channel: NotificationChannel.SMS,
         subject: null,
-        content: '서비스는 만족스러우셨나요? 간단한 후기를 남겨주시면 감사하겠습니다.',
+        content:
+          '서비스는 만족스러우셨나요? 간단한 후기를 남겨주시면 감사하겠습니다.',
       },
     ];
 
     // 기본 템플릿 생성
     for (const templateData of baseTemplates) {
       const existingTemplate = await notificationTemplateRepository.findOne({
-        where: { 
+        where: {
           type: templateData.type,
-          channel: templateData.channel 
-        }
+          channel: templateData.channel,
+        },
       });
 
       if (!existingTemplate) {
         const template = new NotificationTemplate(templateData);
         await notificationTemplateRepository.save(template);
-        console.log(`✅ Notification template created: ${templateData.type} - ${templateData.channel}`);
+        console.log(
+          `✅ Notification template created: ${templateData.type} - ${templateData.channel}`,
+        );
       }
     }
 
     // 현재 템플릿 개수 확인
     const existingTemplatesCount = await notificationTemplateRepository.count();
 
-    // 추가 템플릿이 필요한 경우 팩토리로 생성
+    // 추가 템플릿이 필요한 경우 팩토리로 생성 (중복 방지)
     const templatesToCreate = Math.max(0, 12 - existingTemplatesCount);
-    
+
     if (templatesToCreate > 0) {
-      await factoryManager.get(NotificationTemplate).saveMany(templatesToCreate);
-      console.log(`✅ Created ${templatesToCreate} additional notification templates`);
+      try {
+        const templateFactory = factoryManager.get(NotificationTemplate);
+        let createdCount = 0;
+        let attempts = 0;
+        const maxAttempts = templatesToCreate * 3; // 최대 시도 횟수
+
+        while (createdCount < templatesToCreate && attempts < maxAttempts) {
+          try {
+            const template = await templateFactory.make();
+
+            // 중복 체크
+            const exists = await notificationTemplateRepository.findOne({
+              where: {
+                type: template.type,
+                channel: template.channel,
+              },
+            });
+
+            if (!exists) {
+              await notificationTemplateRepository.save(template);
+              createdCount++;
+            }
+          } catch (error) {
+            // 중복 키 오류 무시하고 계속 진행
+          }
+          attempts++;
+        }
+
+        if (createdCount > 0) {
+          console.log(
+            `✅ Created ${createdCount} additional notification templates`,
+          );
+        }
+      } catch (error) {
+        console.log(
+          '⚠️ Some notification templates may already exist, skipping duplicates',
+        );
+      }
     }
 
     console.log('✅ All notification templates are ready');

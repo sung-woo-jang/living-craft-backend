@@ -6,13 +6,18 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
   const portfolioCategories = [
     {
       type: 'apartment',
-      titles: ['아파트 일반 청소', '아파트 대청소', '신축 아파트 입주 청소', '아파트 이사 청소'],
+      titles: [
+        '아파트 일반 청소',
+        '아파트 대청소',
+        '신축 아파트 입주 청소',
+        '아파트 이사 청소',
+      ],
       descriptions: [
         '30평 아파트 전체 일반 청소 작업 사례입니다.',
         '50평 아파트 대청소 작업으로 구석구석 깔끔하게 정리했습니다.',
         '신축 아파트 입주 전 완벽 청소 서비스 사례입니다.',
-        '이사 후 남은 먼지와 오염물질을 완전히 제거했습니다.'
-      ]
+        '이사 후 남은 먼지와 오염물질을 완전히 제거했습니다.',
+      ],
     },
     {
       type: 'office',
@@ -21,8 +26,8 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
         '30인 규모 사무실 정기 청소 서비스 사례입니다.',
         '개성 있는 카페 공간을 깔끔하게 정리했습니다.',
         '의류 매장 청소로 고객들이 쾌적하게 쇼핑할 수 있도록 했습니다.',
-        '음식점 청소로 위생적인 환경을 만들어드렸습니다.'
-      ]
+        '음식점 청소로 위생적인 환경을 만들어드렸습니다.',
+      ],
     },
     {
       type: 'house',
@@ -31,8 +36,8 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
         '2층 단독주택 전체 청소 작업 사례입니다.',
         '다세대 빌라 청소로 쾌적한 환경을 만들었습니다.',
         '펜션 객실 청소로 다음 손님을 위해 완벽하게 준비했습니다.',
-        '원룸 월세 정리 청소로 보증금 반환에 도움을 드렸습니다.'
-      ]
+        '원룸 월세 정리 청소로 보증금 반환에 도움을 드렸습니다.',
+      ],
     },
     {
       type: 'special',
@@ -41,24 +46,34 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
         '다용도실 및 창고 정리로 활용도를 높였습니다.',
         '체계적인 수납 정리로 공간 활용을 극대화했습니다.',
         '계절별 옷장 정리로 편리한 의류 관리를 도와드렸습니다.',
-        '베란다 청소 및 정리로 생활 공간을 확장했습니다.'
-      ]
-    }
+        '베란다 청소 및 정리로 생활 공간을 확장했습니다.',
+      ],
+    },
   ];
 
   const category = faker.helpers.arrayElement(portfolioCategories);
-  const titleIndex = faker.number.int({ min: 0, max: category.titles.length - 1 });
+  const titleIndex = faker.number.int({
+    min: 0,
+    max: category.titles.length - 1,
+  });
   const title = category.titles[titleIndex];
   const description = category.descriptions[titleIndex];
 
   // 이미지 경로 (가상의 경로)
-  const imageTypes = ['before', 'after', 'work1', 'work2', 'result1', 'result2'];
+  const imageTypes = [
+    'before',
+    'after',
+    'work1',
+    'work2',
+    'result1',
+    'result2',
+  ];
   const imageExtensions = ['jpg', 'jpeg', 'png'];
-  
-  const beforeImage = faker.datatype.boolean(0.8) ? 
-    `/uploads/portfolio/${faker.helpers.arrayElement(imageTypes)}_${faker.number.int({ min: 1, max: 999 })}.${faker.helpers.arrayElement(imageExtensions)}` : 
-    undefined;
-  
+
+  const beforeImage = faker.datatype.boolean(0.8)
+    ? `/uploads/portfolio/${faker.helpers.arrayElement(imageTypes)}_${faker.number.int({ min: 1, max: 999 })}.${faker.helpers.arrayElement(imageExtensions)}`
+    : undefined;
+
   const afterImage = `/uploads/portfolio/${faker.helpers.arrayElement(imageTypes)}_${faker.number.int({ min: 1, max: 999 })}.${faker.helpers.arrayElement(imageExtensions)}`;
 
   return new PortfolioImage({
@@ -68,7 +83,9 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
     afterImage,
     displayOrder: faker.number.int({ min: 1, max: 100 }),
     isActive: faker.datatype.boolean(0.9), // 90% 확률로 활성화
-    serviceId: faker.datatype.boolean(0.7) ? faker.number.int({ min: 1, max: 10 }) : undefined,
+    serviceId: faker.datatype.boolean(0.7)
+      ? faker.number.int({ min: 1, max: 10 })
+      : undefined,
   });
 });
 

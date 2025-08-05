@@ -1,5 +1,11 @@
 import { ApiOperationOptions } from '@nestjs/swagger/dist/decorators/api-operation.decorator';
-import { ApiBody, ApiConsumes, ApiResponse, ApiParam, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiResponse,
+  ApiParam,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { ApiBodyOptions } from '@nestjs/swagger/dist/decorators/api-body.decorator';
 import { ChangePasswordRequestDto } from '../dto/request/change-password-request.dto';
 import { ApiResponseOptions } from '@nestjs/swagger/dist/decorators/api-response.decorator';
@@ -40,32 +46,40 @@ const apiDeactivateResponse: ApiResponseOptions = {
   type: SuccessBaseResponseDto,
 };
 
-export const UpdateMyProfileSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const UpdateMyProfileSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiConsumes('application/json'),
-    ApiResponse(apiUpdateResponse)
+    ApiResponse(apiUpdateResponse),
   );
 };
 
-export const ChangePasswordSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const ChangePasswordSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiBody(apiChangePasswordBody),
     ApiConsumes('application/json'),
-    ApiResponse(apiPasswordResponse)
+    ApiResponse(apiPasswordResponse),
   );
 };
 
-export const UpdateMySettingsSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const UpdateMySettingsSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiConsumes('application/json'),
-    ApiResponse(apiSettingsResponse)
+    ApiResponse(apiSettingsResponse),
   );
 };
 
-export const UpdateUserSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const UpdateUserSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiParam({
@@ -74,11 +88,13 @@ export const UpdateUserSwaggerDecorator = (apiOperation: ApiOperationOptions) =>
       example: 1,
     }),
     ApiConsumes('application/json'),
-    ApiResponse(apiUpdateResponse)
+    ApiResponse(apiUpdateResponse),
   );
 };
 
-export const ActivateUserSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const ActivateUserSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiParam({
@@ -86,11 +102,13 @@ export const ActivateUserSwaggerDecorator = (apiOperation: ApiOperationOptions) 
       description: '사용자 ID',
       example: 1,
     }),
-    ApiResponse(apiActivateResponse)
+    ApiResponse(apiActivateResponse),
   );
 };
 
-export const DeactivateUserSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const DeactivateUserSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
     ApiParam({
@@ -98,6 +116,6 @@ export const DeactivateUserSwaggerDecorator = (apiOperation: ApiOperationOptions
       description: '사용자 ID',
       example: 1,
     }),
-    ApiResponse(apiDeactivateResponse)
+    ApiResponse(apiDeactivateResponse),
   );
 };

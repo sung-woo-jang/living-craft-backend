@@ -21,16 +21,20 @@ const apiDetailedHealthResponse: ApiResponseOptions = {
   description: '서버 상세 상태',
 };
 
-export const HealthCheckSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const HealthCheckSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
-    ApiResponse(apiHealthResponse)
+    ApiResponse(apiHealthResponse),
   );
 };
 
-export const DetailedHealthCheckSwaggerDecorator = (apiOperation: ApiOperationOptions) => {
+export const DetailedHealthCheckSwaggerDecorator = (
+  apiOperation: ApiOperationOptions,
+) => {
   return swaggerBaseApplyDecorator(
     ApiOperation(apiOperation),
-    ApiResponse(apiDetailedHealthResponse)
+    ApiResponse(apiDetailedHealthResponse),
   );
 };

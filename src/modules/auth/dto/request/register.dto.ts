@@ -3,7 +3,7 @@ import { IsOptional } from 'class-validator';
 import { AuthBaseDto } from '../base/auth-base.dto';
 
 export class RegisterDto extends PartialType(
-  OmitType(AuthBaseDto, ['phone'] as const)
+  OmitType(AuthBaseDto, ['phone'] as const),
 ) {
   @ApiPropertyOptional({
     description: '전화번호',

@@ -144,15 +144,17 @@ export class FilesController {
     // 문서 파일 형식 검증
     const allowedDocTypes = ['.pdf', '.doc', '.docx', '.hwp', '.txt'];
     const fileExtension = file.originalname.toLowerCase().split('.').pop();
-    
+
     if (!allowedDocTypes.includes(`.${fileExtension}`)) {
-      throw new BadRequestException('지원되지 않는 문서 형식입니다. 지원 형식: PDF, DOC, DOCX, HWP, TXT');
+      throw new BadRequestException(
+        '지원되지 않는 문서 형식입니다. 지원 형식: PDF, DOC, DOCX, HWP, TXT',
+      );
     }
 
     try {
       // 실제 파일 저장 로직
       const result = await this.filesService.uploadDocument(file);
-      
+
       return new SuccessBaseResponseDto('문서를 성공적으로 업로드했습니다.', {
         originalName: file.originalname,
         filename: result.filename,
@@ -163,7 +165,9 @@ export class FilesController {
         uploadedAt: new Date().toISOString(),
       });
     } catch (error) {
-      throw new BadRequestException(`문서 업로드 중 오류가 발생했습니다: ${error.message}`);
+      throw new BadRequestException(
+        `문서 업로드 중 오류가 발생했습니다: ${error.message}`,
+      );
     }
   }
 
@@ -172,11 +176,11 @@ export class FilesController {
    */
   private formatFileSize(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 

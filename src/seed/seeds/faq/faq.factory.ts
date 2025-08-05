@@ -89,7 +89,9 @@ const FaqFactory = localeKoSetSeederFactory(Faq, (faker) => {
     ],
   };
 
-  const categories = Object.keys(faqCategories) as (keyof typeof faqCategories)[];
+  const categories = Object.keys(
+    faqCategories,
+  ) as (keyof typeof faqCategories)[];
   const selectedCategory = faker.helpers.arrayElement(categories);
   const faqData = faker.helpers.arrayElement(faqCategories[selectedCategory]);
 

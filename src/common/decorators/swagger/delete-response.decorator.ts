@@ -9,12 +9,10 @@ interface DeleteResponseOptions {
 }
 
 export const DeleteResponseDecorator = (
-  options: DeleteResponseOptions = {}
+  options: DeleteResponseOptions = {},
 ) => {
   return (apiOperation: ApiOperationOptions) => {
-    const {
-      description = '삭제 성공'
-    } = options;
+    const { description = '삭제 성공' } = options;
 
     const apiResponse: ApiResponseOptions = {
       status: 200,
@@ -24,7 +22,7 @@ export const DeleteResponseDecorator = (
 
     return SwaggerBaseApply(
       ApiOperation(apiOperation),
-      ApiResponse(apiResponse)
+      ApiResponse(apiResponse),
     );
   };
 };

@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MinLength, IsBoolean } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsBoolean,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class UserBaseDto {
@@ -34,9 +40,9 @@ export class UserBaseDto {
   @MinLength(6, { message: '비밀번호는 6자 이상이어야 합니다.' })
   password: string;
 
-  @ApiPropertyOptional({ 
-    description: '활성 상태', 
-    example: true 
+  @ApiPropertyOptional({
+    description: '활성 상태',
+    example: true,
   })
   @IsOptional()
   @IsBoolean({ message: '활성 상태는 불린 값이어야 합니다.' })

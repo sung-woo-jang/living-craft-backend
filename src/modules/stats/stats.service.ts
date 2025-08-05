@@ -56,7 +56,13 @@ export class StatsService {
   ) {}
 
   async getDashboardStats(): Promise<DashboardStats> {
-    const [reservationStats, quoteStats, customerCount, reviewStats, revenueResult] = await Promise.all([
+    const [
+      reservationStats,
+      quoteStats,
+      customerCount,
+      reviewStats,
+      revenueResult,
+    ] = await Promise.all([
       this.getReservationStats(),
       this.getQuoteStats(),
       this.getTotalCustomers(),
@@ -93,14 +99,26 @@ export class StatsService {
       .getRawMany();
 
     const months = [
-      '1월', '2월', '3월', '4월', '5월', '6월',
-      '7월', '8월', '9월', '10월', '11월', '12월'
+      '1월',
+      '2월',
+      '3월',
+      '4월',
+      '5월',
+      '6월',
+      '7월',
+      '8월',
+      '9월',
+      '10월',
+      '11월',
+      '12월',
     ];
 
     return months.map((monthName, index) => {
       const monthNumber = index + 1;
-      const data = monthlyData.find(item => parseInt(item.month) === monthNumber);
-      
+      const data = monthlyData.find(
+        (item) => parseInt(item.month) === monthNumber,
+      );
+
       return {
         month: monthName,
         reservationsCount: data ? parseInt(data.reservationsCount) : 0,
@@ -127,12 +145,14 @@ export class StatsService {
       .orderBy('reservationsCount', 'DESC')
       .getRawMany();
 
-    return serviceStats.map(stat => ({
+    return serviceStats.map((stat) => ({
       serviceId: parseInt(stat.serviceId),
       serviceName: stat.serviceName,
       reservationsCount: parseInt(stat.reservationsCount) || 0,
       revenue: parseInt(stat.revenue) || 0,
-      averageRating: stat.averageRating ? parseFloat(parseFloat(stat.averageRating).toFixed(1)) : 0,
+      averageRating: stat.averageRating
+        ? parseFloat(parseFloat(stat.averageRating).toFixed(1))
+        : 0,
       reviewsCount: parseInt(stat.reviewsCount) || 0,
     }));
   }
@@ -191,15 +211,16 @@ export class StatsService {
 
   private async getTotalCustomers(): Promise<number> {
     const customerCount = await this.userRepository.count();
-    
+
     // 비회원 예약도 포함하여 고유한 전화번호 기준으로 고객 수 계산
     const uniquePhoneNumbers = await this.reservationRepository
       .createQueryBuilder('reservation')
       .select('COUNT(DISTINCT reservation.customerPhone) as uniqueCustomers')
       .getRawOne();
-    
-    const uniqueCustomerCount = parseInt(uniquePhoneNumbers.uniqueCustomers) || 0;
-    
+
+    const uniqueCustomerCount =
+      parseInt(uniquePhoneNumbers.uniqueCustomers) || 0;
+
     // 회원 수와 비회원 중 더 큰 값 반환 (중복 제거를 위해)
     return Math.max(customerCount, uniqueCustomerCount);
   }
@@ -207,15 +228,14 @@ export class StatsService {
   private async getReviewStats() {
     const reviewStats = await this.reviewRepository
       .createQueryBuilder('review')
-      .select([
-        'COUNT(*) as totalReviews',
-        'AVG(rating) as averageRating',
-      ])
+      .select(['COUNT(*) as totalReviews', 'AVG(rating) as averageRating'])
       .getRawOne();
 
     return {
       totalReviews: parseInt(reviewStats.totalReviews) || 0,
-      averageRating: reviewStats.averageRating ? parseFloat(parseFloat(reviewStats.averageRating).toFixed(1)) : 0,
+      averageRating: reviewStats.averageRating
+        ? parseFloat(parseFloat(reviewStats.averageRating).toFixed(1))
+        : 0,
     };
   }
 
@@ -224,7 +244,9 @@ export class StatsService {
       .createQueryBuilder('reservation')
       .select('SUM(reservation.totalPrice) as totalRevenue')
       .where('reservation.totalPrice IS NOT NULL')
-      .andWhere('reservation.status = :completed', { completed: ReservationStatus.COMPLETED })
+      .andWhere('reservation.status = :completed', {
+        completed: ReservationStatus.COMPLETED,
+      })
       .getRawOne();
 
     return parseInt(revenueResult.totalRevenue) || 0;

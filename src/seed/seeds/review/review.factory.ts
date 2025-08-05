@@ -6,8 +6,8 @@ const ReviewFactory = localeKoSetSeederFactory(Review, (faker) => {
     { weight: 40, value: 5 }, // 40% 확률로 5점
     { weight: 30, value: 4 }, // 30% 확률로 4점
     { weight: 20, value: 3 }, // 20% 확률로 3점
-    { weight: 7, value: 2 },  // 7% 확률로 2점
-    { weight: 3, value: 1 },  // 3% 확률로 1점
+    { weight: 7, value: 2 }, // 7% 확률로 2점
+    { weight: 3, value: 1 }, // 3% 확률로 1점
   ]);
 
   // 평점별 리뷰 내용
@@ -61,15 +61,23 @@ const ReviewFactory = localeKoSetSeederFactory(Review, (faker) => {
   ];
 
   const hasAdminReply = faker.datatype.boolean(0.3);
-  const adminReply = hasAdminReply ? faker.helpers.arrayElement(adminReplies) : undefined;
-  const adminReplyAt = hasAdminReply ? faker.date.recent({ days: 7 }) : undefined;
+  const adminReply = hasAdminReply
+    ? faker.helpers.arrayElement(adminReplies)
+    : undefined;
+  const adminReplyAt = hasAdminReply
+    ? faker.date.recent({ days: 7 })
+    : undefined;
 
   // 리뷰 이미지 (20% 확률)
   const hasImages = faker.datatype.boolean(0.2);
-  const images = hasImages ? [
-    `/uploads/reviews/review_${faker.number.int({ min: 1, max: 999 })}.jpg`,
-    faker.datatype.boolean(0.5) ? `/uploads/reviews/review_${faker.number.int({ min: 1, max: 999 })}.jpg` : null
-  ].filter(Boolean) : undefined;
+  const images = hasImages
+    ? [
+        `/uploads/reviews/review_${faker.number.int({ min: 1, max: 999 })}.jpg`,
+        faker.datatype.boolean(0.5)
+          ? `/uploads/reviews/review_${faker.number.int({ min: 1, max: 999 })}.jpg`
+          : null,
+      ].filter(Boolean)
+    : undefined;
 
   return new Review({
     rating,
@@ -78,7 +86,9 @@ const ReviewFactory = localeKoSetSeederFactory(Review, (faker) => {
     adminReply,
     adminReplyAt,
     isActive: faker.datatype.boolean(0.95), // 95% 확률로 활성화
-    userId: faker.datatype.boolean(0.8) ? faker.number.int({ min: 1, max: 20 }) : undefined,
+    userId: faker.datatype.boolean(0.8)
+      ? faker.number.int({ min: 1, max: 20 })
+      : undefined,
     reservationId: faker.number.int({ min: 1, max: 100 }), // 예약 ID는 시더에서 실제 값으로 설정
   });
 });

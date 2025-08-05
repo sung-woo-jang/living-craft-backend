@@ -160,7 +160,7 @@ export class FilesService {
   ): Promise<{ filename: string; path: string; url: string }> {
     const allowedDocTypes = ['.pdf', '.doc', '.docx', '.hwp', '.txt'];
     const extension = FileUtil.getExtension(file.originalname);
-    
+
     if (!allowedDocTypes.includes(extension.toLowerCase())) {
       throw new BadRequestException('지원되지 않는 문서 파일 형식입니다.');
     }
@@ -181,7 +181,9 @@ export class FilesService {
         url: `/uploads/documents/${filename}`,
       };
     } catch (error) {
-      throw new BadRequestException(`문서 파일 저장 중 오류가 발생했습니다: ${error.message}`);
+      throw new BadRequestException(
+        `문서 파일 저장 중 오류가 발생했습니다: ${error.message}`,
+      );
     }
   }
 

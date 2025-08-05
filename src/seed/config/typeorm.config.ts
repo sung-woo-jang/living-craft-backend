@@ -3,14 +3,12 @@ import { DataSource } from 'typeorm';
 import { DataSourceOptions } from 'typeorm/data-source';
 import { SeederOptions } from 'typeorm-extension';
 import InitSeeder from '../init.seeder';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 ConfigModule.forRoot({
   envFilePath: ['.env.local', '.env'],
 });
 
 const options: DataSourceOptions & SeederOptions = {
-  namingStrategy: new SnakeNamingStrategy(),
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(String(process.env.DB_PORT), 10) || 5432,

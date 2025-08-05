@@ -1,5 +1,10 @@
 import { ApiOperationOptions } from '@nestjs/swagger/dist/decorators/api-operation.decorator';
-import { ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { ApiResponseOptions } from '@nestjs/swagger/dist/decorators/api-response.decorator';
 import { ApiBodyOptions } from '@nestjs/swagger/dist/decorators/api-body.decorator';
 import { SwaggerBaseApply } from '@common/decorators/swagger-base-apply.decorator';
@@ -14,13 +19,13 @@ interface PutResponseOptions {
 
 export const PutResponseDecorator = <T = any>(
   responseType?: Type<T>,
-  options: PutResponseOptions = {}
+  options: PutResponseOptions = {},
 ) => {
   return (apiOperation: ApiOperationOptions) => {
     const {
       description = '수정 성공',
       requestType,
-      consumes = 'application/json'
+      consumes = 'application/json',
     } = options;
 
     const apiResponse: ApiResponseOptions = {
@@ -31,7 +36,7 @@ export const PutResponseDecorator = <T = any>(
 
     const decorators: any[] = [
       ApiOperation(apiOperation),
-      ApiResponse(apiResponse)
+      ApiResponse(apiResponse),
     ];
 
     if (requestType) {

@@ -58,12 +58,14 @@ export class AuthService {
       role: user.role,
       type: 'access',
     };
-    const accessToken = await this.jwtService.signAsync(accessTokenPayload, { expiresIn: '15m' });
+    const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+      expiresIn: '15m',
+    });
 
     // Refresh Token (긴 만료시간, DB 저장)
     const refreshTokenString = this.generateRefreshToken();
     const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7일
-    
+
     await this.refreshTokenRepository.save({
       token: refreshTokenString,
       userId: user.id,
@@ -114,12 +116,14 @@ export class AuthService {
         role: adminUser.role, // 실제 사용자의 원래 역할 사용
         type: 'access',
       };
-      const accessToken = await this.jwtService.signAsync(accessTokenPayload, { expiresIn: '15m' });
+      const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+        expiresIn: '15m',
+      });
 
       // Refresh Token (긴 만료시간, DB 저장)
       const refreshTokenString = this.generateRefreshToken();
       const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7일
-      
+
       await this.refreshTokenRepository.save({
         token: refreshTokenString,
         userId: adminUser.id,
@@ -177,12 +181,14 @@ export class AuthService {
       role: adminUser.role,
       type: 'access',
     };
-    const accessToken = await this.jwtService.signAsync(accessTokenPayload, { expiresIn: '15m' });
+    const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+      expiresIn: '15m',
+    });
 
     // Refresh Token (긴 만료시간, DB 저장)
     const refreshTokenString = this.generateRefreshToken();
     const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7일
-    
+
     await this.refreshTokenRepository.save({
       token: refreshTokenString,
       userId: adminUser.id,
@@ -205,7 +211,10 @@ export class AuthService {
   /**
    * 네이버 OAuth 로그인 처리
    */
-  async naverLogin(naverProfile: any, clientInfo?: { userAgent?: string; ipAddress?: string }): Promise<LoginResponseDto> {
+  async naverLogin(
+    naverProfile: any,
+    clientInfo?: { userAgent?: string; ipAddress?: string },
+  ): Promise<LoginResponseDto> {
     const { id: naverId, email, name, mobile } = naverProfile;
 
     let user = await this.usersService.findByNaverId(naverId);
@@ -232,12 +241,14 @@ export class AuthService {
       role: user.role,
       type: 'access',
     };
-    const accessToken = await this.jwtService.signAsync(accessTokenPayload, { expiresIn: '15m' });
+    const accessToken = await this.jwtService.signAsync(accessTokenPayload, {
+      expiresIn: '15m',
+    });
 
     // Refresh Token (긴 만료시간, DB 저장)
     const refreshTokenString = this.generateRefreshToken();
     const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7일
-    
+
     await this.refreshTokenRepository.save({
       token: refreshTokenString,
       userId: user.id,
@@ -389,7 +400,9 @@ export class AuthService {
   /**
    * Refresh Token으로 Access Token 갱신
    */
-  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const tokenRecord = await this.refreshTokenRepository.findOne({
       where: { token: refreshToken, isRevoked: false },
       relations: ['user'],
@@ -400,12 +413,18 @@ export class AuthService {
     }
 
     if (tokenRecord.expiresAt < new Date()) {
-      await this.refreshTokenRepository.update(tokenRecord.id, { isRevoked: true, revokedReason: 'expired' });
+      await this.refreshTokenRepository.update(tokenRecord.id, {
+        isRevoked: true,
+        revokedReason: 'expired',
+      });
       throw new UnauthorizedException('Refresh token이 만료되었습니다.');
     }
 
     // 기존 refresh token 무효화
-    await this.refreshTokenRepository.update(tokenRecord.id, { isRevoked: true, revokedReason: 'used' });
+    await this.refreshTokenRepository.update(tokenRecord.id, {
+      isRevoked: true,
+      revokedReason: 'used',
+    });
 
     // 새 access token 생성
     const accessTokenPayload = {
@@ -414,12 +433,14 @@ export class AuthService {
       role: tokenRecord.user.role,
       type: 'access',
     };
-    const newAccessToken = await this.jwtService.signAsync(accessTokenPayload, { expiresIn: '15m' });
+    const newAccessToken = await this.jwtService.signAsync(accessTokenPayload, {
+      expiresIn: '15m',
+    });
 
     // 새 refresh token 생성
     const newRefreshToken = this.generateRefreshToken();
     const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    
+
     await this.refreshTokenRepository.save({
       token: newRefreshToken,
       userId: tokenRecord.user.id,
@@ -440,7 +461,7 @@ export class AuthService {
   async revokeUserTokens(userId: number, reason: string): Promise<void> {
     await this.refreshTokenRepository.update(
       { userId, isRevoked: false },
-      { isRevoked: true, revokedAt: new Date(), revokedReason: reason }
+      { isRevoked: true, revokedAt: new Date(), revokedReason: reason },
     );
   }
 
