@@ -11,7 +11,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/request/login-request.dto';
@@ -22,6 +22,15 @@ import { SwaggerBaseApply } from '@common/decorators/swagger-base-apply.decorato
 import { Public } from '@common/decorators/public.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import {
+  LoginSwaggerDecorator,
+  VerifyGuestSwaggerDecorator,
+  GetProfileSwaggerDecorator,
+  LogoutSwaggerDecorator,
+  RefreshTokenSwaggerDecorator,
+  NaverAuthUrlSwaggerDecorator,
+  NaverCallbackSwaggerDecorator,
+} from './docs';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -35,14 +44,9 @@ export class AuthController {
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
+  @LoginSwaggerDecorator({
     summary: '사용자 로그인',
     description: '이메일과 비밀번호로 사용자 로그인을 수행합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '로그인 성공',
-    type: SuccessBaseResponseDto<LoginResponseDto>,
   })
   async login(
     @Body() loginDto: LoginRequestDto,
@@ -54,14 +58,9 @@ export class AuthController {
   @Post('admin/login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
+  @LoginSwaggerDecorator({
     summary: '관리자 로그인',
     description: '이메일과 비밀번호로 관리자 로그인을 수행합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '로그인 성공',
-    type: SuccessBaseResponseDto<LoginResponseDto>,
   })
   async adminLogin(
     @Body() loginDto: LoginRequestDto,
@@ -73,13 +72,9 @@ export class AuthController {
   @Post('verify')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
+  @VerifyGuestSwaggerDecorator({
     summary: '비회원 예약 본인 인증',
     description: '예약번호와 전화번호로 비회원 예약을 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '인증 성공',
   })
   async verifyGuest(
     @Body() verifyDto: VerifyGuestRequestDto,
@@ -90,13 +85,9 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({
+  @GetProfileSwaggerDecorator({
     summary: '현재 사용자 정보 조회',
     description: '토큰으로 현재 로그인된 사용자의 정보를 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 정보 조회 성공',
   })
   async getProfile(
     @CurrentUser() user: any,
@@ -107,13 +98,9 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
+  @LogoutSwaggerDecorator({
     summary: '로그아웃',
     description: '현재 세션을 종료하고 쿠키를 삭제합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '로그아웃 성공',
   })
   async logout(@Req() req: any, @Res() res: any): Promise<void> {
     // DB에서 refresh token 무효화
@@ -148,13 +135,9 @@ export class AuthController {
   @Post('refresh')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({
+  @RefreshTokenSwaggerDecorator({
     summary: 'Access Token 갱신',
     description: 'Refresh Token을 사용하여 새로운 Access Token을 발급합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '토큰 갱신 성공',
   })
   async refreshToken(@Req() req: any, @Res() res: any): Promise<void> {
     const refreshToken = req.cookies?.refreshToken;
@@ -202,30 +185,9 @@ export class AuthController {
 
   @Get('naver')
   @Public()
-  @ApiOperation({
+  @NaverAuthUrlSwaggerDecorator({
     summary: '네이버 OAuth 로그인 URL',
     description: '네이버 OAuth 인증 URL을 반환합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '네이버 OAuth URL 반환 성공',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            url: {
-              type: 'string',
-              example:
-                'https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=CALLBACK_URL&state=STATE',
-            },
-          },
-        },
-        message: { type: 'string', example: '네이버 인증 URL을 반환했습니다.' },
-      },
-    },
   })
   async getNaverAuthUrl(): Promise<SuccessBaseResponseDto<{ url: string }>> {
     const clientId = process.env.NAVER_CLIENT_ID;
@@ -245,23 +207,9 @@ export class AuthController {
 
   @Get('callback/naver')
   @Public()
-  @ApiOperation({
+  @NaverCallbackSwaggerDecorator({
     summary: '네이버 OAuth 콜백',
     description: '네이버 OAuth 인증 완료 후 콜백을 처리하고 HTML 폼으로 안전하게 토큰을 전달합니다.',
-  })
-  @ApiQuery({
-    name: 'code',
-    description: '네이버에서 전달받은 인증 코드',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'state',
-    description: 'CSRF 보호를 위한 상태값',
-    required: true,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '네이버 OAuth 로그인 후 HTML 폼으로 안전한 토큰 전달',
   })
   async naverCallback(
     @Query('code') code: string,

@@ -8,9 +8,10 @@ import {
   UseGuards,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiParam } from '@nestjs/swagger';
 import { UsersService, UpdateUserData } from './users.service';
 import { UserResponseDto } from './dto/response/user-response.dto';
+import { ChangePasswordRequestDto } from './dto/request/change-password-request.dto';
 import {
   SuccessBaseResponseDto,
   PaginatedResponseDto,
@@ -22,6 +23,18 @@ import { Roles } from '@common/decorators/roles.decorator';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 import { PhoneUtil } from '@common/utils/phone.util';
+import {
+  GetMyProfileSwaggerDecorator,
+  GetMySettingsSwaggerDecorator,
+  GetCustomersSwaggerDecorator,
+  GetUserByIdSwaggerDecorator,
+  UpdateMyProfileSwaggerDecorator,
+  ChangePasswordSwaggerDecorator,
+  UpdateMySettingsSwaggerDecorator,
+  UpdateUserSwaggerDecorator,
+  ActivateUserSwaggerDecorator,
+  DeactivateUserSwaggerDecorator,
+} from './docs';
 
 @ApiTags('사용자')
 @Controller('users')
@@ -30,14 +43,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
-  @ApiOperation({
+  @GetMyProfileSwaggerDecorator({
     summary: '내 정보 조회',
     description: '현재 로그인된 사용자의 정보를 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 정보 조회 성공',
-    type: SuccessBaseResponseDto<UserResponseDto>,
   })
   async getMyProfile(
     @CurrentUser() user: any,
@@ -58,14 +66,9 @@ export class UsersController {
   }
 
   @Post('me/update')
-  @ApiOperation({
+  @UpdateMyProfileSwaggerDecorator({
     summary: '내 정보 수정',
     description: '현재 로그인된 사용자의 정보를 수정합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 정보 수정 성공',
-    type: SuccessBaseResponseDto<UserResponseDto>,
   })
   async updateMyProfile(
     @CurrentUser() user: any,
@@ -85,17 +88,66 @@ export class UsersController {
     );
   }
 
+  @Post('me/password/update')
+  @ChangePasswordSwaggerDecorator({
+    summary: '비밀번호 변경',
+    description: '현재 로그인된 사용자의 비밀번호를 변경합니다.',
+  })
+  async changePassword(
+    @CurrentUser() user: any,
+    @Body() changePasswordData: ChangePasswordRequestDto,
+  ): Promise<SuccessBaseResponseDto<null>> {
+    await this.usersService.changePassword(
+      user.sub,
+      changePasswordData.currentPassword,
+      changePasswordData.newPassword,
+    );
+
+    return new SuccessBaseResponseDto(
+      '비밀번호가 성공적으로 변경되었습니다.',
+      null,
+    );
+  }
+
+  @Get('me/settings')
+  @GetMySettingsSwaggerDecorator({
+    summary: '내 설정 정보 조회',
+    description: '현재 로그인된 사용자의 설정 정보를 조회합니다.',
+  })
+  async getMySettings(
+    @CurrentUser() user: any,
+  ): Promise<SuccessBaseResponseDto<any>> {
+    const settings = await this.usersService.getUserSettings(user.sub);
+
+    return new SuccessBaseResponseDto(
+      '설정 정보를 조회했습니다.',
+      settings,
+    );
+  }
+
+  @Post('me/settings/update')
+  @UpdateMySettingsSwaggerDecorator({
+    summary: '내 설정 정보 수정',
+    description: '현재 로그인된 사용자의 설정 정보를 수정합니다.',
+  })
+  async updateMySettings(
+    @CurrentUser() user: any,
+    @Body() settingsData: any, // TODO: 별도 DTO 생성
+  ): Promise<SuccessBaseResponseDto<null>> {
+    await this.usersService.updateUserSettings(user.sub, settingsData);
+
+    return new SuccessBaseResponseDto(
+      '설정이 성공적으로 변경되었습니다.',
+      null,
+    );
+  }
+
   @Get('customers')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @GetCustomersSwaggerDecorator({
     summary: '고객 목록 조회 (관리자)',
     description: '모든 고객의 목록을 페이지네이션으로 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '고객 목록 조회 성공',
-    type: PaginatedResponseDto<UserResponseDto>,
   })
   async getCustomers(
     @Query() paginationDto: PaginationRequestDto,
@@ -115,19 +167,9 @@ export class UsersController {
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @GetUserByIdSwaggerDecorator({
     summary: '사용자 상세 조회 (관리자)',
     description: '특정 사용자의 상세 정보를 조회합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '사용자 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 상세 조회 성공',
-    type: SuccessBaseResponseDto<UserResponseDto>,
   })
   async getUserById(
     @Param('id', ParseIntPipe) id: number,
@@ -144,19 +186,9 @@ export class UsersController {
   @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @UpdateUserSwaggerDecorator({
     summary: '사용자 정보 수정 (관리자)',
     description: '특정 사용자의 정보를 수정합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '사용자 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 정보 수정 성공',
-    type: SuccessBaseResponseDto<UserResponseDto>,
   })
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -174,19 +206,9 @@ export class UsersController {
   @Post(':id/deactivate')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @DeactivateUserSwaggerDecorator({
     summary: '사용자 비활성화 (관리자)',
     description: '특정 사용자를 비활성화합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '사용자 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 비활성화 성공',
-    type: SuccessBaseResponseDto<UserResponseDto>,
   })
   async deactivateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -203,19 +225,9 @@ export class UsersController {
   @Post(':id/activate')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @ActivateUserSwaggerDecorator({
     summary: '사용자 활성화 (관리자)',
     description: '특정 사용자를 활성화합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '사용자 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '사용자 활성화 성공',
-    type: SuccessBaseResponseDto<UserResponseDto>,
   })
   async activateUser(
     @Param('id', ParseIntPipe) id: number,

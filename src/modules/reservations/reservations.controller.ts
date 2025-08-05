@@ -8,7 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationRequestDto } from './dto/request/create-reservation-request.dto';
 import { ReservationResponseDto } from './dto/response/reservation-response.dto';
@@ -23,6 +23,16 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { Roles } from '@common/decorators/roles.decorator';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { ReservationStatus, UserRole } from '@common/enums';
+import {
+  CreateReservationSwaggerDecorator,
+  GetReservationSwaggerDecorator,
+  GetReservationsSwaggerDecorator,
+  GetMyReservationsSwaggerDecorator,
+  GetTodayReservationsSwaggerDecorator,
+  UpdateReservationSwaggerDecorator,
+  UpdateReservationStatusSwaggerDecorator,
+  CancelReservationSwaggerDecorator,
+} from './docs';
 
 @ApiTags('예약')
 @Controller('reservations')
@@ -32,14 +42,9 @@ export class ReservationsController {
 
   @Post()
   @Public()
-  @ApiOperation({
+  @CreateReservationSwaggerDecorator({
     summary: '예약 생성',
     description: '새로운 예약을 생성합니다.',
-  })
-  @ApiResponse({
-    status: 201,
-    description: '예약 생성 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto>,
   })
   async createReservation(
     @Body() createDto: CreateReservationRequestDto,
@@ -55,14 +60,9 @@ export class ReservationsController {
 
   @Get('search')
   @Public()
-  @ApiOperation({
+  @GetReservationSwaggerDecorator({
     summary: '예약번호로 조회',
     description: '예약번호로 예약 정보를 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 조회 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto>,
   })
   async searchReservation(
     @Query('code') reservationCode: string,
@@ -79,14 +79,9 @@ export class ReservationsController {
   @Get()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @GetReservationsSwaggerDecorator({
     summary: '예약 목록 조회 (관리자)',
     description: '모든 예약 목록을 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 목록 조회 성공',
-    type: PaginatedResponseDto<ReservationResponseDto>,
   })
   async getReservations(
     @Query() paginationDto: PaginationRequestDto,
@@ -112,14 +107,9 @@ export class ReservationsController {
   }
 
   @Get('my')
-  @ApiOperation({
+  @GetMyReservationsSwaggerDecorator({
     summary: '내 예약 목록 조회',
     description: '현재 사용자의 예약 목록을 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 목록 조회 성공',
-    type: PaginatedResponseDto<ReservationResponseDto>,
   })
   async getMyReservations(
     @Query() paginationDto: PaginationRequestDto,
@@ -143,14 +133,9 @@ export class ReservationsController {
   @Get('today')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @GetTodayReservationsSwaggerDecorator({
     summary: '오늘의 예약 목록',
     description: '오늘 예정된 예약 목록을 조회합니다.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '오늘의 예약 목록 조회 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto[]>,
   })
   async getTodayReservations(): Promise<
     SuccessBaseResponseDto<ReservationResponseDto[]>
@@ -168,7 +153,7 @@ export class ReservationsController {
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @GetReservationSwaggerDecorator({
     summary: '예약 상세 조회',
     description: '특정 예약의 상세 정보를 조회합니다.',
   })
@@ -176,11 +161,6 @@ export class ReservationsController {
     name: 'id',
     description: '예약 ID',
     example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 상세 조회 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto>,
   })
   async getReservation(
     @Param('id', ParseIntPipe) id: number,
@@ -196,19 +176,9 @@ export class ReservationsController {
   @Post(':id/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @UpdateReservationSwaggerDecorator({
     summary: '예약 수정',
     description: '예약 정보를 수정합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '예약 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 수정 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto>,
   })
   async updateReservation(
     @Param('id', ParseIntPipe) id: number,
@@ -222,19 +192,9 @@ export class ReservationsController {
   @Post(':id/status/update')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({
+  @UpdateReservationStatusSwaggerDecorator({
     summary: '예약 상태 변경',
     description: '예약의 상태를 변경합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '예약 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 상태 변경 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto>,
   })
   async updateReservationStatus(
     @Param('id', ParseIntPipe) id: number,
@@ -249,19 +209,9 @@ export class ReservationsController {
   }
 
   @Post(':id/cancel')
-  @ApiOperation({
+  @CancelReservationSwaggerDecorator({
     summary: '예약 취소',
     description: '예약을 취소합니다.',
-  })
-  @ApiParam({
-    name: 'id',
-    description: '예약 ID',
-    example: 1,
-  })
-  @ApiResponse({
-    status: 200,
-    description: '예약 취소 성공',
-    type: SuccessBaseResponseDto<ReservationResponseDto>,
   })
   async cancelReservation(
     @Param('id', ParseIntPipe) id: number,

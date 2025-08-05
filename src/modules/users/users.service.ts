@@ -30,6 +30,12 @@ export interface UpdateUserData {
   marketingAgree?: boolean;
 }
 
+export interface UserSettingsData {
+  emailNotifications?: boolean;
+  smsNotifications?: boolean;
+  marketingAgree?: boolean;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -329,5 +335,86 @@ export class UsersService {
     // 패스워드 제거 후 반환
     delete user.password;
     return user;
+  }
+
+  /**
+   * 비밀번호 변경
+   */
+  async changePassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    // 사용자 조회 (패스워드 포함)
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'name', 'phone', 'role', 'isActive', 'password'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    // OAuth 전용 사용자인 경우
+    if (!user.password) {
+      throw new ConflictException(
+        '소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다.',
+      );
+    }
+
+    // 현재 비밀번호 확인
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new ConflictException('현재 비밀번호가 올바르지 않습니다.');
+    }
+
+    // 새 비밀번호 해싱
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // 비밀번호 업데이트
+    await this.userRepository.update(userId, {
+      password: hashedNewPassword,
+    });
+  }
+
+  /**
+   * 사용자 설정 정보 조회
+   */
+  async getUserSettings(userId: number) {
+    const user = await this.findById(userId);
+    
+    return {
+      emailNotifications: true, // TODO: 실제 설정 필드 추가시 변경
+      smsNotifications: true,   // TODO: 실제 설정 필드 추가시 변경
+      marketingAgree: user.marketingAgree,
+      naverConnected: !!user.naverId,
+      hasPassword: !!user.password,
+    };
+  }
+
+  /**
+   * 사용자 설정 정보 수정
+   */
+  async updateUserSettings(
+    userId: number,
+    settingsData: UserSettingsData,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    // 현재는 marketingAgree만 실제 저장
+    // TODO: emailNotifications, smsNotifications 필드 추가시 확장
+    if (settingsData.marketingAgree !== undefined) {
+      await this.userRepository.update(userId, {
+        marketingAgree: settingsData.marketingAgree,
+      });
+    }
   }
 }

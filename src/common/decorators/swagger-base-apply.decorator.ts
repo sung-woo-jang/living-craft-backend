@@ -9,14 +9,14 @@ import {
   UnAuthorizedResponseDto,
   ValidationErrorResponseDto,
 } from '@common/dto/response/error-response.dto';
-import { SuccessBaseResponseDto } from '@common/dto/response/success-base-response.dto';
+import { SuccessBaseResponseDto, PaginatedResponseDto } from '@common/dto/response/success-base-response.dto';
 import { applyDecorators } from '@nestjs/common';
 
 export const SwaggerBaseApply = (
   ...decorators: Array<ClassDecorator | MethodDecorator | PropertyDecorator>
 ) =>
   applyDecorators(
-    ApiExtraModels(SuccessBaseResponseDto, ErrorResponseDto),
+    ApiExtraModels(SuccessBaseResponseDto, PaginatedResponseDto, ErrorResponseDto),
     ApiInternalServerErrorResponse({
       description: '서버 내부 오류',
       type: ErrorResponseDto,
@@ -59,3 +59,6 @@ export const SwaggerBaseApply = (
     }),
     ...decorators,
   );
+
+// plav-buds 패턴과 호환되는 별칭 생성
+export const swaggerBaseApplyDecorator = SwaggerBaseApply;
