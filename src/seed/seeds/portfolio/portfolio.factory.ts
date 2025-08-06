@@ -64,11 +64,10 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
     `/uploads/portfolio/portfolio-${i + 1}.jpg`
   );
 
-  const beforeImage = faker.datatype.boolean(0.8)
-    ? faker.helpers.arrayElement(availableImages)
-    : undefined;
-
-  const afterImage = faker.helpers.arrayElement(availableImages);
+  // beforeImage와 afterImage가 항상 다른 이미지가 되도록 보장
+  const shuffledImages = faker.helpers.shuffle([...availableImages]);
+  const beforeImage = shuffledImages[0]; // 항상 이미지 할당
+  const afterImage = shuffledImages[1]; // beforeImage와 다른 이미지 할당
 
   return new PortfolioImage({
     title,
@@ -76,8 +75,8 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
     beforeImage,
     afterImage,
     displayOrder: faker.number.int({ min: 1, max: 100 }),
-    isActive: faker.datatype.boolean(0.9), // 90% 확률로 활성화
-    serviceId: faker.datatype.boolean(0.7)
+    isActive: true, // 포트폴리오는 기본적으로 모두 활성화
+    serviceId: faker.datatype.boolean(0.8)
       ? faker.number.int({ min: 1, max: 10 })
       : undefined,
   });

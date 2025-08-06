@@ -12,47 +12,41 @@ export default class ReservationSeeder implements Seeder {
     // 현재 예약 개수 확인
     const existingReservationsCount = await reservationRepository.count();
 
-    // 최소 20개의 예약이 없으면 추가 생성
-    const reservationsToCreate = Math.max(0, 20 - existingReservationsCount);
+    // 최소 300개의 예약이 없으면 대량 생성 (테스트용 데이터)
+    const reservationsToCreate = Math.max(0, 300 - existingReservationsCount);
 
     if (reservationsToCreate > 0) {
-      try {
-        await factoryManager.get(Reservation).saveMany(reservationsToCreate);
-        console.log(`✅ Created ${reservationsToCreate} reservations`);
-      } catch (error) {
-        // 중복 예약번호로 인한 에러는 개별 처리
-        console.log(
-          '⚠️ Some reservations had duplicate codes, creating individually...',
-        );
+      console.log(`📊 Creating ${reservationsToCreate} reservations for testing...`);
+      
+      // 배치 처리 (50개씩 나누어 생성)
+      const batchSize = 50;
+      const batches = Math.ceil(reservationsToCreate / batchSize);
+      let totalCreated = 0;
 
-        for (let i = 0; i < reservationsToCreate; i++) {
+      for (let batch = 0; batch < batches; batch++) {
+        const batchCount = Math.min(batchSize, reservationsToCreate - (batch * batchSize));
+        let batchCreatedCount = 0;
+
+        console.log(`📦 Processing batch ${batch + 1}/${batches} (${batchCount} reservations)...`);
+
+        for (let i = 0; i < batchCount; i++) {
           try {
             await factoryManager.get(Reservation).save();
-          } catch (individualError) {
-            // 개별 실패는 무시하고 계속 진행
+            batchCreatedCount++;
+          } catch (error) {
+            // 중복 예약번호 에러 시 재시도 없이 무시
             console.log(`⚠️ Skipped one reservation due to duplicate code`);
           }
         }
+
+        totalCreated += batchCreatedCount;
+        console.log(`✅ Batch ${batch + 1} completed: ${batchCreatedCount} reservations created`);
       }
+
+      console.log(`🎉 Total reservations created: ${totalCreated}`);
+    } else {
+      console.log(`✅ Reservation count sufficient: ${existingReservationsCount} reservations exist`);
     }
-
-    // 매번 실행 시 5-10개의 예약 추가 생성
-    const additionalReservationsCount = Math.floor(Math.random() * 6) + 5; // 5-10개
-
-    for (let i = 0; i < additionalReservationsCount; i++) {
-      try {
-        await factoryManager.get(Reservation).save();
-      } catch (error) {
-        // 중복 예약번호 에러 무시
-        console.log(
-          `⚠️ Skipped one additional reservation due to duplicate code`,
-        );
-      }
-    }
-
-    console.log(
-      `✅ Attempted to create ${additionalReservationsCount} additional reservations`,
-    );
 
     // 최종 예약 개수 확인
     const finalCount = await reservationRepository.count();

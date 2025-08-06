@@ -40,30 +40,27 @@ export default class CalendarSeeder implements Seeder {
     // 현재 차단된 날짜 개수 확인
     const existingBlockedDatesCount = await blockedDateRepository.count();
 
-    // 최소 5개의 차단된 날짜가 없으면 추가 생성
-    const blockedDatesToCreate = Math.max(0, 5 - existingBlockedDatesCount);
+    // 최소 25개의 차단된 날짜가 없으면 추가 생성 (테스트용 데이터 확장)
+    const blockedDatesToCreate = Math.max(0, 25 - existingBlockedDatesCount);
 
     if (blockedDatesToCreate > 0) {
-      try {
-        await factoryManager.get(BlockedDate).saveMany(blockedDatesToCreate);
-        console.log(`✅ Created ${blockedDatesToCreate} blocked dates`);
-      } catch (error) {
-        // 중복 날짜로 인한 에러는 무시 (unique constraint)
-        console.log('⚠️ Some blocked dates already exist, skipping duplicates');
+      console.log(`📊 Creating ${blockedDatesToCreate} blocked dates for testing...`);
+      
+      let createdCount = 0;
+      // 개별 생성으로 중복 방지
+      for (let i = 0; i < blockedDatesToCreate; i++) {
+        try {
+          await factoryManager.get(BlockedDate).save();
+          createdCount++;
+        } catch (error) {
+          // 중복 날짜로 인한 에러는 무시 (unique constraint)
+          console.log('⚠️ Skipped duplicate blocked date');
+        }
       }
-    }
-
-    // 매번 실행 시 1-3개의 차단된 날짜 추가 생성
-    try {
-      const additionalBlockedDates = Math.floor(Math.random() * 3) + 1; // 1-3개
-      await factoryManager.get(BlockedDate).saveMany(additionalBlockedDates);
-      console.log(
-        `✅ Created ${additionalBlockedDates} additional blocked dates`,
-      );
-    } catch (error) {
-      console.log(
-        '⚠️ Some additional blocked dates already exist, skipping duplicates',
-      );
+      
+      console.log(`✅ Created ${createdCount} blocked dates`);
+    } else {
+      console.log(`✅ Blocked dates count sufficient: ${existingBlockedDatesCount} blocked dates exist`);
     }
   }
 }

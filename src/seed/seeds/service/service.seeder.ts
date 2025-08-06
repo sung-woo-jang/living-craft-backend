@@ -99,26 +99,20 @@ export default class ServiceSeeder implements Seeder {
     // 현재 서비스 개수 확인
     const existingServicesCount = await serviceRepository.count();
 
-    // 최소 10개의 서비스가 없으면 추가 생성
-    const servicesToCreate = Math.max(0, 10 - existingServicesCount);
+    // 최소 12개의 서비스가 없으면 추가 생성 (기본 5개 + 7개)
+    const servicesToCreate = Math.max(0, 12 - existingServicesCount);
 
     if (servicesToCreate > 0) {
+      console.log(`📊 Creating ${servicesToCreate} additional services...`);
+      
       const newServices = await factoryManager.get(Service).saveMany(servicesToCreate);
       console.log(`✅ Created ${servicesToCreate} additional services`);
       
       // 추가 생성된 서비스들에 이미지 연결
       await this.addImagesToServices(newServices, serviceImageRepository, 10);
+    } else {
+      console.log(`✅ Service count sufficient: ${existingServicesCount} services exist`);
     }
-
-    // 매번 실행 시 2-4개의 서비스 추가 생성
-    const additionalServices = await factoryManager.get(Service).saveMany(
-      Math.floor(Math.random() * 3) + 2, // 2-4개
-    );
-
-    console.log(`✅ Created ${additionalServices.length} random services`);
-    
-    // 랜덤 서비스들에 이미지 연결
-    await this.addImagesToServices(additionalServices, serviceImageRepository, 10);
   }
 
   // 서비스들에 실제 이미지 파일 연결하는 헬퍼 메서드

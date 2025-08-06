@@ -26,72 +26,13 @@ export default class ReviewSeeder implements Seeder {
       `Found ${completedReservationsWithoutReview.length} completed reservations without reviews`,
     );
 
-    // 완료된 예약의 60%에 대해 리뷰 생성
+    // 완료된 예약의 70%에 대해 리뷰 생성 (더 많은 리뷰 생성)
     const reservationsToReview = completedReservationsWithoutReview
-      .filter(() => Math.random() < 0.6) // 60% 확률
-      .slice(0, 15); // 최대 15개
+      .filter(() => Math.random() < 0.7) // 70% 확률로 증가
+      .slice(0, 100); // 최대 100개로 증가
 
+    let reviewsFromCompletedCount = 0;
     for (const reservation of reservationsToReview) {
-      try {
-        const review = await factoryManager.get(Review).make({
-          reservationId: reservation.id,
-          userId: reservation.userId, // 예약한 사용자가 리뷰 작성
-        });
-
-        await reviewRepository.save(review);
-        console.log(
-          `✅ Review created for reservation ${reservation.reservationCode}`,
-        );
-      } catch (error) {
-        console.log(
-          `⚠️ Failed to create review for reservation ${reservation.reservationCode}: ${error.message}`,
-        );
-      }
-    }
-
-    // 기존 리뷰 개수 확인
-    const existingReviewsCount = await reviewRepository.count();
-
-    // 최소 10개의 리뷰가 없으면 랜덤 예약에 대해 추가 생성
-    const reviewsToCreate = Math.max(0, 10 - existingReviewsCount);
-
-    if (reviewsToCreate > 0) {
-      // 리뷰가 없는 예약들 중 랜덤 선택
-      const availableReservations = await reservationRepository
-        .createQueryBuilder('reservation')
-        .leftJoin('reservation.review', 'review')
-        .where('review.id IS NULL')
-        .limit(reviewsToCreate)
-        .getMany();
-
-      for (const reservation of availableReservations) {
-        try {
-          const review = await factoryManager.get(Review).make({
-            reservationId: reservation.id,
-            userId: reservation.userId,
-          });
-
-          await reviewRepository.save(review);
-        } catch (error) {
-          console.log(
-            `⚠️ Failed to create additional review: ${error.message}`,
-          );
-        }
-      }
-
-      console.log(`✅ Created ${reviewsToCreate} additional reviews`);
-    }
-
-    // 매번 실행 시 2-4개의 리뷰 추가 생성 (가능한 예약에 대해서만)
-    const additionalReviewsCount = Math.floor(Math.random() * 3) + 2; // 2-4개
-    const additionalAvailableReservations = await reservationRepository
-      .createQueryBuilder('reservation')
-      .leftJoin('reservation.review', 'review')
-      .where('review.id IS NULL')
-      .limit(additionalReviewsCount)
-      .getMany();
-
-    for (const reservation of additionalAvailableReservations) {
       try {
         const review = await factoryManager.get(Review).make({
           reservationId: reservation.id,
@@ -99,14 +40,68 @@ export default class ReviewSeeder implements Seeder {
         });
 
         await reviewRepository.save(review);
+        reviewsFromCompletedCount++;
       } catch (error) {
-        console.log(`⚠️ Failed to create random review: ${error.message}`);
+        console.log(
+          `⚠️ Failed to create review for reservation ${reservation.reservationCode}: ${error.message}`,
+        );
       }
     }
 
-    console.log(
-      `✅ Created ${additionalAvailableReservations.length} random reviews`,
-    );
+    console.log(`✅ Created ${reviewsFromCompletedCount} reviews from completed reservations`);
+
+    // 현재 리뷰 개수 확인
+    const existingReviewsCount = await reviewRepository.count();
+
+    // 최소 200개의 리뷰가 없으면 대량 생성 (테스트용 데이터)
+    const reviewsToCreate = Math.max(0, 200 - existingReviewsCount);
+
+    if (reviewsToCreate > 0) {
+      console.log(`📊 Creating ${reviewsToCreate} additional reviews for testing...`);
+
+      // 리뷰가 없는 예약들 대량 조회
+      const availableReservations = await reservationRepository
+        .createQueryBuilder('reservation')
+        .leftJoin('reservation.review', 'review')
+        .where('review.id IS NULL')
+        .limit(reviewsToCreate)
+        .getMany();
+
+      // 배치 처리 (30개씩 나누어 생성)
+      const batchSize = 30;
+      const batches = Math.ceil(Math.min(availableReservations.length, reviewsToCreate) / batchSize);
+      let totalCreated = 0;
+
+      for (let batch = 0; batch < batches; batch++) {
+        const startIdx = batch * batchSize;
+        const endIdx = Math.min(startIdx + batchSize, availableReservations.length);
+        const batchReservations = availableReservations.slice(startIdx, endIdx);
+        let batchCreatedCount = 0;
+
+        console.log(`📦 Processing review batch ${batch + 1}/${batches} (${batchReservations.length} reviews)...`);
+
+        for (const reservation of batchReservations) {
+          try {
+            const review = await factoryManager.get(Review).make({
+              reservationId: reservation.id,
+              userId: reservation.userId,
+            });
+
+            await reviewRepository.save(review);
+            batchCreatedCount++;
+          } catch (error) {
+            console.log(`⚠️ Failed to create review: ${error.message}`);
+          }
+        }
+
+        totalCreated += batchCreatedCount;
+        console.log(`✅ Review batch ${batch + 1} completed: ${batchCreatedCount} reviews created`);
+      }
+
+      console.log(`🎉 Total additional reviews created: ${totalCreated}`);
+    } else {
+      console.log(`✅ Review count sufficient: ${existingReviewsCount} reviews exist`);
+    }
 
     // 최종 리뷰 개수 확인
     const finalCount = await reviewRepository.count();

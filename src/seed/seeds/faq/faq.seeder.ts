@@ -85,19 +85,20 @@ export default class FaqSeeder implements Seeder {
     // 현재 FAQ 개수 확인
     const existingFaqsCount = await faqRepository.count();
 
-    // 최소 15개의 FAQ가 없으면 추가 생성
-    const faqsToCreate = Math.max(0, 15 - existingFaqsCount);
+    // 최소 40개의 FAQ가 없으면 추가 생성 (테스트용 데이터 확장)
+    const faqsToCreate = Math.max(0, 40 - existingFaqsCount);
 
     if (faqsToCreate > 0) {
-      await factoryManager.get(Faq).saveMany(faqsToCreate);
-      console.log(`✅ Created ${faqsToCreate} additional FAQs`);
+      console.log(`📊 Creating ${faqsToCreate} additional FAQs for testing...`);
+      
+      try {
+        await factoryManager.get(Faq).saveMany(faqsToCreate);
+        console.log(`✅ Created ${faqsToCreate} additional FAQs`);
+      } catch (error) {
+        console.log(`⚠️ Some FAQs may have failed to create`);
+      }
+    } else {
+      console.log(`✅ FAQ count sufficient: ${existingFaqsCount} FAQs exist`);
     }
-
-    // 매번 실행 시 2-4개의 FAQ 추가 생성
-    const additionalFaqs = await factoryManager.get(Faq).saveMany(
-      Math.floor(Math.random() * 3) + 2, // 2-4개
-    );
-
-    console.log(`✅ Created ${additionalFaqs.length} random FAQs`);
   }
 }
