@@ -59,22 +59,16 @@ const PortfolioFactory = localeKoSetSeederFactory(PortfolioImage, (faker) => {
   const title = category.titles[titleIndex];
   const description = category.descriptions[titleIndex];
 
-  // 이미지 경로 (가상의 경로)
-  const imageTypes = [
-    'before',
-    'after',
-    'work1',
-    'work2',
-    'result1',
-    'result2',
-  ];
-  const imageExtensions = ['jpg', 'jpeg', 'png'];
+  // 실제 업로드된 포트폴리오 이미지 파일들 (portfolio-1.jpg ~ portfolio-20.jpg)
+  const availableImages = Array.from({ length: 20 }, (_, i) => 
+    `/uploads/portfolio/portfolio-${i + 1}.jpg`
+  );
 
   const beforeImage = faker.datatype.boolean(0.8)
-    ? `/uploads/portfolio/${faker.helpers.arrayElement(imageTypes)}_${faker.number.int({ min: 1, max: 999 })}.${faker.helpers.arrayElement(imageExtensions)}`
+    ? faker.helpers.arrayElement(availableImages)
     : undefined;
 
-  const afterImage = `/uploads/portfolio/${faker.helpers.arrayElement(imageTypes)}_${faker.number.int({ min: 1, max: 999 })}.${faker.helpers.arrayElement(imageExtensions)}`;
+  const afterImage = faker.helpers.arrayElement(availableImages);
 
   return new PortfolioImage({
     title,

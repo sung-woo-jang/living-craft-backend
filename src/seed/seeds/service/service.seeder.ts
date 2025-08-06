@@ -1,6 +1,7 @@
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import { Service } from '@modules/services/entities/service.entity';
+import { ServiceImage } from '@modules/services/entities/service-image.entity';
 import { ServiceType } from '@common/enums';
 
 export default class ServiceSeeder implements Seeder {
@@ -9,6 +10,7 @@ export default class ServiceSeeder implements Seeder {
     factoryManager: SeederFactoryManager,
   ): Promise<any> {
     const serviceRepository = dataSource.getRepository(Service);
+    const serviceImageRepository = dataSource.getRepository(ServiceImage);
 
     // 기본 서비스들을 우선 생성 (고정된 기본 서비스)
     const baseServices = [
@@ -59,16 +61,38 @@ export default class ServiceSeeder implements Seeder {
       },
     ];
 
-    // 기본 서비스 생성
-    for (const serviceData of baseServices) {
-      const existingService = await serviceRepository.findOne({
+    // 기본 서비스 생성 및 이미지 추가
+    const serviceImages = [
+      ['/uploads/services/service-1.jpg', '/uploads/services/service-2.jpg'],
+      ['/uploads/services/service-3.jpg', '/uploads/services/service-4.jpg'],
+      ['/uploads/services/service-5.jpg', '/uploads/services/service-6.jpg'],
+      ['/uploads/services/service-7.jpg'],
+      ['/uploads/services/service-8.jpg', '/uploads/services/service-9.jpg'],
+    ];
+
+    for (let i = 0; i < baseServices.length; i++) {
+      const serviceData = baseServices[i];
+      let service = await serviceRepository.findOne({
         where: { name: serviceData.name },
       });
 
-      if (!existingService) {
-        const service = new Service(serviceData);
-        await serviceRepository.save(service);
+      if (!service) {
+        service = new Service(serviceData);
+        service = await serviceRepository.save(service);
         console.log(`✅ Base service created: ${serviceData.name}`);
+
+        // 서비스 이미지 추가
+        const images = serviceImages[i];
+        for (let j = 0; j < images.length; j++) {
+          const imageUrl = images[j];
+          const serviceImage = new ServiceImage({
+            imageUrl,
+            isMain: j === 0, // 첫 번째 이미지를 메인으로 설정
+            displayOrder: j + 1,
+            serviceId: service.id,
+          });
+          await serviceImageRepository.save(serviceImage);
+        }
       }
     }
 
@@ -79,8 +103,11 @@ export default class ServiceSeeder implements Seeder {
     const servicesToCreate = Math.max(0, 10 - existingServicesCount);
 
     if (servicesToCreate > 0) {
-      await factoryManager.get(Service).saveMany(servicesToCreate);
+      const newServices = await factoryManager.get(Service).saveMany(servicesToCreate);
       console.log(`✅ Created ${servicesToCreate} additional services`);
+      
+      // 추가 생성된 서비스들에 이미지 연결
+      await this.addImagesToServices(newServices, serviceImageRepository, 10);
     }
 
     // 매번 실행 시 2-4개의 서비스 추가 생성
@@ -89,5 +116,39 @@ export default class ServiceSeeder implements Seeder {
     );
 
     console.log(`✅ Created ${additionalServices.length} random services`);
+    
+    // 랜덤 서비스들에 이미지 연결
+    await this.addImagesToServices(additionalServices, serviceImageRepository, 10);
+  }
+
+  // 서비스들에 실제 이미지 파일 연결하는 헬퍼 메서드
+  private async addImagesToServices(
+    services: Service[],
+    serviceImageRepository: any,
+    startImageNumber: number
+  ) {
+    const availableImages = Array.from({ length: 20 }, (_, i) => 
+      `/uploads/services/service-${i + 1}.jpg`
+    );
+    
+    let imageIndex = startImageNumber;
+    
+    for (const service of services) {
+      // 각 서비스마다 1-3개의 이미지 할당
+      const imageCount = Math.floor(Math.random() * 3) + 1;
+      
+      for (let i = 0; i < imageCount; i++) {
+        const imageUrl = availableImages[imageIndex % availableImages.length];
+        const serviceImage = new ServiceImage({
+          imageUrl,
+          isMain: i === 0, // 첫 번째 이미지를 메인으로 설정
+          displayOrder: i + 1,
+          serviceId: service.id,
+        });
+        
+        await serviceImageRepository.save(serviceImage);
+        imageIndex++;
+      }
+    }
   }
 }

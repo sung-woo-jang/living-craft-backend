@@ -68,15 +68,20 @@ const ReviewFactory = localeKoSetSeederFactory(Review, (faker) => {
     ? faker.date.recent({ days: 7 })
     : undefined;
 
-  // 리뷰 이미지 (20% 확률)
+  // 리뷰 이미지 (20% 확률) - 실제 업로드된 파일 사용
   const hasImages = faker.datatype.boolean(0.2);
   const images = hasImages
-    ? [
-        `/uploads/reviews/review_${faker.number.int({ min: 1, max: 999 })}.jpg`,
-        faker.datatype.boolean(0.5)
-          ? `/uploads/reviews/review_${faker.number.int({ min: 1, max: 999 })}.jpg`
-          : null,
-      ].filter(Boolean)
+    ? (() => {
+        const availableReviewImages = Array.from({ length: 20 }, (_, i) => 
+          `/uploads/reviews/review-${i + 1}.jpg`
+        );
+        return [
+          faker.helpers.arrayElement(availableReviewImages),
+          faker.datatype.boolean(0.5)
+            ? faker.helpers.arrayElement(availableReviewImages)
+            : null,
+        ].filter(Boolean);
+      })()
     : undefined;
 
   return new Review({
