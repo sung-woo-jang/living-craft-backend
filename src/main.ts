@@ -53,10 +53,15 @@ async function bootstrap() {
   if (environment === 'development') {
     const config = new DocumentBuilder()
       .setTitle('NestJS 클린 템플릿 API')
-      .setDescription('파일 업로드, 헬스 체크 기능을 제공하는 NestJS 템플릿입니다.')
+      .setDescription(
+        '파일 업로드, 헬스 체크, 백오피스 기능을 제공하는 NestJS 템플릿입니다.',
+      )
       .setVersion('1.0')
       .addTag('파일', '파일 업로드 관련 API')
       .addTag('헬스체크', '서버 상태 확인 API')
+      .addTag('관리자 > 인증', '관리자 로그인 및 인증 API')
+      .addTag('관리자 > 사용자 관리', '백오피스 사용자 관리 API')
+      .addBearerAuth()
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

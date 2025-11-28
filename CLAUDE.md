@@ -8,7 +8,7 @@
 
 ### 주요 기능
 
-- **파일 업로드**: 이미지 및 문서 업로드 기능
+- **파일 업로드**: 이미지 및 문서 업로드 기능 (Multer)
 - **헬스 체크**: 서버 상태 모니터링
 
 ### 제거된 기능
@@ -19,66 +19,59 @@
 
 ### 기본 명령어
 ```bash
-# Install dependencies
+# 의존성 설치
 npm install
 
-# Development with hot reload
+# 개발 서버 실행 (hot reload)
 npm run start:dev
 
-# Production build and run
+# 프로덕션 빌드 및 실행
 npm run build
 npm run start:prod
-
-# Full development setup (Docker + App)
-npm run dev:full
 ```
 
 ### Docker 인프라 관리
 ```bash
-# Start PostgreSQL, Redis, pgAdmin, Redis Commander
+# PostgreSQL, pgAdmin 시작
 npm run docker:dev:up
-# or: docker-compose -f docker-compose.local.yml up -d
 
-# Stop services
+# 서비스 중지
 npm run docker:dev:down
 
-# View logs
+# 로그 확인
 npm run docker:dev:logs
 
-# Check service status
+# 상태 확인
 npm run docker:dev:status
 ```
 
 ### 데이터베이스 작업
 ```bash
-# Run migrations
+# 마이그레이션 실행
 npm run migration:run
 
-# Generate new migration
+# 마이그레이션 생성
 npm run migration:generate -- -n MigrationName
 
-# Revert last migration
+# 마이그레이션 되돌리기
 npm run migration:revert
-
-# Seed database with initial data
-npm run seed:run
 ```
 
 ### 테스트 및 코드 품질
 ```bash
-# Unit tests
+# 유닛 테스트
 npm run test
 
-# Test with coverage
+# 커버리지 포함 테스트
 npm run test:cov
 
-# Watch mode for tests
+# Watch 모드 테스트
 npm run test:watch
 
-# Linting
+# 린팅
 npm run lint
 
-# Code formatting
+# 코드 포맷팅
 npm run format
 ```
 
@@ -86,7 +79,7 @@ npm run format
 
 ### 핵심 기술 스택
 - **Backend**: NestJS with TypeScript
-- **Database**: PostgreSQL with TypeORM ORM
+- **Database**: PostgreSQL with TypeORM
 - **File Upload**: Multer
 - **API Documentation**: Swagger
 
@@ -108,32 +101,13 @@ src/modules/
 - `@modules/` → `src/modules/`
 - `@config/` → `src/config/`
 
-**글로벌 가드 & 필터**:
-- JWT 인증이 `JwtAuthGuard`를 통해 전역적으로 적용됨
-- 공개 엔드포인트는 `@Public()` 데코레이터로 인증 우회
+**글로벌 필터**:
 - `HttpExceptionFilter`를 통한 전역 예외 처리
 
 **데이터베이스 전략**:
 - TypeORM을 사용한 엔티티 우선 접근법
 - 공통 필드(id, timestamps)를 위한 Base Entity 패턴 사용
 - 개발 모드에서는 synchronize: true 사용 (마이그레이션 불필요)
-
-### 비즈니스 로직 아키텍처
-
-**예약 시스템**:
-- 정찰제 및 견적제 서비스 모두 지원
-- 예약 상태 흐름: `pending`(대기) → `confirmed`(확정) → `completed`(완료) → `cancelled`(취소)
-- 자동 예약번호 생성: `YYYYMMDD-0001` 형식
-
-**사용자 역할**:
-- 관리자: 시스템 전체 관리
-- 고객: OAuth 및 수동 가입 지원
-- 게스트: 비회원 예약 지원
-
-**알림 시스템**:
-- 템플릿 기반 알림 시스템
-- 스케줄러를 통한 비동기 처리
-- SMS(네이버 클라우드 플랫폼) 및 이메일 지원
 
 ## 개발 환경 설정
 
@@ -148,16 +122,13 @@ src/modules/
 
 ### 환경 변수 설정
 - `.env` 파일 사용, `.env.local`로 폴백
-- 데이터베이스 기본값: localhost:5432, postgres/password123, reservation_dev
-- JWT_SECRET 환경 변수 필수
-- 네이버 OAuth는 NAVER_CLIENT_ID, NAVER_CLIENT_SECRET 필요
+- 데이터베이스 기본값: localhost:5432, postgres/password123, living_craft_dev
 
 ### 개발 환경 접속 포인트
 - API 서버: http://localhost:8000
 - Swagger API 문서: http://localhost:8000/api/docs
 - 헬스 체크: http://localhost:8000/health
-- pgAdmin: http://localhost:5050 (admin@reservation.com / admin123)
-- 프론트엔드: http://localhost:3000
+- pgAdmin: http://localhost:5050 (admin@livingcraft.com / admin123)
 
 ## 코딩 컨벤션 및 스타일 가이드
 
@@ -174,18 +145,18 @@ src/modules/
 
 ```typescript
 // 폴더명: kebab-case
-purchase-request/
-delivery-location/
+user-profile/
+product-catalog/
 
 // 모듈 파일: PascalCase
-PurchaseRequestController.ts
-UserService.ts
-ReservationEntity.ts
+UserController.ts
+ProductService.ts
+OrderEntity.ts
 
 // 일반 파일: camelCase
-userValidator.ts
+emailValidator.ts
 dateFormatter.ts
-reservationHelper.ts
+stringHelper.ts
 ```
 
 #### 변수 및 상수
@@ -193,27 +164,23 @@ reservationHelper.ts
 ```typescript
 // 변수: camelCase
 const userName = 'john';
-const reservationList = [];
+const productList = [];
 const totalAmount = 1000;
 
-// Boolean 변수: is/has prefix
+// Boolean 변수: is/has/can prefix
 const isLoading = true;
 const hasPermission = false;
 const canEdit = true;
 
 // 상수: UPPER_SNAKE_CASE
-const BASE_URL = 'https://api.reservation.com';
-const API_ENDPOINTS = {
-  RESERVATION: '/api/reservations',
-  USER: '/api/users',
-};
+const BASE_URL = 'https://api.example.com';
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-// Enum 상수
-export enum ReservationStatus {
-  PENDING = 'pending',
-  CONFIRMED = 'confirmed',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
+// Enum
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+  GUEST = 'guest',
 }
 ```
 
@@ -223,17 +190,12 @@ export enum ReservationStatus {
 // Event handlers: handle + Target + Event
 const handleSubmitButtonClick = () => {};
 const handleFormSubmit = () => {};
-const handlePasswordReset = () => {};
-
-// Utility functions
-const hasUserAccess = (user) => Boolean(user.permissions);
-const getUserPermissions = (user) => user.permissions || [];
 
 // Service functions (CRUD)
 const fetchUserProfile = async () => {};
-const createReservation = async () => {};
-const updateReservationStatus = async () => {};
-const deleteReservation = async () => {};
+const createProduct = async () => {};
+const updateOrderStatus = async () => {};
+const deleteProduct = async () => {};
 
 // Validation functions
 const validateEmail = (email: string) => boolean;
@@ -252,11 +214,10 @@ interface IUserProfile {
 }
 
 // DTO Interface
-interface ICreateReservationRequest {
-  serviceId: number;
-  customerId: number;
-  reservationDate: string;
-  notes?: string;
+interface ICreateProductRequest {
+  name: string;
+  price: number;
+  description?: string;
 }
 
 // Response Type: T prefix
@@ -266,12 +227,6 @@ type TApiResponse<T> = {
   success: boolean;
   statusCode: number;
 };
-
-// Enum export
-export enum UserRole {
-  ADMIN = 'admin',
-  CUSTOMER = 'customer',
-}
 ```
 
 ### 파일 구조 패턴
@@ -282,22 +237,18 @@ export enum UserRole {
 module-name/
 ├── dto/
 │   ├── request/
-│   │   ├── create-reservation.dto.ts
-│   │   ├── update-reservation.dto.ts
+│   │   ├── create-item.dto.ts
+│   │   ├── update-item.dto.ts
 │   │   └── index.ts
 │   ├── response/
-│   │   ├── reservation-response.dto.ts
+│   │   ├── item-response.dto.ts
 │   │   └── index.ts
 │   └── index.ts
 ├── entities/
-│   ├── reservation.entity.ts
-│   └── index.ts
-├── guards/
-│   ├── reservation-owner.guard.ts
+│   ├── item.entity.ts
 │   └── index.ts
 ├── module-name.controller.ts
 ├── module-name.service.ts
-├── module-name.repository.ts (선택적)
 ├── module-name.module.ts
 └── index.ts
 ```
@@ -305,132 +256,98 @@ module-name/
 #### 엔티티 작성 패턴
 
 ```typescript
-// reservation.entity.ts
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column } from 'typeorm';
 import { BaseEntity } from '@common/entities/base.entity';
-import { User } from '@modules/users/entities/user.entity';
-import { Service } from '@modules/services/entities/service.entity';
-import { ReservationStatus } from '@common/enums';
 
-@Entity('reservations')
-export class Reservation extends BaseEntity {
-  @Column({ name: 'reservation_code', unique: true })
-  reservationCode: string;
+@Entity('products')
+export class Product extends BaseEntity {
+  @Column({ length: 200 })
+  name: string;
 
-  @Column({ name: 'service_id' })
-  serviceId: number;
-
-  @Column({ name: 'customer_id', nullable: true })
-  customerId: number;
-
-  @Column({ 
-    type: 'enum', 
-    enum: ReservationStatus, 
-    default: ReservationStatus.PENDING 
-  })
-  status: ReservationStatus;
-
-  @Column({ name: 'reservation_date', type: 'timestamp' })
-  reservationDate: Date;
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price: number;
 
   @Column({ type: 'text', nullable: true })
-  notes: string;
+  description: string;
 
-  // Relations
-  @ManyToOne(() => User, (user) => user.reservations, { nullable: true })
-  @JoinColumn({ name: 'customer_id' })
-  customer: User;
-
-  @ManyToOne(() => Service, (service) => service.reservations)
-  @JoinColumn({ name: 'service_id' })
-  service: Service;
+  @Column({ name: 'stock_quantity', default: 0 })
+  stockQuantity: number;
 }
 ```
 
 #### DTO 작성 패턴
 
 ```typescript
-// dto/request/create-reservation.dto.ts
-import { IsNumber, IsString, IsOptional, IsDateString } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, MaxLength } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateReservationDto {
-  @ApiProperty({ 
-    description: '서비스 ID',
-    example: 1 
+export class CreateProductDto {
+  @ApiProperty({
+    description: '상품명',
+    example: '노트북'
   })
-  @IsNumber({}, { message: '서비스 ID는 숫자여야 합니다.' })
-  serviceId: number;
+  @IsString({ message: '상품명은 문자열이어야 합니다.' })
+  @MaxLength(200, { message: '상품명은 200자를 초과할 수 없습니다.' })
+  @Transform(({ value }) => value?.trim())
+  name: string;
 
-  @ApiProperty({ 
-    description: '예약 날짜 (ISO 8601 형식)',
-    example: '2024-12-25T14:00:00Z' 
+  @ApiProperty({
+    description: '가격',
+    example: 1500000
   })
-  @IsDateString({}, { message: '올바른 날짜 형식이 아닙니다.' })
-  reservationDate: string;
+  @IsNumber({}, { message: '가격은 숫자여야 합니다.' })
+  @Min(0, { message: '가격은 0 이상이어야 합니다.' })
+  price: number;
 
-  @ApiPropertyOptional({ 
-    description: '예약 메모',
-    example: '2층 화장실 청소 필요' 
+  @ApiPropertyOptional({
+    description: '상품 설명',
+    example: '고성능 노트북'
   })
   @IsOptional()
-  @IsString({ message: '메모는 문자열이어야 합니다.' })
+  @IsString({ message: '설명은 문자열이어야 합니다.' })
   @Transform(({ value }) => value?.trim())
-  notes?: string;
+  description?: string;
 }
 ```
 
 #### 서비스 작성 패턴
 
 ```typescript
-// reservation.service.ts
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Reservation } from './entities/reservation.entity';
-import { CreateReservationDto } from './dto/request/create-reservation.dto';
-import { ReservationStatus } from '@common/enums';
-import { generateReservationCode } from '@common/utils/reservation-code.util';
+import { Product } from './entities/product.entity';
+import { CreateProductDto } from './dto/request/create-product.dto';
 
 @Injectable()
-export class ReservationService {
+export class ProductService {
   constructor(
-    @InjectRepository(Reservation)
-    private readonly reservationRepository: Repository<Reservation>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
-  async createReservation(dto: CreateReservationDto): Promise<Reservation> {
-    // Early return pattern 적용
-    if (!dto.serviceId) {
-      throw new BadRequestException('서비스 ID가 필요합니다.');
+  async createProduct(dto: CreateProductDto): Promise<Product> {
+    // Early return pattern
+    if (dto.price < 0) {
+      throw new BadRequestException('가격은 0 이상이어야 합니다.');
     }
 
-    const reservationCode = generateReservationCode();
-    
-    const reservation = this.reservationRepository.create({
-      ...dto,
-      reservationCode,
-      status: ReservationStatus.PENDING,
-    });
-
-    return await this.reservationRepository.save(reservation);
+    const product = this.productRepository.create(dto);
+    return await this.productRepository.save(product);
   }
 
-  async findReservationById(id: number): Promise<Reservation> {
-    const reservation = await this.reservationRepository.findOne({
+  async findProductById(id: number): Promise<Product> {
+    const product = await this.productRepository.findOne({
       where: { id },
-      relations: ['service', 'customer'],
     });
 
-    if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
+    if (!product) {
+      throw new NotFoundException('상품을 찾을 수 없습니다.');
     }
 
-    return reservation;
+    return product;
   }
-
-  // 추가 메서드들...
 }
 ```
 
@@ -443,8 +360,8 @@ export class ReservationService {
 {
   "success": true,
   "data": { /* 실제 데이터 */ },
-  "message": "예약이 성공적으로 생성되었습니다.",
-  "statusCode": 201
+  "message": "요청이 성공적으로 처리되었습니다.",
+  "statusCode": 200
 }
 
 // 에러 응답
@@ -454,35 +371,37 @@ export class ReservationService {
   "message": "잘못된 요청입니다.",
   "statusCode": 400,
   "timestamp": "2024-01-15T10:30:00.000Z",
-  "path": "/api/reservations"
+  "path": "/api/products"
 }
 ```
 
-#### 데코레이터 사용 패턴
+#### 컨트롤러 작성 패턴
 
 ```typescript
-// 컨트롤러에서 자주 사용하는 패턴
-@Controller('reservations')
-@ApiTags('예약 관리')
-export class ReservationController {
+import { Controller, Post, Get, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ProductService } from './product.service';
+import { CreateProductDto } from './dto/request/create-product.dto';
+
+@Controller('products')
+@ApiTags('상품 관리')
+export class ProductController {
+  constructor(private readonly productService: ProductService) {}
+
   @Post()
-  @ApiOperation({ summary: '새 예약 생성' })
-  @ApiResponse({ status: 201, description: '예약 생성 성공' })
+  @ApiOperation({ summary: '새 상품 생성' })
+  @ApiResponse({ status: 201, description: '상품 생성 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
-  async createReservation(
-    @Body() dto: CreateReservationDto,
-    @CurrentUser() user: User,
-  ): Promise<SuccessResponse<Reservation>> {
-    // 구현...
+  async createProduct(@Body() dto: CreateProductDto) {
+    return await this.productService.createProduct(dto);
   }
 
   @Get(':id')
-  @Public() // JWT 인증 우회
-  @ApiOperation({ summary: '예약 상세 조회' })
-  async getReservation(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<SuccessResponse<Reservation>> {
-    // 구현...
+  @ApiOperation({ summary: '상품 상세 조회' })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  @ApiResponse({ status: 404, description: '상품을 찾을 수 없음' })
+  async getProduct(@Param('id', ParseIntPipe) id: number) {
+    return await this.productService.findProductById(id);
   }
 }
 ```
@@ -492,16 +411,17 @@ export class ReservationController {
 ```typescript
 // 좋은 예: 경로 별칭 사용
 import { BaseEntity } from '@common/entities/base.entity';
-import { ReservationStatus } from '@common/enums';
-import { generateReservationCode } from '@common/utils/reservation-code.util';
-import { User } from '@modules/users/entities/user.entity';
+import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
+import { Product } from '@modules/products/entities/product.entity';
 
 // 나쁜 예: 상대 경로 남용
 import { BaseEntity } from '../../common/entities/base.entity';
-import { User } from '../users/entities/user.entity';
+import { Product } from '../products/entities/product.entity';
 ```
 
-### 1차 리팩토링 허용 범위 (✅ 허용)
+### 리팩토링 가이드
+
+#### 허용 범위 (✅ 허용)
 
 - **Early Return Pattern**: 조건문을 early return 방식으로 변경
 - **네이밍 개선**: 컨벤션에 맞게 변수명, 함수명 수정
@@ -510,7 +430,7 @@ import { User } from '../users/entities/user.entity';
 - **타입 개선**: TypeScript 타입 정확성 향상
 - **에러 메시지 한국어화**: 사용자 친화적 에러 메시지
 
-### 1차 리팩토링 금지사항 (❌ 금지)
+#### 금지사항 (❌ 금지)
 
 - **비즈니스 로직 변경**: 기능적 동작 수정 금지
 - **새 파일 생성**: 컴포넌트 분리, 유틸 함수 분리 등
@@ -524,21 +444,10 @@ import { User } from '../users/entities/user.entity';
 - Jest에 경로 매핑 설정됨
 - 단위 테스트는 `*.spec.ts` 파일에 작성
 - 커버리지 리포트 기능 사용 가능
-- E2E 테스트는 단순화를 위해 제거
 
 ### 테스트 데이터베이스
 - 개발 환경과 동일한 PostgreSQL 설정 사용
 - 실제 데이터베이스 대상 테스트 (모킹 없음)
-
-## 사용 예시
-
-이 템플릿은 다음과 같은 프로젝트의 시작점으로 사용할 수 있습니다:
-- SaaS 애플리케이션
-- 백오피스 관리 시스템
-- RESTful API 서버
-- 마이크로서비스 기반 시스템
-
-핵심 기능(인증, 사용자 관리, 파일 업로드)이 이미 구현되어 있어 빠르게 비즈니스 로직 개발을 시작할 수 있습니다.
 
 ## 개발 시 주의사항
 
@@ -549,47 +458,17 @@ import { User } from '../users/entities/user.entity';
 5. **API 문서화**: Swagger 데코레이터로 API 문서 작성 필수
 6. **환경 변수 검증**: 중요한 환경 변수는 validation schema에서 검증
 7. **전역 필터 활용**: HttpExceptionFilter가 자동으로 에러 응답 포맷팅
-8. **Bull Queue 활용**: 알림 발송 등 비동기 작업은 Queue 시스템 사용
-
-## 주요 엔드포인트 및 권한
-
-### 공개 엔드포인트 (인증 불필요)
-```typescript
-GET  /api/services           // 서비스 목록 조회
-GET  /api/reviews            // 리뷰 목록 조회  
-GET  /api/portfolio          // 포트폴리오 조회
-GET  /api/faq                // FAQ 조회
-GET  /api/calendar/available // 예약 가능 날짜/시간
-POST /api/reservations/search // 예약번호로 조회
-GET  /health                 // 헬스 체크
-```
-
-### 관리자 전용 엔드포인트
-```typescript
-GET  /api/reservations       // 예약 목록 관리
-PUT  /api/quotes/:id         // 견적서 작성
-POST /api/services           // 서비스 생성/수정
-POST /api/notifications      // 알림 발송
-```
-
-### 고객 엔드포인트 (로그인 필요)
-```typescript
-POST /api/reservations       // 예약 생성
-POST /api/quotes             // 견적 요청
-POST /api/quotes/:id/approve // 견적 승인
-POST /api/reviews            // 리뷰 작성
-```
 
 ## 환경별 설정
 
 ### 개발 환경 (Development)
 - 포트: 8000
-- 데이터베이스: reservation_dev
+- 데이터베이스: living_craft_dev
 - synchronize: true (자동 스키마 동기화)
 - 로깅: 활성화
 - Swagger UI: 활성화
 
-### 프로덕션 환경 (Production)  
+### 프로덕션 환경 (Production)
 - 포트: 환경변수로 설정
 - 데이터베이스: 프로덕션 DB
 - synchronize: false (마이그레이션 사용)
@@ -598,43 +477,30 @@ POST /api/reviews            // 리뷰 작성
 
 ## 문제 해결 가이드
 
-### 일반적인 문제들
-
-1. **Docker 컨테이너 문제**
-   ```bash
-   # 컨테이너 완전 재시작
-   npm run docker:dev:down
-   npm run docker:dev:up
-   
-   # 로그 확인
-   npm run docker:dev:logs
-   ```
-
-2. **데이터베이스 연결 실패**
-   ```bash
-   # PostgreSQL 상태 확인
-   docker exec -it reservation_postgres_dev pg_isready -U postgres
-   
-   # 데이터베이스 접속 테스트
-   docker exec -it reservation_postgres_dev psql -U postgres -d reservation_dev
-   ```
-
-3. **마이그레이션 문제**
-   ```bash
-   # 마이그레이션 상태 확인
-   npm run migration:show
-   
-   # 마이그레이션 강제 실행
-   npm run migration:run
-   ```
-
-### 로그 확인 방법
-
+### Docker 컨테이너 문제
 ```bash
-# 애플리케이션 로그 (Winston)
-tail -f logs/error.log
-tail -f logs/combined.log
+# 컨테이너 완전 재시작
+npm run docker:dev:down
+npm run docker:dev:up
 
-# Docker 서비스 로그
-npm run docker:dev:logs postgres
+# 로그 확인
+npm run docker:dev:logs
+```
+
+### 데이터베이스 연결 실패
+```bash
+# PostgreSQL 상태 확인
+docker exec -it living_craft_postgres_dev pg_isready -U postgres
+
+# 데이터베이스 접속 테스트
+docker exec -it living_craft_postgres_dev psql -U postgres -d living_craft_dev
+```
+
+### 마이그레이션 문제
+```bash
+# 마이그레이션 상태 확인
+npm run migration:show
+
+# 마이그레이션 강제 실행
+npm run migration:run
 ```
