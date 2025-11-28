@@ -9,15 +9,11 @@ export default registerAs(
     port: parseInt(process.env.DB_PORT, 10) || 5432,
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'password123',
-    database: process.env.DB_DATABASE || 'reservation_dev',
+    database: process.env.DB_DATABASE || 'living_craft',
     entities: [__dirname + '/../modules/**/*.entity.{js,ts}'],
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
-    synchronize:
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'staging',
-    logging:
-      process.env.NODE_ENV === 'development' ||
-      process.env.NODE_ENV === 'staging',
+    synchronize: process.env.DB_SYNCHRONIZE === 'true',
+    logging: process.env.DB_LOGGING === 'true',
     autoLoadEntities: true,
     retryAttempts: 10,
     retryDelay: 3000,
