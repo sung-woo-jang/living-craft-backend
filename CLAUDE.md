@@ -4,14 +4,16 @@
 
 ## 프로젝트 개요
 
-**NestJS 클린 템플릿** - 새 프로젝트를 빠르게 시작할 수 있는 NestJS 기반 백엔드 템플릿입니다.
+**NestJS 클린 템플릿** - 새 프로젝트를 빠르게 시작할 수 있는 최소한의 NestJS 기반 백엔드 템플릿입니다.
 
 ### 주요 기능
 
-- **인증 시스템**: JWT 기반 인증, Naver OAuth 지원
-- **사용자 관리**: 기본 사용자 CRUD, 역할 기반 접근 제어
 - **파일 업로드**: 이미지 및 문서 업로드 기능
 - **헬스 체크**: 서버 상태 모니터링
+
+### 제거된 기능
+
+인증 및 사용자 관리 모듈은 제거되었습니다. 필요한 경우 토스 로그인 등 원하는 인증 방식을 추가하세요.
 
 ## 개발 명령어
 
@@ -85,16 +87,15 @@ npm run format
 ### 핵심 기술 스택
 - **Backend**: NestJS with TypeScript
 - **Database**: PostgreSQL with TypeORM ORM
-- **Authentication**: JWT + Passport (Local, Naver OAuth)
+- **File Upload**: Multer
+- **API Documentation**: Swagger
 
 ### 모듈 구조
 
-NestJS 모듈 아키텍처를 따르며 명확한 책임 분리를 합니다:
+최소한의 모듈만 포함된 클린 템플릿:
 
 ```
 src/modules/
-├── auth/           # JWT + OAuth 인증 및 인가
-├── users/          # 사용자 관리 (CRUD, 역할 관리)
 ├── files/          # 파일 업로드 및 관리
 └── health/         # 헬스 체크 엔드포인트
 ```

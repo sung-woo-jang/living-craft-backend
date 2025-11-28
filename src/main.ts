@@ -4,7 +4,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import * as session from 'express-session';
 import * as dotenv from 'dotenv';
 import { AppModule } from './app.module';
 
@@ -44,19 +43,6 @@ async function bootstrap() {
     }),
   );
 
-  // Session 설정 (네이버 OAuth용)
-  app.use(
-    session({
-      secret: configService.get<string>('jwt.secret'),
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: environment === 'production',
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24, // 24시간
-      },
-    }),
-  );
 
   // 정적 파일 서빙 (업로드된 파일)
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
@@ -67,23 +53,10 @@ async function bootstrap() {
   if (environment === 'development') {
     const config = new DocumentBuilder()
       .setTitle('NestJS 클린 템플릿 API')
-      .setDescription('인증, 사용자 관리, 파일 업로드, 헬스 체크 기능을 제공하는 NestJS 템플릿입니다.')
+      .setDescription('파일 업로드, 헬스 체크 기능을 제공하는 NestJS 템플릿입니다.')
       .setVersion('1.0')
-      .addTag('인증', '로그인 및 인가 관련 API')
-      .addTag('사용자', '사용자 관리 관련 API')
       .addTag('파일', '파일 업로드 관련 API')
       .addTag('헬스체크', '서버 상태 확인 API')
-      .addBearerAuth(
-        {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          name: 'JWT',
-          description: 'JWT 토큰을 입력하세요',
-          in: 'header',
-        },
-        'JWT-auth',
-      )
       .build();
 
     const document = SwaggerModule.createDocument(app, config);

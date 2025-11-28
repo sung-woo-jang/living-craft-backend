@@ -1,7 +1,7 @@
 {
   "name": "nestjs-clean-template",
   "version": "1.0.0",
-  "description": "NestJS 클린 템플릿 (Auth + Users + Files + Health)",
+  "description": "NestJS 클린 템플릿 (Files + Health)",
   "author": "Developer",
   "private": true,
   "license": "MIT",
