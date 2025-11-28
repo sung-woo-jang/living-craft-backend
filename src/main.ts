@@ -66,19 +66,11 @@ async function bootstrap() {
   // Swagger 설정 (개발 환경에서만)
   if (environment === 'development') {
     const config = new DocumentBuilder()
-      .setTitle('예약 서비스 플랫폼 API')
-      .setDescription('1인 사업자용 예약 서비스 플랫폼의 API 문서입니다.')
+      .setTitle('NestJS 클린 템플릿 API')
+      .setDescription('인증, 사용자 관리, 파일 업로드, 헬스 체크 기능을 제공하는 NestJS 템플릿입니다.')
       .setVersion('1.0')
-      .addTag('인증', '로그인, 회원가입 관련 API')
+      .addTag('인증', '로그인 및 인가 관련 API')
       .addTag('사용자', '사용자 관리 관련 API')
-      .addTag('서비스', '서비스 관리 관련 API')
-      .addTag('예약', '예약 관리 관련 API')
-      .addTag('견적', '견적 관리 관련 API')
-      .addTag('리뷰', '리뷰 관리 관련 API')
-      .addTag('캘린더', '일정 관리 관련 API')
-      .addTag('포트폴리오', '포트폴리오 관리 관련 API')
-      .addTag('알림', '알림 관리 관련 API')
-      .addTag('FAQ', 'FAQ 관리 관련 API')
       .addTag('파일', '파일 업로드 관련 API')
       .addTag('헬스체크', '서버 상태 확인 API')
       .addBearerAuth(
@@ -101,7 +93,7 @@ async function bootstrap() {
         tagsSorter: 'alpha',
         operationsSorter: 'alpha',
       },
-      customSiteTitle: '예약 서비스 플랫폼 API 문서',
+      customSiteTitle: 'NestJS 클린 템플릿 API 문서',
     });
 
     console.log('📚 Swagger UI available at: http://localhost:8000/api/docs');

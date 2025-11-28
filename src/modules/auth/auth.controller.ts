@@ -15,7 +15,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LoginRequestDto } from './dto/request/login-request.dto';
-import { VerifyGuestRequestDto } from './dto/request/verify-guest-request.dto';
 import { LoginResponseDto } from './dto/response/login-response.dto';
 import { SuccessBaseResponseDto } from '@common/dto/response/success-base-response.dto';
 import { SwaggerBaseApply } from '@common/decorators/swagger-base-apply.decorator';
@@ -24,7 +23,6 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import {
   LoginSwaggerDecorator,
-  VerifyGuestSwaggerDecorator,
   GetProfileSwaggerDecorator,
   LogoutSwaggerDecorator,
   RefreshTokenSwaggerDecorator,
@@ -67,20 +65,6 @@ export class AuthController {
   ): Promise<SuccessBaseResponseDto<LoginResponseDto>> {
     const result = await this.authService.adminLogin(loginDto);
     return new SuccessBaseResponseDto('로그인되었습니다.', result);
-  }
-
-  @Post('verify')
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  @VerifyGuestSwaggerDecorator({
-    summary: '비회원 예약 본인 인증',
-    description: '예약번호와 전화번호로 비회원 예약을 조회합니다.',
-  })
-  async verifyGuest(
-    @Body() verifyDto: VerifyGuestRequestDto,
-  ): Promise<SuccessBaseResponseDto<any>> {
-    const result = await this.authService.verifyGuest(verifyDto);
-    return new SuccessBaseResponseDto('인증되었습니다.', result);
   }
 
   @Get('me')

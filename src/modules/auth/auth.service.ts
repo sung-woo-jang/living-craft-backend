@@ -11,11 +11,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UserRole } from '@common/enums';
 import { UsersService } from '../users/users.service';
-import { ReservationsService } from '../reservations/reservations.service';
 import { LoginRequestDto } from './dto/request/login-request.dto';
-import { VerifyGuestRequestDto } from './dto/request/verify-guest-request.dto';
 import { LoginResponseDto } from './dto/response/login-response.dto';
-import { PhoneUtil } from '@common/utils/phone.util';
 import { RefreshToken } from './entities/refresh-token.entity';
 
 export interface JwtPayload {
@@ -30,7 +27,6 @@ export interface JwtPayload {
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly reservationsService: ReservationsService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     @InjectRepository(RefreshToken)
@@ -268,37 +264,6 @@ export class AuthService {
         role: user.role,
       },
     });
-  }
-
-  /**
-   * 비회원 예약 본인 인증
-   */
-  async verifyGuest(
-    verifyDto: VerifyGuestRequestDto,
-  ): Promise<{ valid: boolean; reservation?: any }> {
-    const { reservationCode, phone } = verifyDto;
-
-    const reservation =
-      await this.reservationsService.findByReservationCode(reservationCode);
-
-    if (!reservation) {
-      throw new BadRequestException('존재하지 않는 예약번호입니다.');
-    }
-
-    // 전화번호 정규화 후 비교 (저장된 형식으로 비교)
-    const normalizedInputPhone = PhoneUtil.normalizeForStorage(phone);
-    const normalizedReservationPhone = PhoneUtil.normalizeForStorage(
-      reservation.customerPhone,
-    );
-
-    if (normalizedInputPhone !== normalizedReservationPhone) {
-      throw new UnauthorizedException('전화번호가 일치하지 않습니다.');
-    }
-
-    return {
-      valid: true,
-      reservation,
-    };
   }
 
   /**

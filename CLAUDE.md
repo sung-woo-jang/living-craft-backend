@@ -1,24 +1,17 @@
 # CLAUDE.md
 
-이 파일은 예약 서비스 플랫폼 백엔드 프로젝트에서 Claude Code가 코드 작업을 할 때 가이드를 제공합니다.
+이 파일은 NestJS 클린 템플릿 프로젝트에서 Claude Code가 코드 작업을 할 때 가이드를 제공합니다.
 
 ## 프로젝트 개요
 
-개인 사업자용 예약 서비스 플랫폼의 백엔드 API 서버입니다. 1인 사업자가 운영하는 현장 방문형 서비스(청소, 수리, 미용 등)의 온라인 예약을 받고 관리할 수 있는 웹 플랫폼입니다.
+**NestJS 클린 템플릿** - 새 프로젝트를 빠르게 시작할 수 있는 NestJS 기반 백엔드 템플릿입니다.
 
 ### 주요 기능
 
-- **인증 시스템**: JWT 기반, 네이버 OAuth, 비회원 예약 지원
-- **예약 관리**: 정찰제/견적제 서비스, 실시간 예약 가능 시간 확인
-- **관리자 대시보드**: 예약 현황, 견적 관리, 고객 관리
-- **알림 시스템**: SMS/이메일 자동 발송 (네이버 클라우드 플랫폼)
-- **리뷰 시스템**: 고객 만족도 관리
-- **포트폴리오**: 작업 사례 관리
-
-### 핵심 비즈니스 플로우
-
-1. **정찰제 서비스**: 고객이 직접 예약 → 자동 확정 → 서비스 제공 → 리뷰 작성
-2. **견적제 서비스**: 고객이 견적 요청 → 관리자가 견적서 작성 → 고객 승인 → 예약 확정 → 서비스 제공
+- **인증 시스템**: JWT 기반 인증, Naver OAuth 지원
+- **사용자 관리**: 기본 사용자 CRUD, 역할 기반 접근 제어
+- **파일 업로드**: 이미지 및 문서 업로드 기능
+- **헬스 체크**: 서버 상태 모니터링
 
 ## 개발 명령어
 
@@ -100,18 +93,10 @@ NestJS 모듈 아키텍처를 따르며 명확한 책임 분리를 합니다:
 
 ```
 src/modules/
-├── auth/           # Authentication & authorization
-├── users/          # User management (admin, customers)
-├── services/       # Service offerings management
-├── reservations/   # Booking system core
-├── quotes/         # Custom quote requests
-├── calendar/       # Availability & scheduling
-├── reviews/        # Customer reviews
-├── portfolio/      # Work showcase
-├── notifications/  # SMS/Email alerts
-├── faq/           # FAQ management
-├── files/         # File upload handling
-└── health/        # Health check endpoints
+├── auth/           # JWT + OAuth 인증 및 인가
+├── users/          # 사용자 관리 (CRUD, 역할 관리)
+├── files/          # 파일 업로드 및 관리
+└── health/         # 헬스 체크 엔드포인트
 ```
 
 ### 주요 설계 패턴
@@ -544,17 +529,15 @@ import { User } from '../users/entities/user.entity';
 - 개발 환경과 동일한 PostgreSQL 설정 사용
 - 실제 데이터베이스 대상 테스트 (모킹 없음)
 
-## 비즈니스 컨텍스트
+## 사용 예시
 
-개인 서비스 제공업체(예: 홈 관리, 미용 서비스)를 위한 예약 플랫폼입니다. 주요 비즈니스 기능:
-- 고객을 위한 공개 예약 인터페이스
-- 서비스 제공업체를 위한 관리자 대시보드
-- 이중 가격 체계: 정찰제 서비스 + 맞춤형 견적
-- 자동화된 알림 시스템
-- 포트폴리오 쇼케이스 기능
-- 고객 피드백을 위한 리뷰 시스템
+이 템플릿은 다음과 같은 프로젝트의 시작점으로 사용할 수 있습니다:
+- SaaS 애플리케이션
+- 백오피스 관리 시스템
+- RESTful API 서버
+- 마이크로서비스 기반 시스템
 
-이 시스템은 1인 사업자를 위한 단순함과 유지보수 용이성을 우선시합니다.
+핵심 기능(인증, 사용자 관리, 파일 업로드)이 이미 구현되어 있어 빠르게 비즈니스 로직 개발을 시작할 수 있습니다.
 
 ## 개발 시 주의사항
 

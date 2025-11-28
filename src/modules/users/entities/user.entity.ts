@@ -3,8 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { BaseEntity } from '@common/entities/base.entity';
 import { UserRole } from '@common/enums';
-import { Reservation } from '../../reservations/entities/reservation.entity';
-import { Review } from '../../reviews/entities/review.entity';
 import { OAuthAccount } from './oauth-account.entity';
 
 @Entity('users')
@@ -105,12 +103,6 @@ export class User extends BaseEntity {
   lastLoginAt?: Date;
 
   // Relations
-  @OneToMany(() => Reservation, (reservation) => reservation.user)
-  reservations: Reservation[];
-
-  @OneToMany(() => Review, (review) => review.user)
-  reviews: Review[];
-
   @OneToMany(() => OAuthAccount, (oauthAccount) => oauthAccount.user, {
     cascade: true,
   })
