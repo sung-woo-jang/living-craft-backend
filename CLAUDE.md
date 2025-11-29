@@ -475,6 +475,77 @@ import { Product } from '../products/entities/product.entity';
 - 로깅: 에러만
 - Swagger UI: 비활성화
 
+## MCP 서버 설정
+
+이 프로젝트는 Claude Code와 함께 사용할 수 있는 MCP(Model Context Protocol) 서버가 구성되어 있습니다.
+
+### 설치된 MCP 서버
+
+#### 1. docker-mcp
+Docker 컨테이너와 Compose 스택을 Claude로 직접 관리할 수 있습니다.
+
+**사용 예시**:
+- "living_craft_postgres 컨테이너 로그 보여줘"
+- "docker-compose 서비스 상태 확인해줘"
+- "PostgreSQL 컨테이너 재시작해줘"
+- "실행 중인 모든 컨테이너 목록 보여줘"
+
+#### 2. postgres (PostgreSQL MCP 서버)
+데이터베이스 스키마 탐색 및 읽기 전용 쿼리를 실행할 수 있습니다.
+
+**사용 예시**:
+- "living_craft 데이터베이스의 모든 테이블 보여줘"
+- "특정 테이블 스키마 알려줘"
+- "최근 데이터 10개 조회해줘"
+- "Entity와 실제 DB 스키마 비교해줘"
+
+**보안 참고사항**:
+- PostgreSQL MCP는 읽기 전용으로 설정되어 있습니다
+- 데이터 수정(INSERT/UPDATE/DELETE)은 불가능합니다
+- 프로덕션 데이터베이스 연결 시 주의하세요
+
+#### 3. postman (Postman MCP 서버)
+Postman 워크스페이스, 컬렉션, 환경 변수 등을 Claude로 직접 관리할 수 있습니다.
+
+**사용 예시**:
+- "내 Postman 워크스페이스 목록 보여줘"
+- "특정 컬렉션의 API 요청들 확인해줘"
+- "새로운 환경 변수 추가해줘"
+- "컬렉션 문서 업데이트해줘"
+- "API 테스트 실행해줘"
+
+**참고사항**:
+- Postman API 키가 필요합니다
+- Minimal/Full/Code 세 가지 구성 중 선택 가능
+- 현재 Minimal 구성으로 설치되어 있습니다 (기본 작업 수행)
+
+### MCP 서버 관리 명령어
+
+```bash
+# MCP 서버 목록 확인
+claude mcp list
+
+# MCP 서버 상세 정보
+claude mcp get docker-mcp
+claude mcp get postgres
+claude mcp get postman
+
+# MCP 서버 제거 (필요시)
+claude mcp remove docker-mcp
+claude mcp remove postgres
+claude mcp remove postman
+```
+
+### 새로운 MCP 서버 추가
+
+```bash
+# stdio 방식 MCP 서버 추가
+claude mcp add --transport stdio <서버명> -- npx -y <패키지명> [인자...]
+
+# 예시: SQLite MCP 서버 추가
+claude mcp add --transport stdio sqlite -- npx -y @modelcontextprotocol/server-sqlite ./database.db
+```
+
 ## 문제 해결 가이드
 
 ### Docker 컨테이너 문제
@@ -503,4 +574,13 @@ npm run migration:show
 
 # 마이그레이션 강제 실행
 npm run migration:run
+```
+
+### MCP 서버 연결 문제
+```bash
+# MCP 서버 상태 확인
+claude mcp list
+
+# Claude Code 재시작
+# MCP 서버 설정 변경 후에는 Claude Code를 재시작해야 합니다
 ```

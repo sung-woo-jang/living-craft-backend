@@ -30,7 +30,7 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/config/typeorm.config.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts",
-    "seed:run": "ts-node -r tsconfig-paths/register node_modules/typeorm-extension/bin/cli.cjs seed:run -d src/seed/config/typeorm.config.ts"
+    "seed": "ts-node -r tsconfig-paths/register src/database/seeds/index.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.8",
