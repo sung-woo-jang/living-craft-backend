@@ -18,6 +18,12 @@ export class RolesGuard implements CanActivate {
     }
 
     const { user } = context.switchToHttp().getRequest();
+
+    // SUPERADMIN은 모든 권한 허용
+    if (user.role === UserRole.SUPERADMIN) {
+      return true;
+    }
+
     return requiredRoles.some((role) => user.role === role);
   }
 }
