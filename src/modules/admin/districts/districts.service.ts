@@ -114,6 +114,7 @@ export class DistrictsService {
     // 1. 법정동 코드.txt 파일 읽기
     const txtFilePath = path.join(process.cwd(), 'data/법정동 코드.txt');
     const fileContent = await fs.readFile(txtFilePath, 'utf-8');
+
     const lines = fileContent.split('\n').slice(1); // 헤더 제외
 
     // 2. 각 줄 파싱 (폐지된 구역 제외)
@@ -152,8 +153,14 @@ export class DistrictsService {
       });
     }
 
-    // 3. JSON 파일로 저장
-    const jsonFilePath = path.join(process.cwd(), 'data', 'districts.json');
+    // 3. JSON 파일로 저장 (타임스탬프 추가하여 유니크한 파일명 생성)
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}-${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+    const jsonFilePath = path.join(
+      process.cwd(),
+      'data',
+      `districts-${timestamp}.json`,
+    );
     await fs.mkdir(path.dirname(jsonFilePath), { recursive: true });
     await fs.writeFile(
       jsonFilePath,
@@ -176,9 +183,10 @@ export class DistrictsService {
    * JSON 파일에서 데이터를 읽어 DB로 import합니다.
    * 트랜잭션 내에서 레벨별 순차 처리하여 부모-자식 관계를 보장합니다.
    *
+   * @param filePath JSON 파일 경로 (선택사항, 미지정 시 기본값 사용)
    * @returns Import 결과 (처리 개수, 성공, 실패 등)
    */
-  async importFromJson(): Promise<ImportResult> {
+  async importFromJson(filePath?: string): Promise<ImportResult> {
     const startTime = Date.now();
     const result: ImportResult = {
       totalProcessed: 0,
@@ -192,7 +200,8 @@ export class DistrictsService {
 
     try {
       // 1. JSON 파일 읽기
-      const jsonFilePath = path.join(process.cwd(), 'data', 'districts.json');
+      const jsonFilePath =
+        filePath || path.join(process.cwd(), 'data', 'districts.json');
       const fileContent = await fs.readFile(jsonFilePath, 'utf-8');
       const parsedRows = JSON.parse(fileContent);
 
