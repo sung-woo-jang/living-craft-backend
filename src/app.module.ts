@@ -17,6 +17,12 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { FilesModule } from '@modules/files/files.module';
 import { HealthModule } from '@modules/health/health.module';
 import { AdminModule } from '@modules/admin/admin.module';
+import { CustomersModule } from '@modules/customers/customers.module';
+import { ServicesModule } from '@modules/services/services.module';
+import { SettingsModule } from '@modules/settings/settings.module';
+import { ReservationsModule } from '@modules/reservations/reservations.module';
+import { ReviewsModule } from '@modules/reviews/reviews.module';
+import { PortfoliosModule } from '@modules/portfolios/portfolios.module';
 
 @Module({
   imports: [
@@ -39,6 +45,12 @@ import { AdminModule } from '@modules/admin/admin.module';
     FilesModule,
     HealthModule,
     AdminModule,
+    CustomersModule,
+    ServicesModule,
+    SettingsModule,
+    ReservationsModule,
+    ReviewsModule,
+    PortfoliosModule,
   ],
   providers: [
     // Global Exception Filter

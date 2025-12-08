@@ -1,6 +1,17 @@
 import { DataSource } from 'typeorm';
-import { User } from '@modules/admin/users/entities/user.entity';
 import * as dotenv from 'dotenv';
+
+// Entities
+import { User } from '@modules/admin/users/entities/user.entity';
+import { District } from '@modules/admin/districts/entities/district.entity';
+import { Customer } from '@modules/customers/entities/customer.entity';
+import { Service } from '@modules/services/entities/service.entity';
+import { ServiceRegion } from '@modules/services/entities/service-region.entity';
+import { OperatingSetting } from '@modules/settings/entities/operating-setting.entity';
+import { Holiday } from '@modules/settings/entities/holiday.entity';
+import { Reservation } from '@modules/reservations/entities/reservation.entity';
+import { Review } from '@modules/reviews/entities/review.entity';
+import { Portfolio } from '@modules/portfolios/entities/portfolio.entity';
 
 // 환경 변수 로드
 dotenv.config();
@@ -12,7 +23,18 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'password123',
   database: process.env.DB_DATABASE || 'living_craft',
-  entities: [User],
-  synchronize: false,
+  entities: [
+    User,
+    District,
+    Customer,
+    Service,
+    ServiceRegion,
+    OperatingSetting,
+    Holiday,
+    Reservation,
+    Review,
+    Portfolio,
+  ],
+  synchronize: true, // 시드 실행 시 테이블 자동 생성
   logging: false,
 });

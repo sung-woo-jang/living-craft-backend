@@ -1,0 +1,70 @@
+import { Entity, Column, OneToMany } from 'typeorm';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { BaseEntity } from '@common/entities/base.entity';
+import { ServiceRegion } from './service-region.entity';
+
+@Entity('services')
+export class Service extends BaseEntity {
+  @ApiProperty({
+    description: '서비스 제목',
+    example: '인테리어 필름',
+  })
+  @Column({ length: 100 })
+  title: string;
+
+  @ApiProperty({
+    description: '서비스 설명',
+    example: '고급 인테리어 필름 시공 서비스입니다.',
+  })
+  @Column({ type: 'text' })
+  description: string;
+
+  @ApiProperty({
+    description: 'TDS 아이콘 이름',
+    example: 'ic_home_fill_24',
+  })
+  @Column({ name: 'icon_name', length: 100 })
+  iconName: string;
+
+  @ApiProperty({
+    description: '아이콘 배경색 (HEX)',
+    example: '#E3F2FD',
+  })
+  @Column({ name: 'icon_bg_color', length: 10 })
+  iconBgColor: string;
+
+  @ApiProperty({
+    description: '작업 소요 시간',
+    example: '하루 종일',
+  })
+  @Column({ length: 50 })
+  duration: string;
+
+  @ApiProperty({
+    description: '시공 시간 선택 필요 여부 (false: 하루 종일, true: 시간 선택)',
+    example: false,
+  })
+  @Column({ name: 'requires_time_selection', default: false })
+  requiresTimeSelection: boolean;
+
+  @ApiProperty({
+    description: '활성화 여부',
+    example: true,
+  })
+  @Column({ name: 'is_active', default: true })
+  isActive: boolean;
+
+  @ApiProperty({
+    description: '정렬 순서',
+    example: 1,
+  })
+  @Column({ name: 'sort_order', default: 0 })
+  sortOrder: number;
+
+  @ApiPropertyOptional({
+    description: '서비스 가능 지역 목록',
+    type: () => [ServiceRegion],
+  })
+  @OneToMany(() => ServiceRegion, (serviceRegion) => serviceRegion.service)
+  serviceRegions: ServiceRegion[];
+}
