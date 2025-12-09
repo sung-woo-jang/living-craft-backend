@@ -5,6 +5,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { District } from './entities/district.entity';
 import { DistrictLevel } from '@common/enums/district-level.enum';
+import { DistrictDto } from './dto/response/district.dto';
 
 /**
  * Import 결과 인터페이스
@@ -282,5 +283,55 @@ export class DistrictsService {
       this.logger.error('JSON → DB Import 실패', error.stack);
       throw error;
     }
+  }
+
+  /**
+   * 행정구역 목록 조회 (레벨, 부모 ID 필터링 가능)
+   *
+   * @param level 조회할 행정구역 레벨 (선택사항)
+   * @param parentId 상위 행정구역 ID (선택사항)
+   * @returns DistrictDto 배열
+   */
+  async findAll(
+    level?: DistrictLevel,
+    parentId?: number,
+  ): Promise<DistrictDto[]> {
+    const queryBuilder = this.districtRepository
+      .createQueryBuilder('district')
+      .where('district.isActive = :isActive', { isActive: true })
+      .orderBy('district.code', 'ASC');
+
+    if (level) {
+      queryBuilder.andWhere('district.level = :level', { level });
+    }
+
+    if (parentId !== undefined) {
+      if (parentId === null) {
+        queryBuilder.andWhere('district.parentId IS NULL');
+      } else {
+        queryBuilder.andWhere('district.parentId = :parentId', { parentId });
+      }
+    }
+
+    const districts = await queryBuilder.getMany();
+
+    return districts.map((district) => this.toDistrictDto(district));
+  }
+
+  /**
+   * District 엔티티를 DistrictDto로 변환
+   *
+   * @param district District 엔티티
+   * @returns DistrictDto
+   */
+  private toDistrictDto(district: District): DistrictDto {
+    return {
+      id: district.id,
+      code: district.code,
+      name: district.name,
+      fullName: district.fullName,
+      level: district.level,
+      parentId: district.parentId,
+    };
   }
 }

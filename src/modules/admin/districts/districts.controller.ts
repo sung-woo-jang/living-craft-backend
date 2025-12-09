@@ -1,10 +1,11 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Query, UseGuards } from '@nestjs/common';
 import { Public } from '@common/decorators/public.decorator';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '@common/guards/roles.guard';
@@ -12,6 +13,8 @@ import { Roles } from '@common/decorators/roles.decorator';
 import { UserRole } from '@common/enums/user-role.enum';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { DistrictsService } from './districts.service';
+import { DistrictDto } from './dto/response/district.dto';
+import { DistrictLevel } from '@common/enums/district-level.enum';
 
 @ApiTags('관리자 > 행정구역 관리')
 @ApiBearerAuth()
@@ -20,6 +23,40 @@ import { DistrictsService } from './districts.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DistrictsController {
   constructor(private readonly districtsService: DistrictsService) {}
+
+  /**
+   * 행정구역 목록 조회 (레벨, 부모 ID 필터링 가능)
+   */
+  @Get()
+  @ApiOperation({
+    summary: '행정구역 목록 조회',
+    description:
+      '행정구역 목록을 조회합니다. level, parentId 쿼리 파라미터로 필터링 가능합니다.',
+  })
+  @ApiQuery({
+    name: 'level',
+    required: false,
+    enum: DistrictLevel,
+    description: '조회할 행정구역 레벨 (SIDO, SIGUNGU, EUPMYEONDONG)',
+  })
+  @ApiQuery({
+    name: 'parentId',
+    required: false,
+    type: Number,
+    description: '상위 행정구역 ID (하위 지역 조회 시 사용)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '조회 성공',
+    type: [DistrictDto],
+  })
+  async findAll(
+    @Query('level') level?: DistrictLevel,
+    @Query('parentId') parentId?: number,
+  ): Promise<SuccessResponseDto<DistrictDto[]>> {
+    const districts = await this.districtsService.findAll(level, parentId);
+    return new SuccessResponseDto('행정구역 목록 조회에 성공했습니다.', districts);
+  }
 
   /**
    * 1단계: 법정동 코드.txt 파일을 JSON으로 변환

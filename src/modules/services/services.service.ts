@@ -1,8 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service, ServiceRegion } from './entities';
-import { ServiceListItemDto, ServiceableRegionDto, CityDto } from './dto';
+import {
+  ServiceListItemDto,
+  ServiceableRegionDto,
+  CityDto,
+  ServiceDetailDto,
+  CreateServiceDto,
+  UpdateServiceDto,
+} from './dto';
 import { District } from '@modules/admin/districts/entities/district.entity';
 import { DistrictLevel } from '@common/enums/district-level.enum';
 
@@ -63,6 +70,150 @@ export class ServicesService {
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,
       serviceableRegions,
+    };
+  }
+
+  /**
+   * 서비스 생성 (트랜잭션)
+   */
+  async create(dto: CreateServiceDto): Promise<Service> {
+    return this.serviceRepository.manager.transaction(async (manager) => {
+      // 1. Service 엔티티 생성
+      const service = manager.create(Service, {
+        title: dto.title,
+        description: dto.description,
+        iconName: dto.iconName,
+        iconBgColor: dto.iconBgColor,
+        duration: dto.duration,
+        requiresTimeSelection: dto.requiresTimeSelection,
+        sortOrder: dto.sortOrder ?? 0,
+        isActive: true,
+      });
+
+      const savedService = await manager.save(Service, service);
+
+      // 2. ServiceRegion 엔티티 bulk insert
+      const serviceRegions = dto.regions.map((region) =>
+        manager.create(ServiceRegion, {
+          serviceId: savedService.id,
+          districtId: region.districtId,
+          estimateFee: region.estimateFee,
+        }),
+      );
+
+      await manager.save(ServiceRegion, serviceRegions);
+
+      // 3. Relations과 함께 다시 조회
+      return manager.findOne(Service, {
+        where: { id: savedService.id },
+        relations: ['serviceRegions', 'serviceRegions.district'],
+      });
+    });
+  }
+
+  /**
+   * 서비스 수정 (트랜잭션)
+   */
+  async update(id: number, dto: UpdateServiceDto): Promise<Service> {
+    return this.serviceRepository.manager.transaction(async (manager) => {
+      const service = await manager.findOne(Service, { where: { id } });
+      if (!service) {
+        throw new NotFoundException('서비스를 찾을 수 없습니다.');
+      }
+
+      // Service 필드 업데이트 (필드가 있는 것만)
+      const updateData: Partial<Service> = {};
+      if (dto.title !== undefined) updateData.title = dto.title;
+      if (dto.description !== undefined)
+        updateData.description = dto.description;
+      if (dto.iconName !== undefined) updateData.iconName = dto.iconName;
+      if (dto.iconBgColor !== undefined)
+        updateData.iconBgColor = dto.iconBgColor;
+      if (dto.duration !== undefined) updateData.duration = dto.duration;
+      if (dto.requiresTimeSelection !== undefined)
+        updateData.requiresTimeSelection = dto.requiresTimeSelection;
+      if (dto.sortOrder !== undefined) updateData.sortOrder = dto.sortOrder;
+
+      if (Object.keys(updateData).length > 0) {
+        await manager.update(Service, { id }, updateData);
+      }
+
+      // ServiceRegion 업데이트 (전체 교체)
+      if (dto.regions && dto.regions.length > 0) {
+        // 기존 지역 정보 삭제
+        await manager.delete(ServiceRegion, { serviceId: id });
+
+        // 새로운 지역 정보 삽입
+        const serviceRegions = dto.regions.map((region) =>
+          manager.create(ServiceRegion, {
+            serviceId: id,
+            districtId: region.districtId,
+            estimateFee: region.estimateFee,
+          }),
+        );
+
+        await manager.save(ServiceRegion, serviceRegions);
+      }
+
+      // Relations과 함께 다시 조회
+      return manager.findOne(Service, {
+        where: { id },
+        relations: ['serviceRegions', 'serviceRegions.district'],
+      });
+    });
+  }
+
+  /**
+   * 서비스 삭제 (Soft Delete)
+   */
+  async delete(id: number): Promise<{ deleted: boolean }> {
+    const service = await this.serviceRepository.findOne({ where: { id } });
+    if (!service) {
+      throw new NotFoundException('서비스를 찾을 수 없습니다.');
+    }
+
+    await this.serviceRepository.update({ id }, { isActive: false });
+    return { deleted: true };
+  }
+
+  /**
+   * 서비스 활성/비활성 전환
+   */
+  async toggle(id: number): Promise<Service> {
+    const service = await this.serviceRepository.findOne({ where: { id } });
+    if (!service) {
+      throw new NotFoundException('서비스를 찾을 수 없습니다.');
+    }
+
+    await this.serviceRepository.update(
+      { id },
+      { isActive: !service.isActive },
+    );
+
+    return this.findById(id);
+  }
+
+  /**
+   * Service 엔티티를 ServiceDetailDto로 변환
+   */
+  async toServiceDetailDto(service: Service): Promise<ServiceDetailDto> {
+    const serviceableRegions = await this.groupRegionsBySido(
+      service.serviceRegions,
+    );
+
+    return {
+      id: service.id.toString(),
+      title: service.title,
+      description: service.description,
+      iconName: service.iconName,
+      iconBgColor: service.iconBgColor,
+      duration: service.duration,
+      requiresTimeSelection: service.requiresTimeSelection,
+      isActive: service.isActive,
+      sortOrder: service.sortOrder,
+      serviceableRegions,
+      createdAt: service.createdAt.toISOString(),
+      updatedAt: service.updatedAt.toISOString(),
     };
   }
 

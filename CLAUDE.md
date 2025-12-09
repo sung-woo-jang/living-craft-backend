@@ -375,6 +375,32 @@ export class ProductService {
 }
 ```
 
+### API 개발 규칙
+
+#### HTTP 메서드 제약사항
+
+⚠️ **중요**: 이 프로젝트에서는 **GET과 POST만 사용**합니다.
+
+- ✅ **GET**: 데이터 조회
+- ✅ **POST**: 생성, 수정, 삭제, 상태 변경 모두 POST로 처리
+- ❌ **PUT, PATCH, DELETE**: 사용 금지
+
+**이유**: 일관된 API 규칙 적용 및 프론트엔드 연동 단순화
+
+**예시**:
+```typescript
+// ✅ 올바른 예시
+@Post('admin')  // 생성
+@Post('admin/:id/update')  // 수정
+@Post('admin/:id/delete')  // 삭제
+@Post('admin/:id/toggle')  // 상태 변경
+
+// ❌ 잘못된 예시
+@Put('admin/:id')  // PUT 사용 금지
+@Patch('admin/:id')  // PATCH 사용 금지
+@Delete('admin/:id')  // DELETE 사용 금지
+```
+
 #### 컨트롤러 작성 패턴
 
 ```typescript
