@@ -20,7 +20,9 @@ export class LoginDto {
     enum: TossReferrer,
     example: TossReferrer.DEFAULT,
   })
-  @IsEnum(TossReferrer, { message: 'referrer는 DEFAULT 또는 SANDBOX여야 합니다.' })
+  @IsEnum(TossReferrer, {
+    message: 'referrer는 DEFAULT 또는 SANDBOX여야 합니다.',
+  })
   @IsNotEmpty({ message: 'referrer는 필수입니다.' })
   referrer: TossReferrer;
 }

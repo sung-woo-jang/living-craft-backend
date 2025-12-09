@@ -16,6 +16,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
@@ -31,6 +32,7 @@ import { plainToInstance } from 'class-transformer';
 
 @ApiTags('관리자 > 사용자 관리')
 @ApiBearerAuth()
+@Public()
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
@@ -93,7 +95,10 @@ export class UsersController {
   ): Promise<SuccessResponseDto<UserResponseDto>> {
     const user = await this.usersService.updateUser(id, dto);
     const userResponse = plainToInstance(UserResponseDto, user);
-    return new SuccessResponseDto('사용자 정보가 수정되었습니다.', userResponse);
+    return new SuccessResponseDto(
+      '사용자 정보가 수정되었습니다.',
+      userResponse,
+    );
   }
 
   @Delete(':id')

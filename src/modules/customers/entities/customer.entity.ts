@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, BeforeInsert } from 'typeorm';
+import { Entity, Column, BeforeInsert } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
 import { v4 as uuidv4 } from 'uuid';

@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { DistrictsModule } from './districts/districts.module';
-import { AdminReservationsModule } from './reservations/admin-reservations.module';
-import { AdminServicesModule } from './services/admin-services.module';
-import { AdminPortfoliosModule } from './portfolios/admin-portfolios.module';
-import { AdminReviewsModule } from './reviews/admin-reviews.module';
-import { AdminCustomersModule } from './customers/admin-customers.module';
+import { DistrictsModule } from '@modules/admin/districts';
+import { AdminReservationsModule } from '@modules/admin/reservations';
+import { AdminServicesModule } from '@modules/admin/services';
+import { AdminPortfoliosModule } from '@modules/admin/portfolios';
+import { AdminReviewsModule } from '@modules/admin/reviews';
+import { AdminCustomersModule } from '@modules/admin/customers';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AdminCustomersModule } from './customers/admin-customers.module';
     AdminPortfoliosModule,
     AdminReviewsModule,
     AdminCustomersModule,
+    DashboardModule,
   ],
 })
 export class AdminModule {}

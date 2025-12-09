@@ -6,13 +6,20 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { AdminServicesService } from './admin-services.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/request';
 import { Service } from '@modules/services/entities';
 
-@Controller('api/admin/services')
+@Public()
+@Controller('admin/services')
 @ApiTags('관리자 > 서비스 관리')
 @ApiBearerAuth()
 export class AdminServicesController {

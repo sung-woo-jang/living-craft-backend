@@ -2,8 +2,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import { FileUtil } from '@common/utils/file.util';
 import * as sharp from 'sharp';
 
@@ -98,7 +98,7 @@ export class FilesService {
         path: filepath,
         url: `/uploads/${subfolder}/${filename}`,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('이미지 처리 중 오류가 발생했습니다.');
     }
   }

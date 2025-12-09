@@ -7,7 +7,13 @@ import {
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { AdminReservationsService } from './admin-reservations.service';
 import {
@@ -16,7 +22,8 @@ import {
 } from './dto/request';
 import { AdminReservationListResponseDto } from './dto/response';
 
-@Controller('api/admin/reservations')
+@Public()
+@Controller('admin/reservations')
 @ApiTags('관리자 > 예약 관리')
 @ApiBearerAuth()
 export class AdminReservationsController {

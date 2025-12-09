@@ -21,6 +21,7 @@ import { SwaggerBaseApply } from '@common/decorators/swagger-base-apply.decorato
 import { Roles } from '@common/decorators/roles.decorator';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
+import { FileUtil } from '@common/utils/file.util';
 
 @ApiTags('파일')
 @Controller('files')
@@ -159,7 +160,7 @@ export class FilesController {
         originalName: file.originalname,
         filename: result.filename,
         url: result.url,
-        size: this.formatFileSize(file.size),
+        size: FileUtil.formatFileSize(file.size),
         mimeType: file.mimetype,
         extension: `.${fileExtension}`,
         uploadedAt: new Date().toISOString(),
@@ -169,19 +170,6 @@ export class FilesController {
         `문서 업로드 중 오류가 발생했습니다: ${error.message}`,
       );
     }
-  }
-
-  /**
-   * 파일 크기를 사람이 읽기 쉽은 형식으로 변환
-   */
-  private formatFileSize(bytes: number): string {
-    if (bytes === 0) return '0 Bytes';
-
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   @Post(':category/:filename/delete')

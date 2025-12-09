@@ -4,12 +4,9 @@ import { Public } from '@common/decorators';
 import { SuccessResponseDto } from '@common/dto/response';
 import { PortfoliosService } from './portfolios.service';
 import { PortfoliosQueryDto } from './dto/request';
-import {
-  PortfolioListResponseDto,
-  PortfolioDetailDto,
-} from './dto/response';
+import { PortfolioListResponseDto, PortfolioDetailDto } from './dto/response';
 
-@Controller('api/portfolios')
+@Controller('portfolios')
 @ApiTags('포트폴리오')
 export class PortfoliosController {
   constructor(private readonly portfoliosService: PortfoliosService) {}
@@ -26,7 +23,10 @@ export class PortfoliosController {
     @Query() query: PortfoliosQueryDto,
   ): Promise<SuccessResponseDto<PortfolioListResponseDto>> {
     const result = await this.portfoliosService.findAll(query);
-    return new SuccessResponseDto('포트폴리오 목록 조회에 성공했습니다.', result);
+    return new SuccessResponseDto(
+      '포트폴리오 목록 조회에 성공했습니다.',
+      result,
+    );
   }
 
   @Get(':id')
@@ -42,6 +42,9 @@ export class PortfoliosController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SuccessResponseDto<PortfolioDetailDto>> {
     const result = await this.portfoliosService.findById(id);
-    return new SuccessResponseDto('포트폴리오 상세 조회에 성공했습니다.', result);
+    return new SuccessResponseDto(
+      '포트폴리오 상세 조회에 성공했습니다.',
+      result,
+    );
   }
 }

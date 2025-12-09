@@ -29,9 +29,12 @@ import {
   MyReservationListResponseDto,
 } from './dto/response';
 import { CustomerJwtAuthGuard } from '@modules/customers/guards';
-import { CurrentCustomer, ICurrentCustomer } from '@modules/customers/decorators';
+import {
+  CurrentCustomer,
+  ICurrentCustomer,
+} from '@modules/customers/decorators';
 
-@Controller('api')
+@Controller('')
 @ApiTags('예약')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
@@ -48,7 +51,10 @@ export class ReservationsController {
     @Body() dto: AvailableTimesDto,
   ): Promise<SuccessResponseDto<AvailableTimesResponseDto>> {
     const result = await this.reservationsService.getAvailableTimes(dto);
-    return new SuccessResponseDto('예약 가능 시간 조회에 성공했습니다.', result);
+    return new SuccessResponseDto(
+      '예약 가능 시간 조회에 성공했습니다.',
+      result,
+    );
   }
 
   @Post('reservations')

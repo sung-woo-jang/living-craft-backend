@@ -39,7 +39,10 @@ export class PortfolioDetailDto {
 
   @ApiProperty({
     description: '이미지 URL 목록',
-    example: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],
+    example: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg',
+    ],
   })
   images: string[];
 

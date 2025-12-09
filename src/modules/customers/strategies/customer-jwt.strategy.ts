@@ -6,7 +6,10 @@ import { ICustomerJwtPayload } from '../interfaces';
 import { CustomersService } from '../customers.service';
 
 @Injectable()
-export class CustomerJwtStrategy extends PassportStrategy(Strategy, 'customer-jwt') {
+export class CustomerJwtStrategy extends PassportStrategy(
+  Strategy,
+  'customer-jwt',
+) {
   constructor(
     private readonly configService: ConfigService,
     private readonly customersService: CustomersService,

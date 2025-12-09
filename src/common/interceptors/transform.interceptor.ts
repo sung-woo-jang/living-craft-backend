@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SuccessResponseDto } from '../dto/response/success-response.dto';
-import { PaginatedResponseDto } from '../dto/response/paginated-response.dto';
+import { SuccessResponseDto } from '@common/dto';
+import { PaginatedResponseDto } from '@common/dto';
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, SuccessResponseDto<T> | PaginatedResponseDto<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  SuccessResponseDto<T> | PaginatedResponseDto<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,

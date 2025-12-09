@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -22,9 +15,12 @@ import {
   MyReviewListResponseDto,
 } from './dto/response';
 import { CustomerJwtAuthGuard } from '@modules/customers/guards';
-import { CurrentCustomer, ICurrentCustomer } from '@modules/customers/decorators';
+import {
+  CurrentCustomer,
+  ICurrentCustomer,
+} from '@modules/customers/decorators';
 
-@Controller('api')
+@Controller('')
 @ApiTags('리뷰')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}

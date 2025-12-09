@@ -54,7 +54,9 @@ export class ReservationsService {
     customerId: number,
   ): Promise<CreateReservationResponseDto> {
     // 서비스 존재 확인
-    const service = await this.servicesService.findById(parseInt(dto.serviceId));
+    const service = await this.servicesService.findById(
+      parseInt(dto.serviceId),
+    );
     if (!service || !service.isActive) {
       throw new BadRequestException('유효하지 않은 서비스입니다.');
     }

@@ -7,7 +7,13 @@ import {
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { AdminPortfoliosService } from './admin-portfolios.service';
 import {
@@ -17,7 +23,8 @@ import {
 } from './dto/request';
 import { Portfolio } from '@modules/portfolios/entities';
 
-@Controller('api/admin/portfolios')
+@Public()
+@Controller('admin/portfolios')
 @ApiTags('관리자 > 포트폴리오 관리')
 @ApiBearerAuth()
 export class AdminPortfoliosController {
@@ -32,7 +39,10 @@ export class AdminPortfoliosController {
     @Query() query: AdminPortfoliosQueryDto,
   ): Promise<SuccessResponseDto<{ items: Portfolio[]; total: number }>> {
     const result = await this.adminPortfoliosService.findAll(query);
-    return new SuccessResponseDto('포트폴리오 목록 조회에 성공했습니다.', result);
+    return new SuccessResponseDto(
+      '포트폴리오 목록 조회에 성공했습니다.',
+      result,
+    );
   }
 
   @Get(':id')
@@ -43,7 +53,10 @@ export class AdminPortfoliosController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SuccessResponseDto<Portfolio>> {
     const result = await this.adminPortfoliosService.findById(id);
-    return new SuccessResponseDto('포트폴리오 상세 조회에 성공했습니다.', result);
+    return new SuccessResponseDto(
+      '포트폴리오 상세 조회에 성공했습니다.',
+      result,
+    );
   }
 
   @Post()

@@ -6,13 +6,20 @@ import {
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { AdminReviewsService } from './admin-reviews.service';
 import { AdminReviewsQueryDto } from './dto/request';
 import { AdminReviewListResponseDto } from './dto/response';
 
-@Controller('api/admin/reviews')
+@Public()
+@Controller('admin/reviews')
 @ApiTags('관리자 > 리뷰 관리')
 @ApiBearerAuth()
 export class AdminReviewsController {

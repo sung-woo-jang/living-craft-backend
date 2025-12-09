@@ -1,5 +1,11 @@
 import { Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Public } from '@common/decorators/public.decorator';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { Roles } from '@common/decorators/roles.decorator';
@@ -9,6 +15,7 @@ import { DistrictsService } from './districts.service';
 
 @ApiTags('관리자 > 행정구역 관리')
 @ApiBearerAuth()
+@Public()
 @Controller('admin/districts')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DistrictsController {
@@ -43,7 +50,10 @@ export class DistrictsController {
       },
     },
   })
-  @ApiResponse({ status: 500, description: '변환 실패 (파일 없음, 읽기 오류 등)' })
+  @ApiResponse({
+    status: 500,
+    description: '변환 실패 (파일 없음, 읽기 오류 등)',
+  })
   async convertTxtToJson(): Promise<
     SuccessResponseDto<{
       message: string;

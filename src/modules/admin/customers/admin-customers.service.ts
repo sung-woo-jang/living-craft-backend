@@ -29,13 +29,7 @@ export class AdminCustomersService {
   ): Promise<AdminCustomerListResponseDto> {
     const { search, page = 1, limit = 20 } = query;
 
-    const queryBuilder = this.customerRepository
-      .createQueryBuilder('customer')
-      .loadRelationCountAndMap(
-        'customer.totalReservations',
-        'customer.reservations',
-      )
-      .loadRelationCountAndMap('customer.totalReviews', 'customer.reviews');
+    const queryBuilder = this.customerRepository.createQueryBuilder('customer');
 
     // 검색어 필터
     if (search) {
@@ -105,9 +99,7 @@ export class AdminCustomersService {
     });
 
     // 예약에 리뷰가 있는지 확인
-    const reviewedReservationIds = new Set(
-      reviews.map((r) => r.reservationId),
-    );
+    const reviewedReservationIds = new Set(reviews.map((r) => r.reservationId));
 
     return {
       id: customer.id.toString(),

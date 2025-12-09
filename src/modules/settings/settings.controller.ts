@@ -1,23 +1,20 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Roles } from '@common/decorators';
-import { RolesGuard } from '@common/guards/roles.guard';
-import { UserRole } from '@common/enums';
+import { Public } from '@common/decorators';
 import { SuccessResponseDto } from '@common/dto/response';
 import { SettingsService } from './settings.service';
 import { UpdateOperatingHoursDto, AddHolidayDto } from './dto/request';
 import { OperatingHoursResponseDto } from './dto/response';
 
-@Controller('api/admin/settings')
+@Controller('admin/settings')
 @ApiTags('관리자 - 운영 설정')
 @ApiBearerAuth()
-@UseGuards(RolesGuard)
-@Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
+@Public()
 export class SettingsController {
   constructor(private readonly settingsService: SettingsService) {}
 

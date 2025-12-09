@@ -5,7 +5,7 @@ import { SuccessResponseDto } from '@common/dto/response';
 import { ServicesService } from './services.service';
 import { ServiceListItemDto } from './dto';
 
-@Controller('api/services')
+@Controller('services')
 @ApiTags('서비스')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) {}

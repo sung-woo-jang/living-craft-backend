@@ -197,7 +197,10 @@ export class SettingsService {
   /**
    * Date를 YYYY-MM-DD 형식으로 변환
    */
-  private formatDate(date: Date): string {
+  private formatDate(date: Date | string): string {
+    if (typeof date === 'string') {
+      return date.split('T')[0];
+    }
     return date.toISOString().split('T')[0];
   }
 }

@@ -31,7 +31,9 @@ export class AvailableTimesDto {
     enum: TimeType,
     example: TimeType.ESTIMATE,
   })
-  @IsEnum(TimeType, { message: 'type은 estimate 또는 construction이어야 합니다.' })
+  @IsEnum(TimeType, {
+    message: 'type은 estimate 또는 construction이어야 합니다.',
+  })
   @IsNotEmpty({ message: 'type은 필수입니다.' })
   type: TimeType;
 }

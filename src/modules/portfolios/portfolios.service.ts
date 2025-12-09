@@ -3,10 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Portfolio } from './entities';
 import { PortfoliosQueryDto } from './dto/request';
-import {
-  PortfolioListResponseDto,
-  PortfolioDetailDto,
-} from './dto/response';
+import { PortfolioListResponseDto, PortfolioDetailDto } from './dto/response';
 
 @Injectable()
 export class PortfoliosService {

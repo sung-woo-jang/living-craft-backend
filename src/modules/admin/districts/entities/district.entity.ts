@@ -72,7 +72,8 @@ export class District extends BaseEntity {
   @Column({
     type: 'enum',
     enum: DistrictLevel,
-    comment: '행정구역 레벨 (SIDO: 시/도, SIGUNGU: 시/군/구, EUPMYEONDONG: 읍/면/동)',
+    comment:
+      '행정구역 레벨 (SIDO: 시/도, SIGUNGU: 시/군/구, EUPMYEONDONG: 읍/면/동)',
   })
   level: DistrictLevel;
 

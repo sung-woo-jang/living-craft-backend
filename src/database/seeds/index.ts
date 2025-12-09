@@ -3,6 +3,11 @@ import { createInitialAdmin } from './initial-admin.seed';
 import { createDistricts } from './districts.seed';
 import { createServices } from './services.seed';
 import { createOperatingSettings } from './operating-settings.seed';
+import { createCustomers } from './customers.seed';
+import { createReservations } from './reservations.seed';
+import { createReviews } from './reviews.seed';
+import { createPortfolios } from './portfolios.seed';
+import { createHolidays } from './holidays.seed';
 
 async function runSeeds() {
   console.log('🚀 Starting database seeding...\n');
@@ -24,6 +29,17 @@ async function runSeeds() {
 
     // 4. 운영 시간 설정
     await createOperatingSettings();
+
+    // Phase 2: 고객 및 예약 데이터
+    console.log('\n📌 Phase 2: 고객 및 예약 데이터');
+    await createCustomers();
+    await createReservations();
+    await createReviews();
+
+    // Phase 3: 포트폴리오 및 휴무일
+    console.log('\n📌 Phase 3: 포트폴리오 및 휴무일');
+    await createPortfolios();
+    await createHolidays();
 
     console.log('\n✅ Database seeding completed successfully!');
   } catch (error) {

@@ -181,12 +181,12 @@ export class CustomersService {
     };
 
     const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('jwt.secret'),
-      expiresIn: this.configService.get<string>('jwt.expiresIn') || '24h',
+      secret: this.configService.get('jwt.secret'),
+      expiresIn: this.configService.get('jwt.expiresIn') || '24h',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('jwt.secret'),
+      secret: this.configService.get('jwt.secret'),
       expiresIn: '7d', // Refresh Token은 7일
     });
 

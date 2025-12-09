@@ -1,4 +1,4 @@
-import { IsOptional, IsEnum, IsString, Matches } from 'class-validator';
+import { IsOptional, IsEnum } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { ReservationStatus } from '../../entities';

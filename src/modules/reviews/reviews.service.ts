@@ -45,12 +45,16 @@ export class ReviewsService {
 
     // 본인 예약인지 확인
     if (reservation.customerId !== customerId) {
-      throw new ForbiddenException('본인의 예약에만 리뷰를 작성할 수 있습니다.');
+      throw new ForbiddenException(
+        '본인의 예약에만 리뷰를 작성할 수 있습니다.',
+      );
     }
 
     // 완료된 예약인지 확인
     if (reservation.status !== ReservationStatus.COMPLETED) {
-      throw new BadRequestException('완료된 예약에만 리뷰를 작성할 수 있습니다.');
+      throw new BadRequestException(
+        '완료된 예약에만 리뷰를 작성할 수 있습니다.',
+      );
     }
 
     // 이미 리뷰가 있는지 확인

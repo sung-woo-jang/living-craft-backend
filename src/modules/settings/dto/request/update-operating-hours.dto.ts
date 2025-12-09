@@ -1,12 +1,9 @@
 import {
   IsArray,
   IsString,
-  IsNumber,
   IsEnum,
   Matches,
   ArrayNotEmpty,
-  Min,
-  Max,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 

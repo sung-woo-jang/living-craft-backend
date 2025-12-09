@@ -1,12 +1,13 @@
+import { Controller, Get, Param, Query, ParseIntPipe } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  ParseIntPipe,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
+
+import { Public } from '@common/decorators/public.decorator';
 import { AdminCustomersService } from './admin-customers.service';
 import { AdminCustomersQueryDto } from './dto/request';
 import {
@@ -14,13 +15,12 @@ import {
   AdminCustomerDetailDto,
 } from './dto/response';
 
-@Controller('api/admin/customers')
+@Controller('admin/customers')
 @ApiTags('관리자 > 고객 관리')
 @ApiBearerAuth()
+@Public()
 export class AdminCustomersController {
-  constructor(
-    private readonly adminCustomersService: AdminCustomersService,
-  ) {}
+  constructor(private readonly adminCustomersService: AdminCustomersService) {}
 
   @Get()
   @ApiOperation({ summary: '고객 목록 조회' })

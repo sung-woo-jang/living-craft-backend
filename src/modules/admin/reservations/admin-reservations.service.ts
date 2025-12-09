@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Reservation, ReservationStatus } from '@modules/reservations/entities';
 import {
   AdminReservationsQueryDto,
@@ -89,7 +89,10 @@ export class AdminReservationsService {
   /**
    * 예약 상태 변경 (관리자)
    */
-  async updateStatus(id: number, dto: UpdateReservationStatusDto): Promise<void> {
+  async updateStatus(
+    id: number,
+    dto: UpdateReservationStatusDto,
+  ): Promise<void> {
     const reservation = await this.reservationRepository.findOne({
       where: { id },
     });

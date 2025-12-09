@@ -6,7 +6,7 @@
  * EUPMYEONDONG: 읍/면/동 (예: 청운동, 수원시 팔달구)
  */
 export enum DistrictLevel {
-  SIDO = 'SIDO',                     // 시/도
-  SIGUNGU = 'SIGUNGU',               // 시/군/구
-  EUPMYEONDONG = 'EUPMYEONDONG',     // 읍/면/동
+  SIDO = 'SIDO', // 시/도
+  SIGUNGU = 'SIGUNGU', // 시/군/구
+  EUPMYEONDONG = 'EUPMYEONDONG', // 읍/면/동
 }

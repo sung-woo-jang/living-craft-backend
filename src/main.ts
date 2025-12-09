@@ -43,7 +43,6 @@ async function bootstrap() {
     }),
   );
 
-
   // 정적 파일 서빙 (업로드된 파일)
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
