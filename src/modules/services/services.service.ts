@@ -248,11 +248,12 @@ export class ServicesService {
 
   /**
    * 서비스 지역을 시/도 단위로 그룹핑
+   * SIGUNGU 레벨만 있는 경우에도 parentId를 기준으로 시/도별 그룹핑 수행
    */
   private async groupRegionsBySido(
     serviceRegions: ServiceRegion[],
   ): Promise<ServiceableRegionDto[]> {
-    // 시/도 레벨의 지역만 먼저 가져오기
+    // 시/도 레벨의 지역
     const sidoRegions = serviceRegions.filter(
       (sr) => sr.district?.level === DistrictLevel.SIDO,
     );
@@ -264,48 +265,100 @@ export class ServicesService {
 
     const result: ServiceableRegionDto[] = [];
 
-    for (const sidoRegion of sidoRegions) {
-      const sido = sidoRegion.district;
+    // Case 1: SIDO 레벨 데이터가 있는 경우 (기존 로직)
+    if (sidoRegions.length > 0) {
+      for (const sidoRegion of sidoRegions) {
+        const sido = sidoRegion.district;
 
-      // 해당 시/도 하위의 시/군/구 지역 찾기
-      const cities: CityDto[] = sigunguRegions
-        .filter((sr) => sr.district?.parentId === sido.id)
-        .map((sr) => ({
-          id: sr.district.id.toString(),
-          name: sr.district.name,
-          estimateFee:
-            Number(sr.estimateFee) !== Number(sidoRegion.estimateFee)
-              ? Number(sr.estimateFee)
-              : null,
-        }));
+        // 해당 시/도 하위의 시/군/구 지역 찾기
+        const cities: CityDto[] = sigunguRegions
+          .filter((sr) => sr.district?.parentId === sido.id)
+          .map((sr) => ({
+            id: sr.district.id.toString(),
+            name: sr.district.name,
+            estimateFee:
+              Number(sr.estimateFee) !== Number(sidoRegion.estimateFee)
+                ? Number(sr.estimateFee)
+                : null,
+          }));
 
-      // 시/군/구가 없으면 해당 시/도의 모든 시/군/구 조회
-      if (cities.length === 0) {
-        const allSigungus = await this.districtRepository.find({
-          where: {
-            parentId: sido.id,
-            level: DistrictLevel.SIGUNGU,
-            isActive: true,
-          },
-          order: { name: 'ASC' },
+        // 시/군/구가 없으면 해당 시/도의 모든 시/군/구 조회
+        if (cities.length === 0) {
+          const allSigungus = await this.districtRepository.find({
+            where: {
+              parentId: sido.id,
+              level: DistrictLevel.SIGUNGU,
+              isActive: true,
+            },
+            order: { name: 'ASC' },
+          });
+
+          cities.push(
+            ...allSigungus.map((sigungu) => ({
+              id: sigungu.id.toString(),
+              name: sigungu.name,
+              estimateFee: null, // 상위 지역 기본값 사용
+            })),
+          );
+        }
+
+        result.push({
+          id: sido.id.toString(),
+          name: sido.name,
+          estimateFee: Number(sidoRegion.estimateFee),
+          cities,
         });
-
-        cities.push(
-          ...allSigungus.map((sigungu) => ({
-            id: sigungu.id.toString(),
-            name: sigungu.name,
-            estimateFee: null, // 상위 지역 기본값 사용
-          })),
-        );
       }
+
+      return result;
+    }
+
+    // Case 2: SIGUNGU 레벨만 있는 경우 (새로운 로직)
+    // parentId(시/도 ID)를 기준으로 그룹핑
+    const sidoGroupMap = new Map<number, ServiceRegion[]>();
+
+    for (const sr of sigunguRegions) {
+      const parentId = sr.district?.parentId;
+      if (parentId) {
+        if (!sidoGroupMap.has(parentId)) {
+          sidoGroupMap.set(parentId, []);
+        }
+        sidoGroupMap.get(parentId).push(sr);
+      }
+    }
+
+    // 각 시/도별로 결과 생성
+    for (const [sidoId, regions] of sidoGroupMap) {
+      const sido = await this.districtRepository.findOne({
+        where: { id: sidoId },
+      });
+
+      if (!sido) continue;
+
+      // 시/도의 기본 출장비 계산 (최소값)
+      const baseEstimateFee = Math.min(
+        ...regions.map((r) => Number(r.estimateFee)),
+      );
+
+      const cities: CityDto[] = regions.map((sr) => ({
+        id: sr.district.id.toString(),
+        name: sr.district.name,
+        estimateFee:
+          Number(sr.estimateFee) !== baseEstimateFee
+            ? Number(sr.estimateFee)
+            : null,
+      }));
 
       result.push({
         id: sido.id.toString(),
         name: sido.name,
-        estimateFee: Number(sidoRegion.estimateFee),
+        estimateFee: baseEstimateFee,
         cities,
       });
     }
+
+    // 시/도 코드 순으로 정렬
+    result.sort((a, b) => parseInt(a.id) - parseInt(b.id));
 
     return result;
   }

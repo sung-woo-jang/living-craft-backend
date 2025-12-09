@@ -1,13 +1,12 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import {
-  ApiTags,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginRequestDto } from './dto/request/login-request.dto';
-import { LoginResponseDto } from './dto/response/login-response.dto';
+import { LoginRequestDto, LoginResponseDto } from '@modules/admin/auth/dto';
 import { UserResponseDto } from '@modules/admin/users/dto/response/user-response.dto';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
