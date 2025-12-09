@@ -16,6 +16,7 @@ import { RolesGuard } from '@common/guards/roles.guard';
 // Modules
 import { FilesModule } from '@modules/files/files.module';
 import { HealthModule } from '@modules/health/health.module';
+import { IconsModule } from '@modules/icons/icons.module';
 import { AdminModule } from '@modules/admin/admin.module';
 import { CustomersModule } from '@modules/customers/customers.module';
 import { ServicesModule } from '@modules/services/services.module';
@@ -44,6 +45,7 @@ import { PortfoliosModule } from '@modules/portfolios/portfolios.module';
     // Feature modules
     FilesModule,
     HealthModule,
+    IconsModule,
     AdminModule,
     CustomersModule,
     ServicesModule,

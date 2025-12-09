@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IconListDto } from '@modules/icons/dto/response/icon-list.dto';
 
 export class CityDto {
   @ApiProperty({
@@ -66,10 +67,10 @@ export class ServiceListItemDto {
   description: string;
 
   @ApiProperty({
-    description: 'TDS 아이콘 이름',
-    example: 'ic_home_fill_24',
+    description: '아이콘 정보',
+    type: IconListDto,
   })
-  iconName: string;
+  icon: IconListDto;
 
   @ApiProperty({
     description: '아이콘 배경색 (HEX)',

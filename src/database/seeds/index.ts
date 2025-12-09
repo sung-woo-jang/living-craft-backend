@@ -1,6 +1,7 @@
 import { AppDataSource } from './data-source';
 import { createInitialAdmin } from './initial-admin.seed';
 import { createDistricts } from './districts.seed';
+import { createIcons } from './icons.seed';
 import { createServices } from './services.seed';
 import { createOperatingSettings } from './operating-settings.seed';
 import { createCustomers } from './customers.seed';
@@ -24,10 +25,13 @@ async function runSeeds() {
     // 2. 지역 데이터 (서비스 지역 설정에 필요)
     await createDistricts();
 
-    // 3. 서비스 데이터 + 서비스 가능 지역
+    // 3. 아이콘 마스터 데이터 (서비스에서 FK로 참조)
+    await createIcons();
+
+    // 4. 서비스 데이터 + 서비스 가능 지역
     await createServices();
 
-    // 4. 운영 시간 설정
+    // 5. 운영 시간 설정
     await createOperatingSettings();
 
     // Phase 2: 고객 및 예약 데이터

@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 // Entities
 import { User } from '@modules/admin/users/entities/user.entity';
 import { District } from '@modules/admin/districts/entities/district.entity';
+import { Icon } from '@modules/icons/entities/icon.entity';
 import { Customer } from '@modules/customers/entities/customer.entity';
 import { Service } from '@modules/services/entities/service.entity';
 import { ServiceRegion } from '@modules/services/entities/service-region.entity';
@@ -26,6 +27,7 @@ export const AppDataSource = new DataSource({
   entities: [
     User,
     District,
+    Icon,
     Customer,
     Service,
     ServiceRegion,

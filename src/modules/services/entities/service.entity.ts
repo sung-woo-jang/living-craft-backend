@@ -1,6 +1,7 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
+import { Icon } from '@modules/icons/entities/icon.entity';
 import { ServiceRegion } from './service-region.entity';
 
 @Entity('services')
@@ -20,11 +21,22 @@ export class Service extends BaseEntity {
   description: string;
 
   @ApiProperty({
-    description: 'TDS 아이콘 이름',
-    example: 'ic_home_fill_24',
+    description: '아이콘 ID (icons 테이블 FK)',
+    example: 1,
   })
-  @Column({ name: 'icon_name', length: 100 })
-  iconName: string;
+  @Column({ name: 'icon_id' })
+  iconId: number;
+
+  @ApiPropertyOptional({
+    description: '아이콘 정보',
+    type: () => Icon,
+  })
+  @ManyToOne(() => Icon, (icon) => icon.services, {
+    eager: true,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({ name: 'icon_id' })
+  icon: Icon;
 
   @ApiProperty({
     description: '아이콘 배경색 (HEX)',

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service, ServiceRegion } from './entities';
@@ -12,6 +12,7 @@ import {
 } from './dto';
 import { District } from '@modules/admin/districts/entities/district.entity';
 import { DistrictLevel } from '@common/enums/district-level.enum';
+import { Icon } from '@modules/icons/entities/icon.entity';
 
 @Injectable()
 export class ServicesService {
@@ -22,6 +23,8 @@ export class ServicesService {
     private readonly serviceRegionRepository: Repository<ServiceRegion>,
     @InjectRepository(District)
     private readonly districtRepository: Repository<District>,
+    @InjectRepository(Icon)
+    private readonly iconRepository: Repository<Icon>,
   ) {}
 
   /**
@@ -65,7 +68,11 @@ export class ServicesService {
       id: service.id.toString(),
       title: service.title,
       description: service.description,
-      iconName: service.iconName,
+      icon: {
+        id: service.icon.id,
+        name: service.icon.name,
+        type: service.icon.type,
+      },
       iconBgColor: service.iconBgColor,
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,
@@ -77,12 +84,20 @@ export class ServicesService {
    * 서비스 생성 (트랜잭션)
    */
   async create(dto: CreateServiceDto): Promise<Service> {
+    // Icon 유효성 검증
+    const icon = await this.iconRepository.findOne({
+      where: { id: dto.iconId },
+    });
+    if (!icon) {
+      throw new BadRequestException('존재하지 않는 아이콘 ID입니다.');
+    }
+
     return this.serviceRepository.manager.transaction(async (manager) => {
       // 1. Service 엔티티 생성
       const service = manager.create(Service, {
         title: dto.title,
         description: dto.description,
-        iconName: dto.iconName,
+        iconId: dto.iconId,
         iconBgColor: dto.iconBgColor,
         duration: dto.duration,
         requiresTimeSelection: dto.requiresTimeSelection,
@@ -115,6 +130,16 @@ export class ServicesService {
    * 서비스 수정 (트랜잭션)
    */
   async update(id: number, dto: UpdateServiceDto): Promise<Service> {
+    // Icon ID가 변경되는 경우 유효성 검증
+    if (dto.iconId !== undefined) {
+      const icon = await this.iconRepository.findOne({
+        where: { id: dto.iconId },
+      });
+      if (!icon) {
+        throw new BadRequestException('존재하지 않는 아이콘 ID입니다.');
+      }
+    }
+
     return this.serviceRepository.manager.transaction(async (manager) => {
       const service = await manager.findOne(Service, { where: { id } });
       if (!service) {
@@ -126,7 +151,7 @@ export class ServicesService {
       if (dto.title !== undefined) updateData.title = dto.title;
       if (dto.description !== undefined)
         updateData.description = dto.description;
-      if (dto.iconName !== undefined) updateData.iconName = dto.iconName;
+      if (dto.iconId !== undefined) updateData.iconId = dto.iconId;
       if (dto.iconBgColor !== undefined)
         updateData.iconBgColor = dto.iconBgColor;
       if (dto.duration !== undefined) updateData.duration = dto.duration;
@@ -205,7 +230,11 @@ export class ServicesService {
       id: service.id.toString(),
       title: service.title,
       description: service.description,
-      iconName: service.iconName,
+      icon: {
+        id: service.icon.id,
+        name: service.icon.name,
+        type: service.icon.type,
+      },
       iconBgColor: service.iconBgColor,
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,

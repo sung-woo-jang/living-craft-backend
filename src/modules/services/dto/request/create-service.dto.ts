@@ -55,11 +55,12 @@ export class CreateServiceDto {
   description: string;
 
   @ApiProperty({
-    description: 'TDS 아이콘 이름',
-    example: 'ic_home_fill_24',
+    description: '아이콘 ID (icons 테이블 FK)',
+    example: 1,
   })
-  @IsString({ message: '아이콘 이름은 문자열이어야 합니다.' })
-  iconName: string;
+  @IsNumber({}, { message: '아이콘 ID는 숫자여야 합니다.' })
+  @Min(1, { message: '아이콘 ID는 1 이상이어야 합니다.' })
+  iconId: number;
 
   @ApiProperty({
     description: '아이콘 배경색 (HEX 색상 코드)',
