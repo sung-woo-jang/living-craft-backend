@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service, ServiceRegion } from '@modules/services/entities';
 import { District } from '@modules/admin/districts/entities';
+import { Icon } from '@modules/icons/entities';
 import { CreateServiceDto, UpdateServiceDto } from './dto/request';
 
 @Injectable()
@@ -14,6 +15,8 @@ export class AdminServicesService {
     private readonly serviceRegionRepository: Repository<ServiceRegion>,
     @InjectRepository(District)
     private readonly districtRepository: Repository<District>,
+    @InjectRepository(Icon)
+    private readonly iconRepository: Repository<Icon>,
   ) {}
 
   /**
@@ -47,10 +50,19 @@ export class AdminServicesService {
    * 서비스 생성
    */
   async create(dto: CreateServiceDto): Promise<Service> {
+    // iconName으로 Icon 조회
+    const icon = await this.iconRepository.findOne({
+      where: { name: dto.iconName },
+    });
+
+    if (!icon) {
+      throw new BadRequestException(`아이콘을 찾을 수 없습니다: ${dto.iconName}`);
+    }
+
     const service = this.serviceRepository.create({
       title: dto.title,
       description: dto.description,
-      iconName: dto.iconName,
+      iconId: icon.id,
       iconBgColor: dto.iconBgColor,
       duration: dto.duration,
       requiresTimeSelection: dto.requiresTimeSelection,
@@ -74,7 +86,20 @@ export class AdminServicesService {
 
     if (dto.title !== undefined) service.title = dto.title;
     if (dto.description !== undefined) service.description = dto.description;
-    if (dto.iconName !== undefined) service.iconName = dto.iconName;
+
+    if (dto.iconName !== undefined) {
+      // iconName으로 Icon 조회
+      const icon = await this.iconRepository.findOne({
+        where: { name: dto.iconName },
+      });
+
+      if (!icon) {
+        throw new BadRequestException(`아이콘을 찾을 수 없습니다: ${dto.iconName}`);
+      }
+
+      service.iconId = icon.id;
+    }
+
     if (dto.iconBgColor !== undefined) service.iconBgColor = dto.iconBgColor;
     if (dto.duration !== undefined) service.duration = dto.duration;
     if (dto.requiresTimeSelection !== undefined)

@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,8 +14,11 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
+import { Roles } from '@common/decorators/roles.decorator';
+import { UserRole } from '@common/enums';
 import { AdminPortfoliosService } from './admin-portfolios.service';
 import {
   CreatePortfolioDto,
@@ -23,10 +27,11 @@ import {
 } from './dto/request';
 import { Portfolio } from '@modules/portfolios/entities';
 
-@Public()
 @Controller('admin/portfolios')
 @ApiTags('관리자 > 포트폴리오 관리')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPERADMIN)
 export class AdminPortfoliosController {
   constructor(
     private readonly adminPortfoliosService: AdminPortfoliosService,

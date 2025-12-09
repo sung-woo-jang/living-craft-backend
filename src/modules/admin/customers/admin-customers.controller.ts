@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,8 +13,10 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
-
-import { Public } from '@common/decorators/public.decorator';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
+import { Roles } from '@common/decorators/roles.decorator';
+import { UserRole } from '@common/enums';
 import { AdminCustomersService } from './admin-customers.service';
 import { AdminCustomersQueryDto } from './dto/request';
 import {
@@ -18,7 +27,8 @@ import {
 @Controller('admin/customers')
 @ApiTags('관리자 > 고객 관리')
 @ApiBearerAuth()
-@Public()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPERADMIN)
 export class AdminCustomersController {
   constructor(private readonly adminCustomersService: AdminCustomersService) {}
 

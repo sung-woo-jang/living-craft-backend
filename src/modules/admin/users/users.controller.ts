@@ -2,8 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
-  Delete,
   Body,
   Param,
   Query,
@@ -16,7 +14,6 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Public } from '@common/decorators/public.decorator';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
@@ -32,9 +29,9 @@ import { plainToInstance } from 'class-transformer';
 
 @ApiTags('관리자 > 사용자 관리')
 @ApiBearerAuth()
-@Public()
 @Controller('admin/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPERADMIN)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -83,7 +80,7 @@ export class UsersController {
     return new SuccessResponseDto('사용자 정보를 조회했습니다.', userResponse);
   }
 
-  @Put(':id')
+  @Post(':id/update')
   @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
   @ApiOperation({ summary: '사용자 수정' })
   @ApiResponse({ status: 200, description: '수정 성공' })
@@ -101,7 +98,7 @@ export class UsersController {
     );
   }
 
-  @Delete(':id')
+  @Post(':id/delete')
   @Roles(UserRole.SUPERADMIN)
   @ApiOperation({ summary: '사용자 삭제' })
   @ApiResponse({ status: 200, description: '삭제 성공' })

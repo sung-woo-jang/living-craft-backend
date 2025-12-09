@@ -5,6 +5,7 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -12,16 +13,20 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
+import { Roles } from '@common/decorators/roles.decorator';
+import { UserRole } from '@common/enums';
 import { AdminServicesService } from './admin-services.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/request';
 import { Service } from '@modules/services/entities';
 
-@Public()
 @Controller('admin/services')
 @ApiTags('관리자 > 서비스 관리')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPERADMIN)
 export class AdminServicesController {
   constructor(private readonly adminServicesService: AdminServicesService) {}
 

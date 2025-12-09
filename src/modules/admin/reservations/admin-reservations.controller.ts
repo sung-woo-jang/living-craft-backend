@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -13,8 +14,11 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { Public } from '@common/decorators/public.decorator';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles.guard';
+import { Roles } from '@common/decorators/roles.decorator';
+import { UserRole } from '@common/enums';
 import { AdminReservationsService } from './admin-reservations.service';
 import {
   AdminReservationsQueryDto,
@@ -22,10 +26,11 @@ import {
 } from './dto/request';
 import { AdminReservationListResponseDto } from './dto/response';
 
-@Public()
 @Controller('admin/reservations')
 @ApiTags('관리자 > 예약 관리')
 @ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPERADMIN)
 export class AdminReservationsController {
   constructor(
     private readonly adminReservationsService: AdminReservationsService,

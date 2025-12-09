@@ -1,5 +1,4 @@
 import { Controller, Post, Get, Query, UseGuards } from '@nestjs/common';
-import { Public } from '@common/decorators/public.decorator';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -18,9 +17,9 @@ import { DistrictLevel } from '@common/enums/district-level.enum';
 
 @ApiTags('관리자 > 행정구역 관리')
 @ApiBearerAuth()
-@Public()
 @Controller('admin/districts')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.SUPERADMIN)
 export class DistrictsController {
   constructor(private readonly districtsService: DistrictsService) {}
 
