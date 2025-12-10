@@ -24,8 +24,10 @@ export class CustomValidationPipe implements PipeTransform<any> {
       return value;
     }
 
-    // DTO로 변환
-    const object = plainToInstance(metatype, value);
+    // DTO로 변환 (nested object의 @Type() 데코레이터가 작동하도록 옵션 추가)
+    const object = plainToInstance(metatype, value, {
+      enableImplicitConversion: true,
+    });
 
     // 허용되지 않은 필드 체크 (forbidNonWhitelisted)
     const unknownKeys = this.getUnknownKeys(value, object);

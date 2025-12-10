@@ -17,7 +17,9 @@ export async function createDistricts() {
   if (existingCount > 0) {
     console.log('🗑️  Deleting existing districts...');
     // FK 제약 조건 때문에 CASCADE 사용
-    await AppDataSource.query('TRUNCATE TABLE districts RESTART IDENTITY CASCADE');
+    await AppDataSource.query(
+      'TRUNCATE TABLE districts RESTART IDENTITY CASCADE',
+    );
   }
 
   // 1단계: 시/도(SIDO) 먼저 삽입
@@ -51,7 +53,9 @@ export async function createDistricts() {
       level: DistrictLevel.SIGUNGU,
       isActive: true,
       isAbandoned: false,
-      parentId: sigunguData.parent_id ? sidoMap.get(sigunguData.parent_id) : null,
+      parentId: sigunguData.parent_id
+        ? sidoMap.get(sigunguData.parent_id)
+        : null,
     });
     await districtRepository.save(sigungu);
   }

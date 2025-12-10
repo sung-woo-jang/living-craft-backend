@@ -135,7 +135,10 @@ export class ServicesController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SuccessResponseDto<ServiceHoliday[]>> {
     const holidays = await this.servicesService.getServiceHolidays(id);
-    return new SuccessResponseDto('서비스 휴무일 목록을 조회했습니다.', holidays);
+    return new SuccessResponseDto(
+      '서비스 휴무일 목록을 조회했습니다.',
+      holidays,
+    );
   }
 
   @Post('admin/:id/holidays')
@@ -153,7 +156,10 @@ export class ServicesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: AddServiceHolidayDto,
   ): Promise<SuccessResponseDto<ServiceHoliday[]>> {
-    const holidays = await this.servicesService.addServiceHolidays(id, dto.holidays);
+    const holidays = await this.servicesService.addServiceHolidays(
+      id,
+      dto.holidays,
+    );
     return new SuccessResponseDto('서비스 휴무일이 추가되었습니다.', holidays);
   }
 
@@ -171,7 +177,10 @@ export class ServicesController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: DeleteServiceHolidayDto,
   ): Promise<SuccessResponseDto<{ deleted: number }>> {
-    const result = await this.servicesService.deleteServiceHolidays(id, dto.holidayIds);
+    const result = await this.servicesService.deleteServiceHolidays(
+      id,
+      dto.holidayIds,
+    );
     return new SuccessResponseDto('서비스 휴무일이 삭제되었습니다.', result);
   }
 
@@ -209,6 +218,9 @@ export class ServicesController {
     @Body() dto: ServiceScheduleInputDto,
   ): Promise<SuccessResponseDto<ServiceSchedule>> {
     const schedule = await this.servicesService.updateServiceSchedule(id, dto);
-    return new SuccessResponseDto('서비스 스케줄이 업데이트되었습니다.', schedule);
+    return new SuccessResponseDto(
+      '서비스 스케줄이 업데이트되었습니다.',
+      schedule,
+    );
   }
 }

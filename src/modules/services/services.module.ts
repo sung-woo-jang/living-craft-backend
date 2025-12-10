@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Service, ServiceRegion, ServiceSchedule, ServiceHoliday } from './entities';
+import {
+  Service,
+  ServiceRegion,
+  ServiceSchedule,
+  ServiceHoliday,
+} from './entities';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 import { District } from '@modules/admin/districts/entities/district.entity';

@@ -219,11 +219,14 @@ export class ReservationsService {
     const serviceId = parseInt(dto.serviceId);
 
     // 서비스별 스케줄 조회
-    const serviceSchedule = await this.servicesService.getServiceSchedule(serviceId);
+    const serviceSchedule =
+      await this.servicesService.getServiceSchedule(serviceId);
 
     // 예약 가능 기간 체크
     if (serviceSchedule) {
-      const maxDate = moment().add(serviceSchedule.bookingPeriodMonths, 'months').endOf('day');
+      const maxDate = moment()
+        .add(serviceSchedule.bookingPeriodMonths, 'months')
+        .endOf('day');
       if (moment(date).isAfter(maxDate)) {
         return {
           date: dto.date,
@@ -250,7 +253,8 @@ export class ReservationsService {
     }
 
     // 서비스별 휴무일 체크
-    const serviceHolidays = await this.servicesService.getServiceHolidays(serviceId);
+    const serviceHolidays =
+      await this.servicesService.getServiceHolidays(serviceId);
     const dateString = moment(date).format('YYYY-MM-DD');
     const serviceHoliday = serviceHolidays.find(
       (h) => moment(h.date).format('YYYY-MM-DD') === dateString,
@@ -296,7 +300,11 @@ export class ReservationsService {
     // 스케줄 모드에 따른 설정 결정
     let config = globalSetting || defaultSetting;
 
-    if (serviceSchedule && scheduleMode && scheduleMode !== ScheduleMode.GLOBAL) {
+    if (
+      serviceSchedule &&
+      scheduleMode &&
+      scheduleMode !== ScheduleMode.GLOBAL
+    ) {
       const serviceAvailableDays =
         dto.type === TimeType.ESTIMATE
           ? serviceSchedule.estimateAvailableDays
@@ -518,7 +526,8 @@ export class ReservationsService {
         : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
     // 가능 요일 계산
-    let availableDays: string[] = globalSetting?.availableDays || defaultAvailableDays;
+    let availableDays: string[] =
+      globalSetting?.availableDays || defaultAvailableDays;
 
     if (
       serviceSchedule &&
