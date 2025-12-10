@@ -22,6 +22,7 @@ import { Roles } from '@common/decorators/roles.decorator';
 import { RolesGuard } from '@common/guards/roles.guard';
 import { UserRole } from '@common/enums';
 import { FileUtil } from '@common/utils/file.util';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @ApiTags('파일')
 @Controller('files')
@@ -44,7 +45,7 @@ export class FilesController {
   })
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('파일이 선택되지 않았습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
     }
 
     const result = await this.filesService.uploadImage(file, 'images');
@@ -66,7 +67,7 @@ export class FilesController {
   })
   async uploadServiceImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('파일이 선택되지 않았습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
     }
 
     const result = await this.filesService.uploadImage(file, 'services');
@@ -91,7 +92,7 @@ export class FilesController {
   })
   async uploadPortfolioImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('파일이 선택되지 않았습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
     }
 
     const result = await this.filesService.uploadImage(file, 'portfolio');
@@ -114,7 +115,7 @@ export class FilesController {
   })
   async uploadReviewImages(@UploadedFiles() files: Express.Multer.File[]) {
     if (!files || files.length === 0) {
-      throw new BadRequestException('파일이 선택되지 않았습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
     }
 
     const results = await Promise.all(
@@ -139,7 +140,7 @@ export class FilesController {
   })
   async uploadDocument(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('파일이 선택되지 않았습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
     }
 
     // 문서 파일 형식 검증
@@ -148,7 +149,7 @@ export class FilesController {
 
     if (!allowedDocTypes.includes(`.${fileExtension}`)) {
       throw new BadRequestException(
-        '지원되지 않는 문서 형식입니다. 지원 형식: PDF, DOC, DOCX, HWP, TXT',
+        ERROR_MESSAGES.FILES.UNSUPPORTED_DOCUMENT_FORMAT,
       );
     }
 
@@ -167,7 +168,7 @@ export class FilesController {
       });
     } catch (error) {
       throw new BadRequestException(
-        `문서 업로드 중 오류가 발생했습니다: ${error.message}`,
+        ERROR_MESSAGES.FILES.DOCUMENT_UPLOAD_ERROR(error.message),
       );
     }
   }

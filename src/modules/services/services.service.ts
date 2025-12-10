@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service, ServiceRegion } from './entities';
@@ -13,6 +17,7 @@ import {
 import { District } from '@modules/admin/districts/entities/district.entity';
 import { DistrictLevel } from '@common/enums/district-level.enum';
 import { Icon } from '@modules/icons/entities/icon.entity';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class ServicesService {
@@ -89,7 +94,7 @@ export class ServicesService {
       where: { id: dto.iconId },
     });
     if (!icon) {
-      throw new BadRequestException('존재하지 않는 아이콘 ID입니다.');
+      throw new BadRequestException(ERROR_MESSAGES.SERVICE.INVALID_ICON_ID);
     }
 
     return this.serviceRepository.manager.transaction(async (manager) => {
@@ -136,14 +141,14 @@ export class ServicesService {
         where: { id: dto.iconId },
       });
       if (!icon) {
-        throw new BadRequestException('존재하지 않는 아이콘 ID입니다.');
+        throw new BadRequestException(ERROR_MESSAGES.SERVICE.INVALID_ICON_ID);
       }
     }
 
     return this.serviceRepository.manager.transaction(async (manager) => {
       const service = await manager.findOne(Service, { where: { id } });
       if (!service) {
-        throw new NotFoundException('서비스를 찾을 수 없습니다.');
+        throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
       }
 
       // Service 필드 업데이트 (필드가 있는 것만)
@@ -194,7 +199,7 @@ export class ServicesService {
   async delete(id: number): Promise<{ deleted: boolean }> {
     const service = await this.serviceRepository.findOne({ where: { id } });
     if (!service) {
-      throw new NotFoundException('서비스를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
     }
 
     await this.serviceRepository.update({ id }, { isActive: false });
@@ -207,7 +212,7 @@ export class ServicesService {
   async toggle(id: number): Promise<Service> {
     const service = await this.serviceRepository.findOne({ where: { id } });
     if (!service) {
-      throw new NotFoundException('서비스를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
     }
 
     await this.serviceRepository.update(

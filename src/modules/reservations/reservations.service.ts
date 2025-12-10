@@ -25,6 +25,7 @@ import { ServicesService } from '@modules/services/services.service';
 import { SettingsService } from '@modules/settings/settings.service';
 import { OperatingType } from '@modules/settings/entities';
 import { ReservationCodeUtil } from '@common/utils/reservation-code.util';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class ReservationsService {
@@ -58,7 +59,7 @@ export class ReservationsService {
       parseInt(dto.serviceId),
     );
     if (!service || !service.isActive) {
-      throw new BadRequestException('유효하지 않은 서비스입니다.');
+      throw new BadRequestException(ERROR_MESSAGES.RESERVATION.INVALID_SERVICE);
     }
 
     // 예약번호 생성
@@ -117,12 +118,12 @@ export class ReservationsService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
     }
 
     // 고객 ID가 제공된 경우 본인 예약인지 확인
     if (customerId && reservation.customerId !== customerId) {
-      throw new ForbiddenException('본인의 예약만 조회할 수 있습니다.');
+      throw new ForbiddenException(ERROR_MESSAGES.RESERVATION.FORBIDDEN_ACCESS);
     }
 
     return this.toReservationDetailDto(reservation);
@@ -138,19 +139,23 @@ export class ReservationsService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
     }
 
     if (reservation.customerId !== customerId) {
-      throw new ForbiddenException('본인의 예약만 취소할 수 있습니다.');
+      throw new ForbiddenException(ERROR_MESSAGES.RESERVATION.FORBIDDEN_CANCEL);
     }
 
     if (reservation.status === ReservationStatus.CANCELLED) {
-      throw new BadRequestException('이미 취소된 예약입니다.');
+      throw new BadRequestException(
+        ERROR_MESSAGES.RESERVATION.ALREADY_CANCELLED,
+      );
     }
 
     if (reservation.status === ReservationStatus.COMPLETED) {
-      throw new BadRequestException('완료된 예약은 취소할 수 없습니다.');
+      throw new BadRequestException(
+        ERROR_MESSAGES.RESERVATION.CANNOT_CANCEL_COMPLETED,
+      );
     }
 
     reservation.status = ReservationStatus.CANCELLED;

@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 /**
  * 서비스 지역 입력 DTO
@@ -21,16 +22,30 @@ export class ServiceRegionInputDto {
     description: '지역 ID (District ID)',
     example: 1,
   })
-  @IsNumber({}, { message: '지역 ID는 숫자여야 합니다.' })
-  @Min(1, { message: '지역 ID는 1 이상이어야 합니다.' })
+  @IsNumber(
+    {},
+    {
+      message: ERROR_MESSAGES.VALIDATION.IS_NUMBER(FIELD_NAMES.districtId),
+    },
+  )
+  @Min(1, {
+    message: ERROR_MESSAGES.VALIDATION.MIN(FIELD_NAMES.districtId, 1),
+  })
   districtId: number;
 
   @ApiProperty({
     description: '출장비 (원)',
     example: 10000,
   })
-  @IsNumber({}, { message: '출장비는 숫자여야 합니다.' })
-  @Min(0, { message: '출장비는 0 이상이어야 합니다.' })
+  @IsNumber(
+    {},
+    {
+      message: ERROR_MESSAGES.VALIDATION.IS_NUMBER('출장비'),
+    },
+  )
+  @Min(0, {
+    message: ERROR_MESSAGES.VALIDATION.MIN('출장비', 0),
+  })
   estimateFee: number;
 }
 
@@ -43,32 +58,47 @@ export class CreateServiceDto {
     example: '인테리어 필름',
     maxLength: 100,
   })
-  @IsString({ message: '서비스명은 문자열이어야 합니다.' })
-  @MaxLength(100, { message: '서비스명은 100자를 초과할 수 없습니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.title),
+  })
+  @MaxLength(100, {
+    message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(FIELD_NAMES.title, 100),
+  })
   title: string;
 
   @ApiProperty({
     description: '서비스 설명',
     example: '고급 인테리어 필름 시공 서비스입니다.',
   })
-  @IsString({ message: '설명은 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.description),
+  })
   description: string;
 
   @ApiProperty({
     description: '아이콘 ID (icons 테이블 FK)',
     example: 1,
   })
-  @IsNumber({}, { message: '아이콘 ID는 숫자여야 합니다.' })
-  @Min(1, { message: '아이콘 ID는 1 이상이어야 합니다.' })
+  @IsNumber(
+    {},
+    {
+      message: ERROR_MESSAGES.VALIDATION.IS_NUMBER('아이콘 ID'),
+    },
+  )
+  @Min(1, {
+    message: ERROR_MESSAGES.VALIDATION.MIN('아이콘 ID', 1),
+  })
   iconId: number;
 
   @ApiProperty({
     description: '아이콘 배경색 (HEX 색상 코드)',
     example: '#E3F2FD',
   })
-  @IsString({ message: '배경색은 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.iconBgColor),
+  })
   @Matches(/^#[0-9A-Fa-f]{6}$/, {
-    message: '유효한 HEX 색상 코드를 입력해주세요. (예: #E3F2FD)',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_COLOR_FORMAT,
   })
   iconBgColor: string;
 
@@ -76,14 +106,20 @@ export class CreateServiceDto {
     description: '작업 소요 시간',
     example: '하루 종일',
   })
-  @IsString({ message: '소요 시간은 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.duration),
+  })
   duration: string;
 
   @ApiProperty({
     description: '시공 시간 선택 필요 여부',
     example: false,
   })
-  @IsBoolean({ message: '시간 선택 필요 여부는 boolean이어야 합니다.' })
+  @IsBoolean({
+    message: ERROR_MESSAGES.VALIDATION.IS_BOOLEAN(
+      FIELD_NAMES.requiresTimeSelection,
+    ),
+  })
   requiresTimeSelection: boolean;
 
   @ApiPropertyOptional({
@@ -92,16 +128,27 @@ export class CreateServiceDto {
     default: 0,
   })
   @IsOptional()
-  @IsNumber({}, { message: '정렬 순서는 숫자여야 합니다.' })
-  @Min(0, { message: '정렬 순서는 0 이상이어야 합니다.' })
+  @IsNumber(
+    {},
+    {
+      message: ERROR_MESSAGES.VALIDATION.IS_NUMBER('정렬 순서'),
+    },
+  )
+  @Min(0, {
+    message: ERROR_MESSAGES.VALIDATION.MIN('정렬 순서', 0),
+  })
   sortOrder?: number;
 
   @ApiProperty({
     description: '서비스 가능 지역 목록',
     type: [ServiceRegionInputDto],
   })
-  @IsArray({ message: '지역 목록은 배열이어야 합니다.' })
-  @ArrayMinSize(1, { message: '최소 1개 이상의 지역을 선택해야 합니다.' })
+  @IsArray({
+    message: ERROR_MESSAGES.VALIDATION.IS_ARRAY('지역 목록'),
+  })
+  @ArrayMinSize(1, {
+    message: ERROR_MESSAGES.VALIDATION.ARRAY_NOT_EMPTY('지역 목록'),
+  })
   @ValidateNested({ each: true })
   @Type(() => ServiceRegionInputDto)
   regions: ServiceRegionInputDto[];

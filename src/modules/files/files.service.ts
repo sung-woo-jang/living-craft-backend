@@ -5,6 +5,7 @@ import { diskStorage } from 'multer';
 import { join } from 'path';
 import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import { FileUtil } from '@common/utils/file.util';
+import { ERROR_MESSAGES } from '@common/constants';
 import * as sharp from 'sharp';
 
 @Injectable()
@@ -50,7 +51,10 @@ export class FilesService {
         if (FileUtil.isAllowedFileType(file.originalname, allowedTypes)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('지원하지 않는 파일 형식입니다.'), false);
+          cb(
+            new BadRequestException(ERROR_MESSAGES.FILES.UNSUPPORTED_TYPE),
+            false,
+          );
         }
       },
       limits: {
@@ -72,7 +76,7 @@ export class FilesService {
     quality = 80,
   ): Promise<{ filename: string; path: string; url: string }> {
     if (!FileUtil.isImageFile(file.originalname)) {
-      throw new BadRequestException('이미지 파일만 업로드 가능합니다.');
+      throw new BadRequestException(ERROR_MESSAGES.FILES.IMAGE_ONLY);
     }
 
     const uploadDir = join(this.uploadPath, subfolder);
@@ -99,7 +103,9 @@ export class FilesService {
         url: `/uploads/${subfolder}/${filename}`,
       };
     } catch {
-      throw new BadRequestException('이미지 처리 중 오류가 발생했습니다.');
+      throw new BadRequestException(
+        ERROR_MESSAGES.FILES.IMAGE_PROCESSING_ERROR,
+      );
     }
   }
 
@@ -162,7 +168,9 @@ export class FilesService {
     const extension = FileUtil.getExtension(file.originalname);
 
     if (!allowedDocTypes.includes(extension.toLowerCase())) {
-      throw new BadRequestException('지원되지 않는 문서 파일 형식입니다.');
+      throw new BadRequestException(
+        ERROR_MESSAGES.FILES.UNSUPPORTED_DOCUMENT_TYPE,
+      );
     }
 
     const uploadDir = join(this.uploadPath, 'documents');
@@ -182,7 +190,7 @@ export class FilesService {
       };
     } catch (error) {
       throw new BadRequestException(
-        `문서 파일 저장 중 오류가 발생했습니다: ${error.message}`,
+        ERROR_MESSAGES.FILES.DOCUMENT_SAVE_ERROR(error.message),
       );
     }
   }

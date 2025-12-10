@@ -54,7 +54,10 @@ export class DistrictsController {
     @Query('parentId') parentId?: number,
   ): Promise<SuccessResponseDto<DistrictDto[]>> {
     const districts = await this.districtsService.findAll(level, parentId);
-    return new SuccessResponseDto('행정구역 목록 조회에 성공했습니다.', districts);
+    return new SuccessResponseDto(
+      '행정구역 목록 조회에 성공했습니다.',
+      districts,
+    );
   }
 
   /**

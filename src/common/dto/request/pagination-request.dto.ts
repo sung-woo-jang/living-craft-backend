@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export enum SortOrder {
   ASC = 'ASC',
@@ -15,8 +16,12 @@ export class PaginationRequestDto {
   })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @IsInt({
+    message: ERROR_MESSAGES.VALIDATION.IS_NUMBER(FIELD_NAMES.page),
+  })
+  @Min(1, {
+    message: ERROR_MESSAGES.VALIDATION.MIN(FIELD_NAMES.page, 1),
+  })
   page?: number = 1;
 
   @ApiPropertyOptional({
@@ -27,9 +32,15 @@ export class PaginationRequestDto {
   })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
+  @IsInt({
+    message: ERROR_MESSAGES.VALIDATION.IS_NUMBER(FIELD_NAMES.limit),
+  })
+  @Min(1, {
+    message: ERROR_MESSAGES.VALIDATION.MIN(FIELD_NAMES.limit, 1),
+  })
+  @Max(100, {
+    message: ERROR_MESSAGES.VALIDATION.MAX(FIELD_NAMES.limit, 100),
+  })
   limit?: number = 10;
 
   @ApiPropertyOptional({
@@ -45,7 +56,12 @@ export class PaginationRequestDto {
     example: SortOrder.DESC,
   })
   @IsOptional()
-  @IsEnum(SortOrder)
+  @IsEnum(SortOrder, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      FIELD_NAMES.sortOrder,
+      Object.values(SortOrder).join(', '),
+    ),
+  })
   sortOrder?: SortOrder = SortOrder.DESC;
 
   get skip(): number {

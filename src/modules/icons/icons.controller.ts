@@ -30,6 +30,12 @@ export class IconsController {
     type: String,
     description: '아이콘 이름 검색어',
   })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: '최대 결과 개수 (기본: 100, 최대: 500)',
+  })
   @ApiResponse({
     status: 200,
     description: '아이콘 목록 조회 성공',
@@ -38,8 +44,9 @@ export class IconsController {
   async findAll(
     @Query('type') type?: IconType,
     @Query('search') search?: string,
+    @Query('limit') limit?: number,
   ): Promise<SuccessResponseDto<IconListDto[]>> {
-    const icons = await this.iconsService.findAll(type, search);
+    const icons = await this.iconsService.findAll(type, search, limit);
     return new SuccessResponseDto('아이콘 목록 조회에 성공했습니다.', icons);
   }
 }

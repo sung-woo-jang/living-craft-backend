@@ -3,6 +3,7 @@ import { Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationRequestDto } from '@common/dto/request/pagination-request.dto';
 import { UserRole, UserStatus } from '@common/enums';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export class UsersQueryDto extends PaginationRequestDto {
   @ApiPropertyOptional({
@@ -10,7 +11,9 @@ export class UsersQueryDto extends PaginationRequestDto {
     example: 'hong',
   })
   @IsOptional()
-  @IsString({ message: '검색어는 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING('검색어'),
+  })
   @Transform(({ value }) => value?.trim())
   search?: string;
 
@@ -20,7 +23,12 @@ export class UsersQueryDto extends PaginationRequestDto {
     example: UserRole.ADMIN,
   })
   @IsOptional()
-  @IsEnum(UserRole, { message: '올바른 역할을 선택해야 합니다.' })
+  @IsEnum(UserRole, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      FIELD_NAMES.role,
+      Object.values(UserRole).join(', '),
+    ),
+  })
   role?: UserRole;
 
   @ApiPropertyOptional({
@@ -29,6 +37,11 @@ export class UsersQueryDto extends PaginationRequestDto {
     example: UserStatus.ACTIVE,
   })
   @IsOptional()
-  @IsEnum(UserStatus, { message: '올바른 상태를 선택해야 합니다.' })
+  @IsEnum(UserStatus, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      FIELD_NAMES.status,
+      Object.values(UserStatus).join(', '),
+    ),
+  })
   status?: UserStatus;
 }

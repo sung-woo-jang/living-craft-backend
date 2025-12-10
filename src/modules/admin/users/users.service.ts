@@ -10,6 +10,7 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/request/create-user.dto';
 import { UpdateUserDto } from './dto/request/update-user.dto';
 import { UsersQueryDto } from './dto/request/users-query.dto';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class UsersService {
@@ -27,10 +28,12 @@ export class UsersService {
 
     if (existingUser) {
       if (existingUser.email === dto.email) {
-        throw new ConflictException('이미 사용 중인 이메일입니다.');
+        throw new ConflictException(ERROR_MESSAGES.USER.EMAIL_ALREADY_EXISTS);
       }
       if (existingUser.username === dto.username) {
-        throw new ConflictException('이미 사용 중인 사용자명입니다.');
+        throw new ConflictException(
+          ERROR_MESSAGES.USER.USERNAME_ALREADY_EXISTS,
+        );
       }
     }
 
@@ -103,7 +106,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.USER.NOT_FOUND);
     }
 
     return user;
@@ -116,7 +119,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.USER.NOT_FOUND);
     }
 
     return user;
@@ -130,7 +133,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.USER.NOT_FOUND);
     }
 
     return user;
@@ -146,7 +149,7 @@ export class UsersService {
         where: { email: dto.email },
       });
       if (existingEmail) {
-        throw new ConflictException('이미 사용 중인 이메일입니다.');
+        throw new ConflictException(ERROR_MESSAGES.USER.EMAIL_ALREADY_EXISTS);
       }
     }
 
@@ -155,7 +158,9 @@ export class UsersService {
         where: { username: dto.username },
       });
       if (existingUsername) {
-        throw new ConflictException('이미 사용 중인 사용자명입니다.');
+        throw new ConflictException(
+          ERROR_MESSAGES.USER.USERNAME_ALREADY_EXISTS,
+        );
       }
     }
 

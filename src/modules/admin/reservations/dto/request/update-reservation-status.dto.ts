@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export enum AdminReservationStatusUpdate {
   CONFIRMED = 'confirmed',
@@ -14,7 +15,10 @@ export class UpdateReservationStatusDto {
     example: 'confirmed',
   })
   @IsEnum(AdminReservationStatusUpdate, {
-    message: '유효한 예약 상태를 입력해주세요.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      FIELD_NAMES.status,
+      Object.values(AdminReservationStatusUpdate).join(', '),
+    ),
   })
   status: AdminReservationStatusUpdate;
 }

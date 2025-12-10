@@ -8,6 +8,7 @@ import { IJwtPayload } from '@common/interfaces';
 import { UserStatus } from '@common/enums';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from '@modules/admin/users/dto/response/user-response.dto';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class AuthService {
@@ -24,16 +25,12 @@ export class AuthService {
     // 비밀번호 검증
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException(
-        '이메일 또는 비밀번호가 올바르지 않습니다.',
-      );
+      throw new UnauthorizedException(ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
     // 사용자 상태 확인
     if (user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(
-        '비활성화된 계정입니다. 관리자에게 문의하세요.',
-      );
+      throw new UnauthorizedException(ERROR_MESSAGES.AUTH.ACCOUNT_INACTIVE);
     }
 
     // JWT 페이로드 생성

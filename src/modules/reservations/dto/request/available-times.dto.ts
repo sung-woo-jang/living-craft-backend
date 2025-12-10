@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsEnum, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export enum TimeType {
   ESTIMATE = 'estimate',
@@ -11,18 +12,26 @@ export class AvailableTimesDto {
     description: '서비스 ID',
     example: '1',
   })
-  @IsString({ message: 'serviceId는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'serviceId는 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.serviceId),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.serviceId),
+  })
   serviceId: string;
 
   @ApiProperty({
     description: '조회 날짜 (YYYY-MM-DD)',
     example: '2024-01-15',
   })
-  @IsString({ message: 'date는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'date는 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.date),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.date),
+  })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'date 형식은 YYYY-MM-DD여야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_DATE_FORMAT,
   })
   date: string;
 
@@ -32,8 +41,13 @@ export class AvailableTimesDto {
     example: TimeType.ESTIMATE,
   })
   @IsEnum(TimeType, {
-    message: 'type은 estimate 또는 construction이어야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      '시간 타입',
+      Object.values(TimeType).join(', '),
+    ),
   })
-  @IsNotEmpty({ message: 'type은 필수입니다.' })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY('시간 타입'),
+  })
   type: TimeType;
 }

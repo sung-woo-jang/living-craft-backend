@@ -16,10 +16,7 @@ export interface ParsedIcon {
  * @param type 아이콘 타입 (FILL, MONO, COLOR)
  * @returns 파싱된 아이콘 배열
  */
-export function parseIconFile(
-  filePath: string,
-  type: IconType,
-): ParsedIcon[] {
+export function parseIconFile(filePath: string, type: IconType): ParsedIcon[] {
   try {
     const content = fs.readFileSync(filePath, 'utf-8');
 
@@ -35,7 +32,9 @@ export function parseIconFile(
       .map((line) => line.trim())
       .filter((line) => line.length > 0 && !line.startsWith('//'));
 
-    console.log(`   📋 Parsed ${iconNames.length} icons from ${path.basename(filePath)}`);
+    console.log(
+      `   📋 Parsed ${iconNames.length} icons from ${path.basename(filePath)}`,
+    );
 
     return iconNames.map((name) => ({ name, type }));
   } catch (error) {

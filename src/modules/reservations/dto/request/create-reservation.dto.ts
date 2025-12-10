@@ -8,24 +8,33 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export class CreateReservationDto {
   @ApiProperty({
     description: '서비스 ID',
     example: '1',
   })
-  @IsString({ message: 'serviceId는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'serviceId는 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.serviceId),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.serviceId),
+  })
   serviceId: string;
 
   @ApiProperty({
     description: '견적 날짜 (YYYY-MM-DD)',
     example: '2024-01-15',
   })
-  @IsString({ message: 'estimateDate는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'estimateDate는 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.estimateDate),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.estimateDate),
+  })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'estimateDate 형식은 YYYY-MM-DD여야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.DATE_FORMAT(FIELD_NAMES.estimateDate),
   })
   estimateDate: string;
 
@@ -33,10 +42,14 @@ export class CreateReservationDto {
     description: '견적 시간 (HH:mm)',
     example: '18:00',
   })
-  @IsString({ message: 'estimateTime은 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'estimateTime은 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.estimateTime),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.estimateTime),
+  })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: 'estimateTime 형식은 HH:mm이어야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.TIME_FORMAT(FIELD_NAMES.estimateTime),
   })
   estimateTime: string;
 
@@ -44,10 +57,18 @@ export class CreateReservationDto {
     description: '시공 날짜 (YYYY-MM-DD)',
     example: '2024-01-20',
   })
-  @IsString({ message: 'constructionDate는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'constructionDate는 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.constructionDate),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(
+      FIELD_NAMES.constructionDate,
+    ),
+  })
   @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: 'constructionDate 형식은 YYYY-MM-DD여야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.DATE_FORMAT(
+      FIELD_NAMES.constructionDate,
+    ),
   })
   constructionDate: string;
 
@@ -56,9 +77,13 @@ export class CreateReservationDto {
     example: '09:00',
   })
   @IsOptional()
-  @IsString({ message: 'constructionTime은 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.constructionTime),
+  })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: 'constructionTime 형식은 HH:mm이어야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.TIME_FORMAT(
+      FIELD_NAMES.constructionTime,
+    ),
   })
   constructionTime?: string | null;
 
@@ -66,9 +91,15 @@ export class CreateReservationDto {
     description: '도로명 주소',
     example: '서울특별시 강남구 테헤란로 123',
   })
-  @IsString({ message: 'address는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'address는 필수입니다.' })
-  @MaxLength(500, { message: 'address는 500자를 초과할 수 없습니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.address),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.address),
+  })
+  @MaxLength(500, {
+    message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(FIELD_NAMES.address, 500),
+  })
   @Transform(({ value }) => value?.trim())
   address: string;
 
@@ -76,9 +107,18 @@ export class CreateReservationDto {
     description: '상세 주소',
     example: '2층 201호',
   })
-  @IsString({ message: 'detailAddress는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'detailAddress는 필수입니다.' })
-  @MaxLength(200, { message: 'detailAddress는 200자를 초과할 수 없습니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.detailAddress),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.detailAddress),
+  })
+  @MaxLength(200, {
+    message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(
+      FIELD_NAMES.detailAddress,
+      200,
+    ),
+  })
   @Transform(({ value }) => value?.trim())
   detailAddress: string;
 
@@ -86,9 +126,18 @@ export class CreateReservationDto {
     description: '고객 이름',
     example: '홍길동',
   })
-  @IsString({ message: 'customerName은 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'customerName은 필수입니다.' })
-  @MaxLength(100, { message: 'customerName은 100자를 초과할 수 없습니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.customerName),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.customerName),
+  })
+  @MaxLength(100, {
+    message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(
+      FIELD_NAMES.customerName,
+      100,
+    ),
+  })
   @Transform(({ value }) => value?.trim())
   customerName: string;
 
@@ -96,9 +145,18 @@ export class CreateReservationDto {
     description: '고객 전화번호',
     example: '010-1234-5678',
   })
-  @IsString({ message: 'customerPhone은 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: 'customerPhone은 필수입니다.' })
-  @MaxLength(20, { message: 'customerPhone은 20자를 초과할 수 없습니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.customerPhone),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(FIELD_NAMES.customerPhone),
+  })
+  @MaxLength(20, {
+    message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(
+      FIELD_NAMES.customerPhone,
+      20,
+    ),
+  })
   customerPhone: string;
 
   @ApiPropertyOptional({
@@ -106,7 +164,9 @@ export class CreateReservationDto {
     example: '주차 공간 없음',
   })
   @IsOptional()
-  @IsString({ message: 'memo는 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.memo),
+  })
   @Transform(({ value }) => value?.trim())
   memo?: string;
 
@@ -115,7 +175,12 @@ export class CreateReservationDto {
     example: ['https://example.com/photo1.jpg'],
   })
   @IsOptional()
-  @IsArray({ message: 'photos는 배열이어야 합니다.' })
-  @IsString({ each: true, message: 'photos의 각 항목은 문자열이어야 합니다.' })
+  @IsArray({
+    message: ERROR_MESSAGES.VALIDATION.IS_ARRAY(FIELD_NAMES.photos),
+  })
+  @IsString({
+    each: true,
+    message: ERROR_MESSAGES.VALIDATION.ARRAY_ITEM_STRING(FIELD_NAMES.photos),
+  })
   photos?: string[];
 }

@@ -14,6 +14,7 @@ import {
   MyReviewListResponseDto,
 } from './dto/response';
 import { Reservation, ReservationStatus } from '@modules/reservations/entities';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class ReviewsService {
@@ -40,20 +41,18 @@ export class ReviewsService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
     }
 
     // 본인 예약인지 확인
     if (reservation.customerId !== customerId) {
-      throw new ForbiddenException(
-        '본인의 예약에만 리뷰를 작성할 수 있습니다.',
-      );
+      throw new ForbiddenException(ERROR_MESSAGES.REVIEW.FORBIDDEN_CREATE);
     }
 
     // 완료된 예약인지 확인
     if (reservation.status !== ReservationStatus.COMPLETED) {
       throw new BadRequestException(
-        '완료된 예약에만 리뷰를 작성할 수 있습니다.',
+        ERROR_MESSAGES.REVIEW.ONLY_COMPLETED_RESERVATION,
       );
     }
 
@@ -63,7 +62,7 @@ export class ReviewsService {
     });
 
     if (existingReview) {
-      throw new BadRequestException('이미 리뷰를 작성했습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.REVIEW.ALREADY_REVIEWED);
     }
 
     // 리뷰 생성

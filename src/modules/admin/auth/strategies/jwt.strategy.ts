@@ -5,6 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { IJwtPayload } from '@common/interfaces';
 import { UsersService } from '@modules/admin/users/users.service';
 import { UserStatus } from '@common/enums';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -24,14 +25,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.usersService.findUserByUuid(payload.sub);
 
     if (!user) {
-      throw new UnauthorizedException('인증되지 않은 사용자입니다.');
+      throw new UnauthorizedException(ERROR_MESSAGES.AUTH.UNAUTHORIZED_USER);
     }
 
     // 사용자 상태 확인
     if (user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException(
-        '비활성화된 계정입니다. 관리자에게 문의하세요.',
-      );
+      throw new UnauthorizedException(ERROR_MESSAGES.AUTH.ACCOUNT_INACTIVE);
     }
 
     // request.user에 저장될 데이터

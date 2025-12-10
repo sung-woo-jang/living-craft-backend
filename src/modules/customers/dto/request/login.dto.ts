@@ -1,5 +1,6 @@
 import { IsString, IsEnum, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ERROR_MESSAGES } from '@common/constants';
 
 export enum TossReferrer {
   DEFAULT = 'DEFAULT',
@@ -11,8 +12,12 @@ export class LoginDto {
     description: '토스 앱에서 발급받은 인가 코드',
     example: 'auth_code_12345',
   })
-  @IsString({ message: '인가 코드는 문자열이어야 합니다.' })
-  @IsNotEmpty({ message: '인가 코드는 필수입니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING('인가 코드'),
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY('인가 코드'),
+  })
   authorizationCode: string;
 
   @ApiProperty({
@@ -21,8 +26,13 @@ export class LoginDto {
     example: TossReferrer.DEFAULT,
   })
   @IsEnum(TossReferrer, {
-    message: 'referrer는 DEFAULT 또는 SANDBOX여야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      'referrer',
+      Object.values(TossReferrer).join(', '),
+    ),
   })
-  @IsNotEmpty({ message: 'referrer는 필수입니다.' })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY('referrer'),
+  })
   referrer: TossReferrer;
 }

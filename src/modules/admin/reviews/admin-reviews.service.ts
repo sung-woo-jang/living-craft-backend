@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Review } from '@modules/reviews/entities';
 import { AdminReviewsQueryDto } from './dto/request';
 import { AdminReviewListResponseDto } from './dto/response';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class AdminReviewsService {
@@ -69,7 +70,7 @@ export class AdminReviewsService {
     });
 
     if (!review) {
-      throw new NotFoundException('리뷰를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.REVIEW.NOT_FOUND);
     }
 
     await this.reviewRepository.remove(review);

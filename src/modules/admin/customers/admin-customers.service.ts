@@ -9,6 +9,7 @@ import {
   AdminCustomerListResponseDto,
   AdminCustomerDetailDto,
 } from './dto/response';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class AdminCustomersService {
@@ -81,7 +82,7 @@ export class AdminCustomersService {
     });
 
     if (!customer) {
-      throw new NotFoundException('고객을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.CUSTOMER.NOT_FOUND);
     }
 
     // 예약 목록 조회

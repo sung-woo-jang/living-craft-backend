@@ -6,6 +6,7 @@ import {
   ArrayNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ERROR_MESSAGES } from '@common/constants';
 
 export enum DayOfWeek {
   MON = 'mon',
@@ -24,11 +25,18 @@ export class TimeSlotConfigDto {
     isArray: true,
     example: ['mon', 'tue', 'wed', 'thu', 'fri'],
   })
-  @IsArray({ message: 'availableDays는 배열이어야 합니다.' })
-  @ArrayNotEmpty({ message: 'availableDays는 최소 1개 이상이어야 합니다.' })
+  @IsArray({
+    message: ERROR_MESSAGES.VALIDATION.IS_ARRAY('가능한 요일 목록'),
+  })
+  @ArrayNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.ARRAY_NOT_EMPTY('가능한 요일 목록'),
+  })
   @IsEnum(DayOfWeek, {
     each: true,
-    message: '유효하지 않은 요일입니다.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      '요일',
+      Object.values(DayOfWeek).join(', '),
+    ),
   })
   availableDays: DayOfWeek[];
 
@@ -36,9 +44,11 @@ export class TimeSlotConfigDto {
     description: '시작 시간 (HH:mm)',
     example: '18:00',
   })
-  @IsString({ message: 'startTime은 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING('시작 시간'),
+  })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: '시작 시간 형식은 HH:mm이어야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_TIME_FORMAT,
   })
   startTime: string;
 
@@ -46,9 +56,11 @@ export class TimeSlotConfigDto {
     description: '종료 시간 (HH:mm)',
     example: '22:00',
   })
-  @IsString({ message: 'endTime은 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING('종료 시간'),
+  })
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: '종료 시간 형식은 HH:mm이어야 합니다.',
+    message: ERROR_MESSAGES.VALIDATION.INVALID_TIME_FORMAT,
   })
   endTime: string;
 }

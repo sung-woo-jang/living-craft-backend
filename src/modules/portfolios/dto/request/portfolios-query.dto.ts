@@ -1,6 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export class PortfoliosQueryDto {
   @ApiPropertyOptional({
@@ -8,7 +9,9 @@ export class PortfoliosQueryDto {
     example: '인테리어필름',
   })
   @IsOptional()
-  @IsString({ message: 'category는 문자열이어야 합니다.' })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.category),
+  })
   category?: string;
 
   @ApiPropertyOptional({

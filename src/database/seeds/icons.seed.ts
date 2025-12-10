@@ -16,7 +16,9 @@ export async function createIcons() {
   // 기존 데이터 확인
   const existingCount = await iconRepository.count();
   if (existingCount > 0) {
-    console.log(`ℹ️  Icons already exist (${existingCount} icons). Skipping...`);
+    console.log(
+      `ℹ️  Icons already exist (${existingCount} icons). Skipping...`,
+    );
     return;
   }
 
@@ -56,7 +58,9 @@ export async function createIcons() {
     await iconRepository.save(icons);
     totalInserted += icons.length;
 
-    console.log(`   ✓ Batch ${Math.floor(i / batchSize) + 1}: ${icons.length} icons inserted`);
+    console.log(
+      `   ✓ Batch ${Math.floor(i / batchSize) + 1}: ${icons.length} icons inserted`,
+    );
   }
 
   console.log('\n✅ Icons created successfully!');

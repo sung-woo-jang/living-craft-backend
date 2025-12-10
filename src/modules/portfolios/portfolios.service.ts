@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Portfolio } from './entities';
 import { PortfoliosQueryDto } from './dto/request';
 import { PortfolioListResponseDto, PortfolioDetailDto } from './dto/response';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class PortfoliosService {
@@ -51,7 +52,7 @@ export class PortfoliosService {
     });
 
     if (!portfolio) {
-      throw new NotFoundException('포트폴리오를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.PORTFOLIO.NOT_FOUND);
     }
 
     return {

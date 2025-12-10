@@ -15,6 +15,7 @@ import {
   CustomerProfileDto,
 } from './dto/response';
 import { ICustomerJwtPayload } from './interfaces';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class CustomersService {
@@ -106,19 +107,21 @@ export class CustomersService {
       );
 
       if (payload.type !== 'customer') {
-        throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+        throw new UnauthorizedException(ERROR_MESSAGES.AUTH.INVALID_TOKEN);
       }
 
       // 고객 조회
       const customer = await this.findByUuid(payload.sub);
 
       if (!customer) {
-        throw new UnauthorizedException('인증되지 않은 사용자입니다.');
+        throw new UnauthorizedException(ERROR_MESSAGES.AUTH.UNAUTHORIZED_USER);
       }
 
       // 저장된 Refresh Token과 비교
       if (customer.refreshToken !== dto.refreshToken) {
-        throw new UnauthorizedException('유효하지 않은 Refresh Token입니다.');
+        throw new UnauthorizedException(
+          ERROR_MESSAGES.AUTH.INVALID_REFRESH_TOKEN,
+        );
       }
 
       // 새 토큰 발급
@@ -135,7 +138,7 @@ export class CustomersService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new UnauthorizedException('토큰 갱신에 실패했습니다.');
+      throw new UnauthorizedException(ERROR_MESSAGES.AUTH.TOKEN_REFRESH_FAILED);
     }
   }
 
@@ -155,7 +158,7 @@ export class CustomersService {
     const customer = await this.findById(customerId);
 
     if (!customer) {
-      throw new BadRequestException('고객 정보를 찾을 수 없습니다.');
+      throw new BadRequestException(ERROR_MESSAGES.CUSTOMER.NOT_FOUND);
     }
 
     return {

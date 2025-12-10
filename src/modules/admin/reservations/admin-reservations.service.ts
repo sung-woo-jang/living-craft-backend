@@ -8,6 +8,7 @@ import {
   AdminReservationStatusUpdate,
 } from './dto/request';
 import { AdminReservationListResponseDto } from './dto/response';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class AdminReservationsService {
@@ -98,7 +99,7 @@ export class AdminReservationsService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
     }
 
     reservation.status = dto.status as unknown as ReservationStatus;
@@ -119,7 +120,7 @@ export class AdminReservationsService {
     });
 
     if (!reservation) {
-      throw new NotFoundException('예약을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
     }
 
     reservation.status = ReservationStatus.CANCELLED;

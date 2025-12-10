@@ -19,7 +19,11 @@ import { RolesGuard } from '@common/guards/roles.guard';
 import { Roles } from '@common/decorators/roles.decorator';
 import { UserRole } from '@common/enums';
 import { AdminServicesService } from './admin-services.service';
-import { CreateServiceDto, UpdateServiceDto } from './dto/request';
+import {
+  CreateServiceDto,
+  UpdateServiceDto,
+  UpdateServiceOrderDto,
+} from './dto/request';
 import { Service } from '@modules/services/entities';
 
 @Controller('admin/services')
@@ -81,5 +85,16 @@ export class AdminServicesController {
   ): Promise<SuccessResponseDto<void>> {
     await this.adminServicesService.delete(id);
     return new SuccessResponseDto('서비스가 삭제되었습니다.');
+  }
+
+  @Post('update-order')
+  @ApiOperation({ summary: '서비스 순서 변경' })
+  @ApiResponse({ status: 200, description: '순서 변경 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
+  async updateServiceOrder(
+    @Body() dto: UpdateServiceOrderDto,
+  ): Promise<SuccessResponseDto<void>> {
+    await this.adminServicesService.updateServiceOrder(dto);
+    return new SuccessResponseDto('서비스 순서가 변경되었습니다.');
   }
 }

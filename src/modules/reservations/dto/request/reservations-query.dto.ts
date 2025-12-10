@@ -2,6 +2,7 @@ import { IsOptional, IsEnum } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { ReservationStatus } from '../../entities';
+import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
 export class ReservationsQueryDto {
   @ApiPropertyOptional({
@@ -10,7 +11,12 @@ export class ReservationsQueryDto {
     example: ReservationStatus.PENDING,
   })
   @IsOptional()
-  @IsEnum(ReservationStatus, { message: '유효하지 않은 상태입니다.' })
+  @IsEnum(ReservationStatus, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_ENUM(
+      FIELD_NAMES.status,
+      Object.values(ReservationStatus).join(', '),
+    ),
+  })
   status?: ReservationStatus;
 
   @ApiPropertyOptional({

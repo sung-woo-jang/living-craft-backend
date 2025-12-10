@@ -1,10 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Service, ServiceRegion } from '@modules/services/entities';
 import { District } from '@modules/admin/districts/entities';
 import { Icon } from '@modules/icons/entities';
-import { CreateServiceDto, UpdateServiceDto } from './dto/request';
+import {
+  CreateServiceDto,
+  UpdateServiceDto,
+  UpdateServiceOrderDto,
+} from './dto/request';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class AdminServicesService {
@@ -40,7 +49,7 @@ export class AdminServicesService {
     });
 
     if (!service) {
-      throw new NotFoundException('서비스를 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
     }
 
     return service;
@@ -56,7 +65,20 @@ export class AdminServicesService {
     });
 
     if (!icon) {
-      throw new BadRequestException(`아이콘을 찾을 수 없습니다: ${dto.iconName}`);
+      throw new BadRequestException(
+        ERROR_MESSAGES.SERVICE.ICON_NOT_FOUND(dto.iconName),
+      );
+    }
+
+    // sortOrder가 제공되지 않은 경우 자동 계산
+    let sortOrder = dto.sortOrder;
+    if (sortOrder === undefined || sortOrder === null) {
+      const maxSortOrder = await this.serviceRepository
+        .createQueryBuilder('service')
+        .select('MAX(service.sortOrder)', 'max')
+        .getRawOne();
+
+      sortOrder = (maxSortOrder?.max ?? 0) + 1;
     }
 
     const service = this.serviceRepository.create({
@@ -66,13 +88,14 @@ export class AdminServicesService {
       iconBgColor: dto.iconBgColor,
       duration: dto.duration,
       requiresTimeSelection: dto.requiresTimeSelection,
+      sortOrder,
     });
 
     const savedService = await this.serviceRepository.save(service);
 
     // 서비스 가능 지역 설정
-    if (dto.serviceableRegions && dto.serviceableRegions.length > 0) {
-      await this.updateServiceRegions(savedService.id, dto.serviceableRegions);
+    if (dto.regions && dto.regions.length > 0) {
+      await this.updateServiceRegionsWithFee(savedService.id, dto.regions);
     }
 
     return this.findById(savedService.id);
@@ -94,7 +117,9 @@ export class AdminServicesService {
       });
 
       if (!icon) {
-        throw new BadRequestException(`아이콘을 찾을 수 없습니다: ${dto.iconName}`);
+        throw new BadRequestException(
+          ERROR_MESSAGES.SERVICE.ICON_NOT_FOUND(dto.iconName),
+        );
       }
 
       service.iconId = icon.id;
@@ -108,8 +133,8 @@ export class AdminServicesService {
     await this.serviceRepository.save(service);
 
     // 서비스 가능 지역 업데이트
-    if (dto.serviceableRegions !== undefined) {
-      await this.updateServiceRegions(id, dto.serviceableRegions);
+    if (dto.regions !== undefined) {
+      await this.updateServiceRegionsWithFee(id, dto.regions);
     }
 
     return this.findById(id);
@@ -125,7 +150,50 @@ export class AdminServicesService {
   }
 
   /**
-   * 서비스 가능 지역 업데이트
+   * 서비스 순서 변경
+   */
+  async updateServiceOrder(dto: UpdateServiceOrderDto): Promise<void> {
+    // 트랜잭션으로 일괄 업데이트
+    await this.serviceRepository.manager.transaction(async (manager) => {
+      for (const item of dto.serviceOrders) {
+        await manager.update(
+          Service,
+          { id: item.id },
+          { sortOrder: item.sortOrder },
+        );
+      }
+    });
+  }
+
+  /**
+   * 서비스 가능 지역 업데이트 (출장비 포함)
+   */
+  private async updateServiceRegionsWithFee(
+    serviceId: number,
+    regions: { districtId: number; estimateFee: number }[],
+  ): Promise<void> {
+    // 기존 지역 삭제
+    await this.serviceRegionRepository.delete({ serviceId });
+
+    // 새 지역 추가
+    for (const region of regions) {
+      const district = await this.districtRepository.findOne({
+        where: { id: region.districtId },
+      });
+
+      if (district) {
+        const serviceRegion = this.serviceRegionRepository.create({
+          serviceId,
+          districtId: region.districtId,
+          estimateFee: region.estimateFee,
+        });
+        await this.serviceRegionRepository.save(serviceRegion);
+      }
+    }
+  }
+
+  /**
+   * 서비스 가능 지역 업데이트 (기존 방식 - 호환성 유지)
    */
   private async updateServiceRegions(
     serviceId: number,

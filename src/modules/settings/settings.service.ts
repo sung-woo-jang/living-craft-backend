@@ -8,6 +8,7 @@ import { Repository, MoreThanOrEqual } from 'typeorm';
 import { OperatingSetting, OperatingType, Holiday } from './entities';
 import { UpdateOperatingHoursDto, AddHolidayDto } from './dto/request';
 import { OperatingHoursResponseDto } from './dto/response';
+import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
 export class SettingsService {
@@ -129,7 +130,9 @@ export class SettingsService {
     });
 
     if (existing) {
-      throw new BadRequestException('이미 등록된 휴무일입니다.');
+      throw new BadRequestException(
+        ERROR_MESSAGES.SETTINGS.HOLIDAY_ALREADY_EXISTS,
+      );
     }
 
     const holiday = this.holidayRepository.create({
@@ -159,7 +162,7 @@ export class SettingsService {
     });
 
     if (!holiday) {
-      throw new NotFoundException('해당 휴무일을 찾을 수 없습니다.');
+      throw new NotFoundException(ERROR_MESSAGES.SETTINGS.HOLIDAY_NOT_FOUND);
     }
 
     await this.holidayRepository.remove(holiday);

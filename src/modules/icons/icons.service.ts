@@ -16,8 +16,13 @@ export class IconsService {
    * 아이콘 목록 조회
    * @param type 아이콘 타입 필터 (선택)
    * @param search 아이콘 이름 검색 (선택)
+   * @param limit 최대 결과 개수 (기본: 100, 최대: 500)
    */
-  async findAll(type?: IconType, search?: string): Promise<IconListDto[]> {
+  async findAll(
+    type?: IconType,
+    search?: string,
+    limit?: number,
+  ): Promise<IconListDto[]> {
     const where: any = {};
 
     if (type) {
@@ -28,9 +33,13 @@ export class IconsService {
       where.name = Like(`%${search}%`);
     }
 
+    // limit 검증 (기본: 100, 최대: 500)
+    const take = Math.min(limit || 100, 500);
+
     const icons = await this.iconRepository.find({
       where,
       order: { name: 'ASC' },
+      take,
     });
 
     return icons.map((icon) => ({
