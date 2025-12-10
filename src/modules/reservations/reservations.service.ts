@@ -24,6 +24,7 @@ import {
 import { ServicesService } from '@modules/services/services.service';
 import { SettingsService } from '@modules/settings/settings.service';
 import { OperatingType } from '@modules/settings/entities';
+import { ScheduleMode } from '@modules/services/entities/service-schedule.entity';
 import { ReservationCodeUtil } from '@common/utils/reservation-code.util';
 import { ERROR_MESSAGES } from '@common/constants';
 
@@ -212,25 +213,70 @@ export class ReservationsService {
     const date = new Date(dto.date);
     const dayOfWeekIndex = date.getDay();
     const dayOfWeek = this.dayOfWeekMap[dayOfWeekIndex];
+    const serviceId = parseInt(dto.serviceId);
 
-    // 휴무일 체크
-    const isHoliday = await this.settingsService.isHoliday(date);
-    if (isHoliday) {
+    // 서비스별 스케줄 조회
+    const serviceSchedule = await this.servicesService.getServiceSchedule(serviceId);
+
+    // 예약 가능 기간 체크
+    if (serviceSchedule) {
+      const maxDate = moment().add(serviceSchedule.bookingPeriodMonths, 'months').endOf('day');
+      if (moment(date).isAfter(maxDate)) {
+        return {
+          date: dto.date,
+          dayOfWeek,
+          isAvailable: false,
+          times: [],
+          defaultTime: '09:00',
+          reason: `예약 가능 기간이 아닙니다. (${serviceSchedule.bookingPeriodMonths}개월 이내만 예약 가능)`,
+        };
+      }
+    }
+
+    // 전역 휴무일 체크
+    const isGlobalHoliday = await this.settingsService.isHoliday(date);
+    if (isGlobalHoliday) {
       return {
         date: dto.date,
         dayOfWeek,
         isAvailable: false,
         times: [],
         defaultTime: '09:00',
+        reason: '휴무일입니다.',
       };
     }
 
-    // 운영 설정 조회
+    // 서비스별 휴무일 체크
+    const serviceHolidays = await this.servicesService.getServiceHolidays(serviceId);
+    const dateString = moment(date).format('YYYY-MM-DD');
+    const serviceHoliday = serviceHolidays.find(
+      (h) => moment(h.date).format('YYYY-MM-DD') === dateString,
+    );
+    if (serviceHoliday) {
+      return {
+        date: dto.date,
+        dayOfWeek,
+        isAvailable: false,
+        times: [],
+        defaultTime: '09:00',
+        reason: serviceHoliday.reason || '서비스 휴무일입니다.',
+      };
+    }
+
+    // 스케줄 모드에 따른 운영 설정 결정
     const operatingType =
       dto.type === TimeType.ESTIMATE
         ? OperatingType.ESTIMATE
         : OperatingType.CONSTRUCTION;
-    const setting =
+
+    // 서비스별 스케줄 모드 가져오기
+    const scheduleMode =
+      dto.type === TimeType.ESTIMATE
+        ? serviceSchedule?.estimateScheduleMode
+        : serviceSchedule?.constructionScheduleMode;
+
+    // 기본 전역 설정
+    const globalSetting =
       await this.settingsService.getOperatingSettingByType(operatingType);
 
     // 기본값 설정
@@ -244,7 +290,62 @@ export class ReservationsService {
       slotDuration: 60,
     };
 
-    const config = setting || defaultSetting;
+    // 스케줄 모드에 따른 설정 결정
+    let config = globalSetting || defaultSetting;
+
+    if (serviceSchedule && scheduleMode && scheduleMode !== ScheduleMode.GLOBAL) {
+      const serviceAvailableDays =
+        dto.type === TimeType.ESTIMATE
+          ? serviceSchedule.estimateAvailableDays
+          : serviceSchedule.constructionAvailableDays;
+
+      const serviceStartTime =
+        dto.type === TimeType.ESTIMATE
+          ? serviceSchedule.estimateStartTime
+          : serviceSchedule.constructionStartTime;
+
+      const serviceEndTime =
+        dto.type === TimeType.ESTIMATE
+          ? serviceSchedule.estimateEndTime
+          : serviceSchedule.constructionEndTime;
+
+      const serviceSlotDuration =
+        dto.type === TimeType.ESTIMATE
+          ? serviceSchedule.estimateSlotDuration
+          : serviceSchedule.constructionSlotDuration;
+
+      // 스케줄 모드에 따른 요일 계산
+      let availableDays: string[];
+      switch (scheduleMode) {
+        case ScheduleMode.WEEKDAYS:
+          availableDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+          break;
+        case ScheduleMode.WEEKENDS:
+          availableDays = ['sat', 'sun'];
+          break;
+        case ScheduleMode.EVERYDAY:
+          availableDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          break;
+        case ScheduleMode.CUSTOM:
+          availableDays = serviceAvailableDays || config.availableDays;
+          break;
+        case ScheduleMode.EVERYDAY_EXCEPT:
+          // 매일에서 특정 요일 제외
+          const allDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          const excludeDays = serviceAvailableDays || [];
+          availableDays = allDays.filter((day) => !excludeDays.includes(day));
+          break;
+        default:
+          availableDays = config.availableDays;
+      }
+
+      config = {
+        availableDays,
+        startTime: serviceStartTime || config.startTime,
+        endTime: serviceEndTime || config.endTime,
+        slotDuration: serviceSlotDuration || config.slotDuration,
+      };
+    }
 
     // 요일 체크
     const dayCode = Object.keys(this.dayCodeMap).find(
@@ -259,6 +360,7 @@ export class ReservationsService {
         isAvailable: false,
         times: [],
         defaultTime: config.startTime,
+        reason: '해당 요일은 예약이 불가능합니다.',
       };
     }
 

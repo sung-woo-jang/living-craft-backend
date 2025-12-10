@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsEnum, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
 
@@ -12,6 +13,7 @@ export class AvailableTimesDto {
     description: '서비스 ID',
     example: '1',
   })
+  @Transform(({ value }) => String(value))
   @IsString({
     message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.serviceId),
   })

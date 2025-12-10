@@ -13,6 +13,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
+import { ServiceScheduleInputDto } from './service-schedule.dto';
 
 /**
  * 서비스 지역 입력 DTO
@@ -152,4 +153,13 @@ export class CreateServiceDto {
   @ValidateNested({ each: true })
   @Type(() => ServiceRegionInputDto)
   regions: ServiceRegionInputDto[];
+
+  @ApiPropertyOptional({
+    description: '서비스 스케줄 설정 (미입력 시 전역 설정 사용)',
+    type: ServiceScheduleInputDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ServiceScheduleInputDto)
+  schedule?: ServiceScheduleInputDto;
 }

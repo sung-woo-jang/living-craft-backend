@@ -1,8 +1,10 @@
-import { Entity, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, OneToMany, OneToOne, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
 import { Icon } from '@modules/icons/entities/icon.entity';
 import { ServiceRegion } from './service-region.entity';
+import { ServiceSchedule } from './service-schedule.entity';
+import { ServiceHoliday } from './service-holiday.entity';
 
 @Entity('services')
 export class Service extends BaseEntity {
@@ -79,4 +81,21 @@ export class Service extends BaseEntity {
   })
   @OneToMany(() => ServiceRegion, (serviceRegion) => serviceRegion.service)
   serviceRegions: ServiceRegion[];
+
+  @ApiPropertyOptional({
+    description: '서비스 스케줄 설정',
+    type: () => ServiceSchedule,
+  })
+  @OneToOne(() => ServiceSchedule, (schedule) => schedule.service, {
+    cascade: true,
+    nullable: true,
+  })
+  schedule: ServiceSchedule;
+
+  @ApiPropertyOptional({
+    description: '서비스별 휴무일 목록',
+    type: () => [ServiceHoliday],
+  })
+  @OneToMany(() => ServiceHoliday, (holiday) => holiday.service)
+  holidays: ServiceHoliday[];
 }

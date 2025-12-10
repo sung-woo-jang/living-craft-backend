@@ -4,8 +4,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Service, ServiceRegion } from './entities';
+import { Repository, In } from 'typeorm';
+import { Service, ServiceRegion, ServiceSchedule, ServiceHoliday } from './entities';
 import {
   ServiceListItemDto,
   ServiceableRegionDto,
@@ -13,11 +13,14 @@ import {
   ServiceDetailDto,
   CreateServiceDto,
   UpdateServiceDto,
+  ServiceScheduleInputDto,
+  ServiceHolidayInputDto,
 } from './dto';
 import { District } from '@modules/admin/districts/entities/district.entity';
 import { DistrictLevel } from '@common/enums/district-level.enum';
 import { Icon } from '@modules/icons/entities/icon.entity';
 import { ERROR_MESSAGES } from '@common/constants';
+import { ScheduleMode } from './entities/service-schedule.entity';
 
 @Injectable()
 export class ServicesService {
@@ -26,6 +29,10 @@ export class ServicesService {
     private readonly serviceRepository: Repository<Service>,
     @InjectRepository(ServiceRegion)
     private readonly serviceRegionRepository: Repository<ServiceRegion>,
+    @InjectRepository(ServiceSchedule)
+    private readonly serviceScheduleRepository: Repository<ServiceSchedule>,
+    @InjectRepository(ServiceHoliday)
+    private readonly serviceHolidayRepository: Repository<ServiceHoliday>,
     @InjectRepository(District)
     private readonly districtRepository: Repository<District>,
     @InjectRepository(Icon)
@@ -123,10 +130,30 @@ export class ServicesService {
 
       await manager.save(ServiceRegion, serviceRegions);
 
-      // 3. Relations과 함께 다시 조회
+      // 3. ServiceSchedule 생성 (있는 경우)
+      if (dto.schedule) {
+        const schedule = manager.create(ServiceSchedule, {
+          serviceId: savedService.id,
+          estimateScheduleMode: dto.schedule.estimateScheduleMode ?? ScheduleMode.GLOBAL,
+          estimateAvailableDays: dto.schedule.estimateAvailableDays ?? null,
+          estimateStartTime: dto.schedule.estimateStartTime ?? null,
+          estimateEndTime: dto.schedule.estimateEndTime ?? null,
+          estimateSlotDuration: dto.schedule.estimateSlotDuration ?? null,
+          constructionScheduleMode: dto.schedule.constructionScheduleMode ?? ScheduleMode.GLOBAL,
+          constructionAvailableDays: dto.schedule.constructionAvailableDays ?? null,
+          constructionStartTime: dto.schedule.constructionStartTime ?? null,
+          constructionEndTime: dto.schedule.constructionEndTime ?? null,
+          constructionSlotDuration: dto.schedule.constructionSlotDuration ?? null,
+          bookingPeriodMonths: dto.schedule.bookingPeriodMonths ?? 3,
+        });
+
+        await manager.save(ServiceSchedule, schedule);
+      }
+
+      // 4. Relations과 함께 다시 조회
       return manager.findOne(Service, {
         where: { id: savedService.id },
-        relations: ['serviceRegions', 'serviceRegions.district'],
+        relations: ['serviceRegions', 'serviceRegions.district', 'schedule', 'holidays'],
       });
     });
   }
@@ -185,10 +212,53 @@ export class ServicesService {
         await manager.save(ServiceRegion, serviceRegions);
       }
 
+      // ServiceSchedule 업데이트 (있는 경우)
+      if (dto.schedule !== undefined) {
+        // 기존 스케줄 조회
+        const existingSchedule = await manager.findOne(ServiceSchedule, {
+          where: { serviceId: id },
+        });
+
+        if (existingSchedule) {
+          // 기존 스케줄 업데이트
+          await manager.update(ServiceSchedule, { serviceId: id }, {
+            estimateScheduleMode: dto.schedule.estimateScheduleMode ?? existingSchedule.estimateScheduleMode,
+            estimateAvailableDays: dto.schedule.estimateAvailableDays ?? existingSchedule.estimateAvailableDays,
+            estimateStartTime: dto.schedule.estimateStartTime ?? existingSchedule.estimateStartTime,
+            estimateEndTime: dto.schedule.estimateEndTime ?? existingSchedule.estimateEndTime,
+            estimateSlotDuration: dto.schedule.estimateSlotDuration ?? existingSchedule.estimateSlotDuration,
+            constructionScheduleMode: dto.schedule.constructionScheduleMode ?? existingSchedule.constructionScheduleMode,
+            constructionAvailableDays: dto.schedule.constructionAvailableDays ?? existingSchedule.constructionAvailableDays,
+            constructionStartTime: dto.schedule.constructionStartTime ?? existingSchedule.constructionStartTime,
+            constructionEndTime: dto.schedule.constructionEndTime ?? existingSchedule.constructionEndTime,
+            constructionSlotDuration: dto.schedule.constructionSlotDuration ?? existingSchedule.constructionSlotDuration,
+            bookingPeriodMonths: dto.schedule.bookingPeriodMonths ?? existingSchedule.bookingPeriodMonths,
+          });
+        } else {
+          // 새로운 스케줄 생성
+          const schedule = manager.create(ServiceSchedule, {
+            serviceId: id,
+            estimateScheduleMode: dto.schedule.estimateScheduleMode ?? ScheduleMode.GLOBAL,
+            estimateAvailableDays: dto.schedule.estimateAvailableDays ?? null,
+            estimateStartTime: dto.schedule.estimateStartTime ?? null,
+            estimateEndTime: dto.schedule.estimateEndTime ?? null,
+            estimateSlotDuration: dto.schedule.estimateSlotDuration ?? null,
+            constructionScheduleMode: dto.schedule.constructionScheduleMode ?? ScheduleMode.GLOBAL,
+            constructionAvailableDays: dto.schedule.constructionAvailableDays ?? null,
+            constructionStartTime: dto.schedule.constructionStartTime ?? null,
+            constructionEndTime: dto.schedule.constructionEndTime ?? null,
+            constructionSlotDuration: dto.schedule.constructionSlotDuration ?? null,
+            bookingPeriodMonths: dto.schedule.bookingPeriodMonths ?? 3,
+          });
+
+          await manager.save(ServiceSchedule, schedule);
+        }
+      }
+
       // Relations과 함께 다시 조회
       return manager.findOne(Service, {
         where: { id },
-        relations: ['serviceRegions', 'serviceRegions.district'],
+        relations: ['serviceRegions', 'serviceRegions.district', 'schedule', 'holidays'],
       });
     });
   }
@@ -366,5 +436,141 @@ export class ServicesService {
     result.sort((a, b) => parseInt(a.id) - parseInt(b.id));
 
     return result;
+  }
+
+  // ===== 서비스 휴무일 관련 메서드 =====
+
+  /**
+   * 서비스 휴무일 목록 조회
+   */
+  async getServiceHolidays(serviceId: number): Promise<ServiceHoliday[]> {
+    const service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
+    });
+    if (!service) {
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
+    }
+
+    return this.serviceHolidayRepository.find({
+      where: { serviceId },
+      order: { date: 'ASC' },
+    });
+  }
+
+  /**
+   * 서비스 휴무일 추가
+   */
+  async addServiceHolidays(
+    serviceId: number,
+    holidays: ServiceHolidayInputDto[],
+  ): Promise<ServiceHoliday[]> {
+    const service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
+    });
+    if (!service) {
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
+    }
+
+    const newHolidays = holidays.map((holiday) =>
+      this.serviceHolidayRepository.create({
+        serviceId,
+        date: new Date(holiday.date),
+        reason: holiday.reason,
+      }),
+    );
+
+    return this.serviceHolidayRepository.save(newHolidays);
+  }
+
+  /**
+   * 서비스 휴무일 삭제
+   */
+  async deleteServiceHolidays(
+    serviceId: number,
+    holidayIds: number[],
+  ): Promise<{ deleted: number }> {
+    const service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
+    });
+    if (!service) {
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
+    }
+
+    const result = await this.serviceHolidayRepository.delete({
+      id: In(holidayIds),
+      serviceId,
+    });
+
+    return { deleted: result.affected ?? 0 };
+  }
+
+  /**
+   * 서비스 스케줄 조회
+   */
+  async getServiceSchedule(serviceId: number): Promise<ServiceSchedule | null> {
+    const service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
+    });
+    if (!service) {
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
+    }
+
+    return this.serviceScheduleRepository.findOne({
+      where: { serviceId },
+    });
+  }
+
+  /**
+   * 서비스 스케줄 업데이트
+   */
+  async updateServiceSchedule(
+    serviceId: number,
+    dto: ServiceScheduleInputDto,
+  ): Promise<ServiceSchedule> {
+    const service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
+    });
+    if (!service) {
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
+    }
+
+    let schedule = await this.serviceScheduleRepository.findOne({
+      where: { serviceId },
+    });
+
+    if (schedule) {
+      // 기존 스케줄 업데이트
+      Object.assign(schedule, {
+        estimateScheduleMode: dto.estimateScheduleMode ?? schedule.estimateScheduleMode,
+        estimateAvailableDays: dto.estimateAvailableDays ?? schedule.estimateAvailableDays,
+        estimateStartTime: dto.estimateStartTime ?? schedule.estimateStartTime,
+        estimateEndTime: dto.estimateEndTime ?? schedule.estimateEndTime,
+        estimateSlotDuration: dto.estimateSlotDuration ?? schedule.estimateSlotDuration,
+        constructionScheduleMode: dto.constructionScheduleMode ?? schedule.constructionScheduleMode,
+        constructionAvailableDays: dto.constructionAvailableDays ?? schedule.constructionAvailableDays,
+        constructionStartTime: dto.constructionStartTime ?? schedule.constructionStartTime,
+        constructionEndTime: dto.constructionEndTime ?? schedule.constructionEndTime,
+        constructionSlotDuration: dto.constructionSlotDuration ?? schedule.constructionSlotDuration,
+        bookingPeriodMonths: dto.bookingPeriodMonths ?? schedule.bookingPeriodMonths,
+      });
+    } else {
+      // 새 스케줄 생성
+      schedule = this.serviceScheduleRepository.create({
+        serviceId,
+        estimateScheduleMode: dto.estimateScheduleMode ?? ScheduleMode.GLOBAL,
+        estimateAvailableDays: dto.estimateAvailableDays ?? null,
+        estimateStartTime: dto.estimateStartTime ?? null,
+        estimateEndTime: dto.estimateEndTime ?? null,
+        estimateSlotDuration: dto.estimateSlotDuration ?? null,
+        constructionScheduleMode: dto.constructionScheduleMode ?? ScheduleMode.GLOBAL,
+        constructionAvailableDays: dto.constructionAvailableDays ?? null,
+        constructionStartTime: dto.constructionStartTime ?? null,
+        constructionEndTime: dto.constructionEndTime ?? null,
+        constructionSlotDuration: dto.constructionSlotDuration ?? null,
+        bookingPeriodMonths: dto.bookingPeriodMonths ?? 3,
+      });
+    }
+
+    return this.serviceScheduleRepository.save(schedule);
   }
 }

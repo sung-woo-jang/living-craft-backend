@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class TimeSlotDto {
   @ApiProperty({
@@ -44,4 +44,10 @@ export class AvailableTimesResponseDto {
     example: '09:00',
   })
   defaultTime: string;
+
+  @ApiPropertyOptional({
+    description: '예약 불가 사유 (isAvailable이 false일 때만 반환)',
+    example: '휴무일입니다.',
+  })
+  reason?: string;
 }
