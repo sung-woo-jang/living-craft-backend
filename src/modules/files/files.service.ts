@@ -6,7 +6,7 @@ import { join } from 'path';
 import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import { FileUtil } from '@common/utils/file.util';
 import { ERROR_MESSAGES } from '@common/constants';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 
 @Injectable()
 export class FilesService {

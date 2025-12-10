@@ -20,12 +20,14 @@ import { ReservationsService } from './reservations.service';
 import {
   CreateReservationDto,
   AvailableTimesDto,
+  AvailableDatesDto,
   ReservationsQueryDto,
 } from './dto/request';
 import {
   CreateReservationResponseDto,
   ReservationDetailDto,
   AvailableTimesResponseDto,
+  AvailableDatesResponseDto,
   MyReservationListResponseDto,
 } from './dto/response';
 import { CustomerJwtAuthGuard } from '@modules/customers/guards';
@@ -53,6 +55,24 @@ export class ReservationsController {
     const result = await this.reservationsService.getAvailableTimes(dto);
     return new SuccessResponseDto(
       '예약 가능 시간 조회에 성공했습니다.',
+      result,
+    );
+  }
+
+  @Post('services/available-dates')
+  @Public()
+  @ApiOperation({ summary: '월별 예약 가능 날짜 조회' })
+  @ApiResponse({
+    status: 201,
+    description: '조회 성공',
+    type: AvailableDatesResponseDto,
+  })
+  async getAvailableDates(
+    @Body() dto: AvailableDatesDto,
+  ): Promise<SuccessResponseDto<AvailableDatesResponseDto>> {
+    const result = await this.reservationsService.getAvailableDates(dto);
+    return new SuccessResponseDto(
+      '월별 예약 가능 날짜 조회에 성공했습니다.',
       result,
     );
   }

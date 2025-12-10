@@ -1,4 +1,4 @@
-import * as moment from 'moment';
+import moment from 'moment';
 
 /**
  * 예약번호 생성 및 관리 유틸리티 클래스

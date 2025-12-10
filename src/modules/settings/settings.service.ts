@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual, Between } from 'typeorm';
 import { OperatingSetting, OperatingType, Holiday } from './entities';
 import { UpdateOperatingHoursDto, AddHolidayDto } from './dto/request';
 import { OperatingHoursResponseDto } from './dto/response';
@@ -194,6 +194,21 @@ export class SettingsService {
   ): Promise<OperatingSetting | null> {
     return this.operatingSettingRepository.findOne({
       where: { type },
+    });
+  }
+
+  /**
+   * 특정 월의 휴무일 목록 조회
+   */
+  async getHolidaysForMonth(year: number, month: number): Promise<Holiday[]> {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0); // 해당 월의 마지막 날
+
+    return this.holidayRepository.find({
+      where: {
+        date: Between(startDate, endDate),
+      },
+      order: { date: 'ASC' },
     });
   }
 

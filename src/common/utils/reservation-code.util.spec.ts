@@ -1,7 +1,7 @@
 // ReservationCodeUtil 유틸리티 클래스 테스트
 import { ReservationCodeUtil } from './reservation-code.util';
 // moment.js: 날짜 처리를 위한 라이브러리
-import * as moment from 'moment';
+import moment from 'moment';
 
 // ReservationCodeUtil 클래스에 대한 테스트 스위트
 describe('ReservationCodeUtil', () => {

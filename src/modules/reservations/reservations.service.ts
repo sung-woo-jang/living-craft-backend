@@ -6,11 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as moment from 'moment';
+import moment from 'moment';
 import { Reservation, ReservationStatus } from './entities';
 import {
   CreateReservationDto,
   AvailableTimesDto,
+  AvailableDatesDto,
   TimeType,
   ReservationsQueryDto,
 } from './dto/request';
@@ -18,6 +19,8 @@ import {
   CreateReservationResponseDto,
   ReservationDetailDto,
   AvailableTimesResponseDto,
+  AvailableDatesResponseDto,
+  UnavailableDateDto,
   TimeSlotDto,
   MyReservationListResponseDto,
 } from './dto/response';
@@ -461,5 +464,158 @@ export class ReservationsService {
    */
   private formatDate(date: Date): string {
     return moment(date).format('YYYY-MM-DD');
+  }
+
+  /**
+   * 월별 예약 가능 날짜 조회
+   * 해당 월의 모든 날짜에 대해 예약 가능 여부를 반환합니다.
+   */
+  async getAvailableDates(
+    dto: AvailableDatesDto,
+  ): Promise<AvailableDatesResponseDto> {
+    const { serviceId, year, month, type } = dto;
+
+    // 서비스별 스케줄 조회
+    const serviceSchedule =
+      await this.servicesService.getServiceSchedule(serviceId);
+
+    // 예약 가능 최대 날짜 계산 (기본 3개월)
+    const bookingPeriodMonths = serviceSchedule?.bookingPeriodMonths || 3;
+    const maxDate = moment()
+      .add(bookingPeriodMonths, 'months')
+      .endOf('day')
+      .format('YYYY-MM-DD');
+
+    // 전역 휴무일 목록 조회
+    const globalHolidays = await this.settingsService.getHolidaysForMonth(
+      year,
+      month,
+    );
+
+    // 서비스별 휴무일 목록 조회
+    const serviceHolidays =
+      await this.servicesService.getServiceHolidays(serviceId);
+
+    // 스케줄 모드에 따른 가능 요일 계산
+    const operatingType =
+      type === TimeType.ESTIMATE
+        ? OperatingType.ESTIMATE
+        : OperatingType.CONSTRUCTION;
+
+    const scheduleMode =
+      type === TimeType.ESTIMATE
+        ? serviceSchedule?.estimateScheduleMode
+        : serviceSchedule?.constructionScheduleMode;
+
+    // 전역 설정 조회
+    const globalSetting =
+      await this.settingsService.getOperatingSettingByType(operatingType);
+
+    // 기본값 설정
+    const defaultAvailableDays =
+      type === TimeType.ESTIMATE
+        ? ['mon', 'tue', 'wed', 'thu', 'fri']
+        : ['mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+    // 가능 요일 계산
+    let availableDays: string[] = globalSetting?.availableDays || defaultAvailableDays;
+
+    if (
+      serviceSchedule &&
+      scheduleMode &&
+      scheduleMode !== ScheduleMode.GLOBAL
+    ) {
+      const serviceAvailableDays =
+        type === TimeType.ESTIMATE
+          ? serviceSchedule.estimateAvailableDays
+          : serviceSchedule.constructionAvailableDays;
+
+      switch (scheduleMode) {
+        case ScheduleMode.WEEKDAYS:
+          availableDays = ['mon', 'tue', 'wed', 'thu', 'fri'];
+          break;
+        case ScheduleMode.WEEKENDS:
+          availableDays = ['sat', 'sun'];
+          break;
+        case ScheduleMode.EVERYDAY:
+          availableDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          break;
+        case ScheduleMode.CUSTOM:
+          availableDays = serviceAvailableDays || availableDays;
+          break;
+        case ScheduleMode.EVERYDAY_EXCEPT:
+          const allDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          const excludeDays = serviceAvailableDays || [];
+          availableDays = allDays.filter((day) => !excludeDays.includes(day));
+          break;
+      }
+    }
+
+    // 해당 월의 첫날과 마지막 날 계산
+    const firstDay = moment({ year, month: month - 1, day: 1 });
+    const lastDay = moment({ year, month: month - 1 }).endOf('month');
+
+    // 예약 불가능한 날짜 목록 생성
+    const unavailableDates: UnavailableDateDto[] = [];
+    const today = moment().startOf('day');
+
+    const current = firstDay.clone();
+    while (current.isSameOrBefore(lastDay)) {
+      const dateString = current.format('YYYY-MM-DD');
+      const dayOfWeekIndex = current.day();
+      const dayCode = Object.keys(this.dayCodeMap).find(
+        (key) => this.dayCodeMap[key] === dayOfWeekIndex,
+      );
+
+      let reason: string | null = null;
+
+      // 1. 과거 날짜 체크
+      if (current.isBefore(today)) {
+        reason = '과거 날짜는 예약할 수 없습니다.';
+      }
+      // 2. 예약 가능 기간 체크
+      else if (current.isAfter(moment(maxDate))) {
+        reason = `예약 가능 기간이 아닙니다. (${bookingPeriodMonths}개월 이내만 예약 가능)`;
+      }
+      // 3. 전역 휴무일 체크
+      else if (
+        globalHolidays.some(
+          (h) => moment(h.date).format('YYYY-MM-DD') === dateString,
+        )
+      ) {
+        const holiday = globalHolidays.find(
+          (h) => moment(h.date).format('YYYY-MM-DD') === dateString,
+        );
+        reason = holiday?.reason || '휴무일입니다.';
+      }
+      // 4. 서비스별 휴무일 체크
+      else if (
+        serviceHolidays.some(
+          (h) => moment(h.date).format('YYYY-MM-DD') === dateString,
+        )
+      ) {
+        const holiday = serviceHolidays.find(
+          (h) => moment(h.date).format('YYYY-MM-DD') === dateString,
+        );
+        reason = holiday?.reason || '서비스 휴무일입니다.';
+      }
+      // 5. 운영 요일 체크
+      else if (!availableDays.includes(dayCode || '')) {
+        reason = '해당 요일은 예약이 불가능합니다.';
+      }
+
+      if (reason) {
+        unavailableDates.push({ date: dateString, reason });
+      }
+
+      current.add(1, 'day');
+    }
+
+    return {
+      year,
+      month,
+      unavailableDates,
+      maxDate,
+    };
   }
 }
