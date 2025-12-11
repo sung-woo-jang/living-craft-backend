@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ERROR_MESSAGES, FIELD_NAMES } from '@common/constants';
+import { ServiceScheduleInputDto } from '@modules/services/dto/request/service-schedule.dto';
 
 export class ServiceRegionFeeDto {
   @ApiProperty({ description: '지역 ID (District ID)', example: 3 })
@@ -127,4 +128,13 @@ export class CreateServiceDto {
   @ValidateNested({ each: true })
   @Type(() => ServiceRegionFeeDto)
   regions: ServiceRegionFeeDto[];
+
+  @ApiPropertyOptional({
+    description: '서비스 스케줄 설정',
+    type: ServiceScheduleInputDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ServiceScheduleInputDto)
+  schedule?: ServiceScheduleInputDto;
 }

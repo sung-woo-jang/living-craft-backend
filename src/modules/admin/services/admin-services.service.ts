@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Service, ServiceRegion } from '@modules/services/entities';
+import {
+  Service,
+  ServiceRegion,
+  ServiceSchedule,
+} from '@modules/services/entities';
 import { District } from '@modules/admin/districts/entities';
 import { Icon } from '@modules/icons/entities';
 import {
@@ -22,6 +26,8 @@ export class AdminServicesService {
     private readonly serviceRepository: Repository<Service>,
     @InjectRepository(ServiceRegion)
     private readonly serviceRegionRepository: Repository<ServiceRegion>,
+    @InjectRepository(ServiceSchedule)
+    private readonly scheduleRepository: Repository<ServiceSchedule>,
     @InjectRepository(District)
     private readonly districtRepository: Repository<District>,
     @InjectRepository(Icon)
@@ -34,7 +40,13 @@ export class AdminServicesService {
   async findAll(): Promise<Service[]> {
     return this.serviceRepository.find({
       where: { isActive: true },
-      relations: ['serviceRegions', 'serviceRegions.district'],
+      relations: [
+        'serviceRegions',
+        'serviceRegions.district',
+        'serviceRegions.district.parent',
+        'schedule',
+        'icon',
+      ],
       order: { sortOrder: 'ASC', createdAt: 'DESC' },
     });
   }
@@ -45,7 +57,13 @@ export class AdminServicesService {
   async findById(id: number): Promise<Service> {
     const service = await this.serviceRepository.findOne({
       where: { id },
-      relations: ['serviceRegions', 'serviceRegions.district'],
+      relations: [
+        'serviceRegions',
+        'serviceRegions.district',
+        'serviceRegions.district.parent',
+        'schedule',
+        'icon',
+      ],
     });
 
     if (!service) {
@@ -98,6 +116,30 @@ export class AdminServicesService {
       await this.updateServiceRegionsWithFee(savedService.id, dto.regions);
     }
 
+    // 스케줄 저장
+    if (dto.schedule) {
+      const schedule = this.scheduleRepository.create({
+        serviceId: savedService.id,
+        estimateScheduleMode: dto.schedule.estimateScheduleMode,
+        estimateAvailableDays: dto.schedule.estimateAvailableDays?.length
+          ? dto.schedule.estimateAvailableDays
+          : null,
+        estimateStartTime: dto.schedule.estimateStartTime || null,
+        estimateEndTime: dto.schedule.estimateEndTime || null,
+        estimateSlotDuration: dto.schedule.estimateSlotDuration || null,
+        constructionScheduleMode: dto.schedule.constructionScheduleMode,
+        constructionAvailableDays: dto.schedule.constructionAvailableDays
+          ?.length
+          ? dto.schedule.constructionAvailableDays
+          : null,
+        constructionStartTime: dto.schedule.constructionStartTime || null,
+        constructionEndTime: dto.schedule.constructionEndTime || null,
+        constructionSlotDuration: dto.schedule.constructionSlotDuration || null,
+        bookingPeriodMonths: dto.schedule.bookingPeriodMonths ?? 3,
+      });
+      await this.scheduleRepository.save(schedule);
+    }
+
     return this.findById(savedService.id);
   }
 
@@ -135,6 +177,62 @@ export class AdminServicesService {
     // 서비스 가능 지역 업데이트
     if (dto.regions !== undefined) {
       await this.updateServiceRegionsWithFee(id, dto.regions);
+    }
+
+    // 스케줄 업데이트
+    if (dto.schedule !== undefined) {
+      let schedule = await this.scheduleRepository.findOne({
+        where: { serviceId: id },
+      });
+
+      if (schedule) {
+        // 기존 스케줄 업데이트
+        schedule.estimateScheduleMode = dto.schedule.estimateScheduleMode;
+        schedule.estimateAvailableDays = dto.schedule.estimateAvailableDays
+          ?.length
+          ? dto.schedule.estimateAvailableDays
+          : null;
+        schedule.estimateStartTime = dto.schedule.estimateStartTime || null;
+        schedule.estimateEndTime = dto.schedule.estimateEndTime || null;
+        schedule.estimateSlotDuration =
+          dto.schedule.estimateSlotDuration || null;
+        schedule.constructionScheduleMode =
+          dto.schedule.constructionScheduleMode;
+        schedule.constructionAvailableDays = dto.schedule
+          .constructionAvailableDays?.length
+          ? dto.schedule.constructionAvailableDays
+          : null;
+        schedule.constructionStartTime =
+          dto.schedule.constructionStartTime || null;
+        schedule.constructionEndTime = dto.schedule.constructionEndTime || null;
+        schedule.constructionSlotDuration =
+          dto.schedule.constructionSlotDuration || null;
+        schedule.bookingPeriodMonths = dto.schedule.bookingPeriodMonths ?? 3;
+        await this.scheduleRepository.save(schedule);
+      } else {
+        // 새 스케줄 생성
+        schedule = this.scheduleRepository.create({
+          serviceId: id,
+          estimateScheduleMode: dto.schedule.estimateScheduleMode,
+          estimateAvailableDays: dto.schedule.estimateAvailableDays?.length
+            ? dto.schedule.estimateAvailableDays
+            : null,
+          estimateStartTime: dto.schedule.estimateStartTime || null,
+          estimateEndTime: dto.schedule.estimateEndTime || null,
+          estimateSlotDuration: dto.schedule.estimateSlotDuration || null,
+          constructionScheduleMode: dto.schedule.constructionScheduleMode,
+          constructionAvailableDays: dto.schedule.constructionAvailableDays
+            ?.length
+            ? dto.schedule.constructionAvailableDays
+            : null,
+          constructionStartTime: dto.schedule.constructionStartTime || null,
+          constructionEndTime: dto.schedule.constructionEndTime || null,
+          constructionSlotDuration:
+            dto.schedule.constructionSlotDuration || null,
+          bookingPeriodMonths: dto.schedule.bookingPeriodMonths ?? 3,
+        });
+        await this.scheduleRepository.save(schedule);
+      }
     }
 
     return this.findById(id);
