@@ -5,9 +5,15 @@ import { Customer } from '@modules/customers/entities';
 import { Service } from '@modules/services/entities';
 
 export enum ReservationStatus {
+  /** 견적 대기 - 고객이 견적 문의 예약 생성 */
   PENDING = 'pending',
-  CONFIRMED = 'confirmed',
+  /** 견적 확정 - 관리자가 견적 방문 확인 */
+  ESTIMATE_CONFIRMED = 'estimate_confirmed',
+  /** 시공 예정 - 관리자가 시공 일정 지정 */
+  CONSTRUCTION_SCHEDULED = 'construction_scheduled',
+  /** 완료 */
   COMPLETED = 'completed',
+  /** 취소 */
   CANCELLED = 'cancelled',
 }
 
@@ -64,19 +70,33 @@ export class Reservation extends BaseEntity {
   @Column({ name: 'estimate_time', length: 10 })
   estimateTime: string;
 
-  @ApiProperty({
-    description: '시공 날짜',
+  @ApiPropertyOptional({
+    description: '시공 날짜 (관리자가 견적 완료 후 지정)',
     example: '2024-01-20',
   })
-  @Column({ name: 'construction_date', type: 'date' })
-  constructionDate: Date;
+  @Column({ name: 'construction_date', type: 'date', nullable: true })
+  constructionDate: Date | null;
 
   @ApiPropertyOptional({
-    description: '시공 시간 (null: 하루 종일)',
+    description: '시공 시간 (null: 하루 종일 또는 미정)',
     example: '09:00',
   })
   @Column({ name: 'construction_time', length: 10, nullable: true })
   constructionTime: string | null;
+
+  @ApiPropertyOptional({
+    description: '견적 확정 일시',
+    example: '2024-01-16T10:30:00.000Z',
+  })
+  @Column({ name: 'estimate_confirmed_at', type: 'timestamp', nullable: true })
+  estimateConfirmedAt: Date | null;
+
+  @ApiPropertyOptional({
+    description: '시공 일정 지정 일시',
+    example: '2024-01-17T10:30:00.000Z',
+  })
+  @Column({ name: 'construction_scheduled_at', type: 'timestamp', nullable: true })
+  constructionScheduledAt: Date | null;
 
   @ApiProperty({
     description: '도로명 주소',

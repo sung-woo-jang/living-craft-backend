@@ -54,40 +54,6 @@ export class CreateReservationDto {
   estimateTime: string;
 
   @ApiProperty({
-    description: '시공 날짜 (YYYY-MM-DD)',
-    example: '2024-01-20',
-  })
-  @IsString({
-    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.constructionDate),
-  })
-  @IsNotEmpty({
-    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY(
-      FIELD_NAMES.constructionDate,
-    ),
-  })
-  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
-    message: ERROR_MESSAGES.VALIDATION.DATE_FORMAT(
-      FIELD_NAMES.constructionDate,
-    ),
-  })
-  constructionDate: string;
-
-  @ApiPropertyOptional({
-    description: '시공 시간 (HH:mm, 하루 종일이면 null)',
-    example: '09:00',
-  })
-  @IsOptional()
-  @IsString({
-    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.constructionTime),
-  })
-  @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-    message: ERROR_MESSAGES.VALIDATION.TIME_FORMAT(
-      FIELD_NAMES.constructionTime,
-    ),
-  })
-  constructionTime?: string | null;
-
-  @ApiProperty({
     description: '도로명 주소',
     example: '서울특별시 강남구 테헤란로 123',
   })
