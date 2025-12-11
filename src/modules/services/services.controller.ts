@@ -23,6 +23,8 @@ import {
   AddServiceHolidayDto,
   DeleteServiceHolidayDto,
   ServiceScheduleInputDto,
+  ServiceAdminListItemDto,
+  ServiceAdminDetailDto,
 } from './dto';
 import { ServiceHoliday, ServiceSchedule } from './entities';
 
@@ -42,6 +44,37 @@ export class ServicesController {
   async findAll(): Promise<SuccessResponseDto<ServiceListItemDto[]>> {
     const services = await this.servicesService.findAll();
     return new SuccessResponseDto('서비스 목록 조회에 성공했습니다.', services);
+  }
+
+  @Get('admin')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[관리자] 서비스 목록 조회 (간소화)' })
+  @ApiResponse({
+    status: 200,
+    description: '서비스 목록 조회 성공',
+    type: [ServiceAdminListItemDto],
+  })
+  @ApiResponse({ status: 401, description: '인증 실패' })
+  async findAllForAdmin(): Promise<SuccessResponseDto<ServiceAdminListItemDto[]>> {
+    const services = await this.servicesService.findAllForAdmin();
+    return new SuccessResponseDto('서비스 목록 조회에 성공했습니다.', services);
+  }
+
+  @Get('admin/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '[관리자] 서비스 상세 조회 (수정 페이지용)' })
+  @ApiResponse({
+    status: 200,
+    description: '서비스 상세 조회 성공',
+    type: ServiceAdminDetailDto,
+  })
+  @ApiResponse({ status: 401, description: '인증 실패' })
+  @ApiResponse({ status: 404, description: '서비스를 찾을 수 없음' })
+  async findByIdForAdmin(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<SuccessResponseDto<ServiceAdminDetailDto>> {
+    const service = await this.servicesService.findByIdForAdmin(id);
+    return new SuccessResponseDto('서비스 상세 조회에 성공했습니다.', service);
   }
 
   @Post('admin')

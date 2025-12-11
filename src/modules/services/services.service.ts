@@ -20,10 +20,15 @@ import {
   ServiceListItemDto,
   ServiceScheduleInputDto,
   UpdateServiceDto,
+  ServiceAdminListItemDto,
+  ServiceAdminDetailDto,
+  ServiceRegionAdminDto,
+  ServiceScheduleAdminDto,
 } from './dto';
 import { District } from '@modules/admin/districts/entities/district.entity';
 import { DistrictLevel } from '@common/enums/district-level.enum';
 import { Icon } from '@modules/icons/entities/icon.entity';
+import { IconType } from '@modules/icons/enums/icon-type.enum';
 import { ERROR_MESSAGES } from '@common/constants';
 import { ScheduleMode } from './entities/service-schedule.entity';
 
@@ -68,6 +73,116 @@ export class ServicesService {
       where: { id },
       relations: ['serviceRegions', 'serviceRegions.district'],
     });
+  }
+
+  /**
+   * [관리자] 서비스 목록 조회 (간소화된 응답)
+   * 테이블 표시에 필요한 최소 정보만 반환
+   */
+  async findAllForAdmin(): Promise<ServiceAdminListItemDto[]> {
+    const services = await this.serviceRepository.find({
+      relations: ['icon', 'serviceRegions'],
+      order: { sortOrder: 'ASC', id: 'ASC' },
+    });
+
+    return services.map((service) => this.toAdminListItemDto(service));
+  }
+
+  /**
+   * [관리자] 서비스 상세 조회 (수정 페이지용)
+   */
+  async findByIdForAdmin(id: number): Promise<ServiceAdminDetailDto> {
+    const service = await this.serviceRepository.findOne({
+      where: { id },
+      relations: [
+        'icon',
+        'serviceRegions',
+        'serviceRegions.district',
+        'serviceRegions.district.parent',
+        'schedule',
+      ],
+    });
+
+    if (!service) {
+      throw new NotFoundException(ERROR_MESSAGES.SERVICE.NOT_FOUND);
+    }
+
+    return this.toAdminDetailDto(service);
+  }
+
+  /**
+   * Service 엔티티를 ServiceAdminListItemDto로 변환
+   */
+  private toAdminListItemDto(service: Service): ServiceAdminListItemDto {
+    return {
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      iconName: service.icon?.name ?? '',
+      iconBgColor: service.iconBgColor,
+      duration: service.duration,
+      requiresTimeSelection: service.requiresTimeSelection,
+      isActive: service.isActive,
+      sortOrder: service.sortOrder,
+      regionsCount: service.serviceRegions?.length ?? 0,
+      createdAt: service.createdAt.toISOString(),
+      updatedAt: service.updatedAt.toISOString(),
+    };
+  }
+
+  /**
+   * Service 엔티티를 ServiceAdminDetailDto로 변환
+   */
+  private toAdminDetailDto(service: Service): ServiceAdminDetailDto {
+    // 지역 정보 변환 (원본 형태 유지)
+    const regions: ServiceRegionAdminDto[] = (service.serviceRegions ?? []).map(
+      (sr) => ({
+        districtId: sr.districtId,
+        districtFullName: sr.district?.fullName ?? '',
+        districtName: sr.district?.name ?? '',
+        estimateFee: Number(sr.estimateFee),
+      }),
+    );
+
+    // 스케줄 정보 변환
+    let schedule: ServiceScheduleAdminDto | null = null;
+    if (service.schedule) {
+      schedule = {
+        estimateScheduleMode: service.schedule.estimateScheduleMode,
+        estimateAvailableDays: service.schedule.estimateAvailableDays,
+        estimateStartTime: service.schedule.estimateStartTime,
+        estimateEndTime: service.schedule.estimateEndTime,
+        estimateSlotDuration: service.schedule.estimateSlotDuration,
+        constructionScheduleMode: service.schedule.constructionScheduleMode,
+        constructionAvailableDays: service.schedule.constructionAvailableDays,
+        constructionStartTime: service.schedule.constructionStartTime,
+        constructionEndTime: service.schedule.constructionEndTime,
+        constructionSlotDuration: service.schedule.constructionSlotDuration,
+        bookingPeriodMonths: service.schedule.bookingPeriodMonths,
+      };
+    }
+
+    return {
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      icon: service.icon
+        ? {
+            id: service.icon.id,
+            name: service.icon.name,
+            type: service.icon.type,
+          }
+        : { id: 0, name: '', type: IconType.FILL },
+      iconBgColor: service.iconBgColor,
+      duration: service.duration,
+      requiresTimeSelection: service.requiresTimeSelection,
+      isActive: service.isActive,
+      sortOrder: service.sortOrder,
+      regions,
+      schedule,
+      createdAt: service.createdAt.toISOString(),
+      updatedAt: service.updatedAt.toISOString(),
+    };
   }
 
   /**
