@@ -24,6 +24,7 @@ import { SettingsModule } from '@modules/settings/settings.module';
 import { ReservationsModule } from '@modules/reservations/reservations.module';
 import { ReviewsModule } from '@modules/reviews/reviews.module';
 import { PortfoliosModule } from '@modules/portfolios/portfolios.module';
+import { AddressModule } from '@modules/address/address.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { PortfoliosModule } from '@modules/portfolios/portfolios.module';
     ReservationsModule,
     ReviewsModule,
     PortfoliosModule,
+    AddressModule,
   ],
   providers: [
     // Global Exception Filter

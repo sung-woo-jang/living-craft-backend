@@ -20,8 +20,8 @@ import { Roles } from '@common/decorators/roles.decorator';
 import { UserRole } from '@common/enums';
 import { AdminServicesService } from './admin-services.service';
 import {
-  CreateServiceDto,
-  UpdateServiceDto,
+  AdminCreateServiceDto,
+  AdminUpdateServiceDto,
   UpdateServiceOrderDto,
 } from './dto/request';
 import { Service } from '@modules/services/entities';
@@ -58,7 +58,7 @@ export class AdminServicesController {
   @ApiResponse({ status: 201, description: '생성 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
   async create(
-    @Body() dto: CreateServiceDto,
+    @Body() dto: AdminCreateServiceDto,
   ): Promise<SuccessResponseDto<Service>> {
     const result = await this.adminServicesService.create(dto);
     return new SuccessResponseDto('서비스가 생성되었습니다.', result);
@@ -70,7 +70,7 @@ export class AdminServicesController {
   @ApiResponse({ status: 404, description: '서비스를 찾을 수 없음' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateServiceDto,
+    @Body() dto: AdminUpdateServiceDto,
   ): Promise<SuccessResponseDto<Service>> {
     const result = await this.adminServicesService.update(id, dto);
     return new SuccessResponseDto('서비스가 수정되었습니다.', result);

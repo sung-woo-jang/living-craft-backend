@@ -118,7 +118,7 @@ export class AdminCustomersService {
         status: reservation.status,
         canCancel:
           reservation.status === ReservationStatus.PENDING ||
-          reservation.status === ReservationStatus.CONFIRMED,
+          reservation.status === ReservationStatus.ESTIMATE_CONFIRMED,
         canReview:
           reservation.status === ReservationStatus.COMPLETED &&
           !reviewedReservationIds.has(reservation.id),

@@ -13,8 +13,8 @@ import {
 import { District } from '@modules/admin/districts/entities';
 import { Icon } from '@modules/icons/entities';
 import {
-  CreateServiceDto,
-  UpdateServiceDto,
+  AdminCreateServiceDto,
+  AdminUpdateServiceDto,
   UpdateServiceOrderDto,
 } from './dto/request';
 import { ERROR_MESSAGES } from '@common/constants';
@@ -76,7 +76,7 @@ export class AdminServicesService {
   /**
    * 서비스 생성
    */
-  async create(dto: CreateServiceDto): Promise<Service> {
+  async create(dto: AdminCreateServiceDto): Promise<Service> {
     // iconName으로 Icon 조회
     const icon = await this.iconRepository.findOne({
       where: { name: dto.iconName },
@@ -146,7 +146,7 @@ export class AdminServicesService {
   /**
    * 서비스 수정
    */
-  async update(id: number, dto: UpdateServiceDto): Promise<Service> {
+  async update(id: number, dto: AdminUpdateServiceDto): Promise<Service> {
     const service = await this.findById(id);
 
     if (dto.title !== undefined) service.title = dto.title;

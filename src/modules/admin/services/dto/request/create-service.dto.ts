@@ -40,7 +40,7 @@ export class ServiceRegionFeeDto {
   estimateFee: number;
 }
 
-export class CreateServiceDto {
+export class AdminCreateServiceDto {
   @ApiProperty({ description: '서비스 제목', example: '인테리어 필름' })
   @IsString({
     message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.title),

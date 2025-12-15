@@ -88,8 +88,8 @@ export class ReservationsService {
       serviceId: parseInt(dto.serviceId),
       estimateDate,
       estimateTime: dto.estimateTime,
-      constructionDate: new Date(dto.constructionDate),
-      constructionTime: dto.constructionTime || null,
+      constructionDate: null, // 관리자가 나중에 지정
+      constructionTime: null, // 관리자가 나중에 지정
       address: dto.address,
       detailAddress: dto.detailAddress,
       customerName: dto.customerName,
