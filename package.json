@@ -31,6 +31,7 @@
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/config/typeorm.config.ts",
     "seed": "ts-node -r tsconfig-paths/register src/database/seeds/index.ts",
+    "seed:icons": "ts-node -r tsconfig-paths/register scripts/seed-icons.ts",
     "lint:fix": "eslint --fix .",
     "fix:all": "yarn lint:fix && yarn format",
     "ts:check": "tsc -b"
