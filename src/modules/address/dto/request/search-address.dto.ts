@@ -9,7 +9,11 @@ export class SearchAddressDto {
   @Transform(({ value }) => value?.trim())
   query: string;
 
-  @ApiPropertyOptional({ description: '지역 접두어', example: '인천 연수구', default: '인천' })
+  @ApiPropertyOptional({
+    description: '지역 접두어',
+    example: '인천 연수구',
+    default: '인천',
+  })
   @IsOptional()
   @IsString()
   @Transform(({ value }) => value?.trim() || '인천')

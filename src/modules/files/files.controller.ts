@@ -1,19 +1,19 @@
 import {
+  BadRequestException,
   Controller,
+  Param,
   Post,
   UploadedFile,
   UploadedFiles,
-  UseInterceptors,
-  Param,
   UseGuards,
-  BadRequestException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
-  ApiTags,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
-  ApiConsumes,
+  ApiTags,
 } from '@nestjs/swagger';
 import { FilesService } from './files.service';
 import { SuccessBaseResponseDto } from '@common/dto/response/success-base-response.dto';
@@ -100,6 +100,29 @@ export class FilesController {
       '포트폴리오 이미지를 업로드했습니다.',
       result,
     );
+  }
+
+  @Post('upload/reservation-images')
+  @UseInterceptors(FilesInterceptor('files', 5)) // 최대 5개 파일
+  @ApiOperation({
+    summary: '예약 이미지 업로드',
+    description: '예약용 이미지 파일들을 업로드합니다 (최대 5개).',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: 201,
+    description: '예약 이미지 업로드 성공',
+  })
+  async uploadReservationImages(@UploadedFiles() files: Express.Multer.File[]) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
+    }
+
+    const results = await Promise.all(
+      files.map((file) => this.filesService.uploadImage(file, 'reservations')),
+    );
+
+    return new SuccessBaseResponseDto('예약 이미지를 업로드했습니다.', results);
   }
 
   @Post('upload/review-images')

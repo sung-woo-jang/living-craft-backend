@@ -95,7 +95,11 @@ export class Reservation extends BaseEntity {
     description: '시공 일정 지정 일시',
     example: '2024-01-17T10:30:00.000Z',
   })
-  @Column({ name: 'construction_scheduled_at', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'construction_scheduled_at',
+    type: 'timestamp',
+    nullable: true,
+  })
   constructionScheduledAt: Date | null;
 
   @ApiProperty({

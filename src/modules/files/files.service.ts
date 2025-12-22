@@ -1,23 +1,28 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
 import { join } from 'path';
-import { existsSync, unlinkSync, writeFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { FileUtil } from '@common/utils/file.util';
 import { ERROR_MESSAGES } from '@common/constants';
+import { NcpStorageService } from '@common/services/ncp-storage.service';
 import sharp from 'sharp';
 
 @Injectable()
 export class FilesService {
   private readonly uploadPath: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly ncpStorageService: NcpStorageService,
+  ) {
     this.uploadPath = this.configService.get<string>(
       'app.uploadPath',
       './uploads',
     );
-    this.ensureUploadDirectories();
+    // NCP Object Storage 사용으로 로컬 디렉토리 생성 불필요
+    // this.ensureUploadDirectories();
   }
 
   /**
@@ -67,7 +72,7 @@ export class FilesService {
   }
 
   /**
-   * 이미지 업로드 및 리사이징
+   * 이미지 업로드 및 리사이징 (NCP Object Storage)
    */
   async uploadImage(
     file: Express.Multer.File,
@@ -79,30 +84,33 @@ export class FilesService {
       throw new BadRequestException(ERROR_MESSAGES.FILES.IMAGE_ONLY);
     }
 
-    const uploadDir = join(this.uploadPath, subfolder);
-    FileUtil.ensureDirectoryExists(uploadDir);
-
     const filename = FileUtil.generateUniqueFilename(file.originalname);
-    const filepath = join(uploadDir, filename);
+    const s3Key = `${subfolder}/${filename}`;
 
     // Sharp를 사용한 이미지 리사이징 및 최적화
     try {
-      await sharp(file.buffer)
+      const processedBuffer = await sharp(file.buffer)
         .resize(maxWidth, null, {
           withoutEnlargement: true,
           fit: 'inside',
         })
         .jpeg({ quality, progressive: true })
-        .png({ quality, progressive: true })
-        .webp({ quality })
-        .toFile(filepath);
+        .toBuffer();
+
+      // NCP Object Storage에 업로드
+      const url = await this.ncpStorageService.uploadFile(
+        processedBuffer,
+        s3Key,
+        'image/jpeg',
+      );
 
       return {
         filename,
-        path: filepath,
-        url: `/uploads/${subfolder}/${filename}`,
+        path: s3Key,
+        url,
       };
-    } catch {
+    } catch (error) {
+      console.error('이미지 처리 실패:', error);
       throw new BadRequestException(
         ERROR_MESSAGES.FILES.IMAGE_PROCESSING_ERROR,
       );
@@ -110,26 +118,35 @@ export class FilesService {
   }
 
   /**
-   * 파일 삭제
+   * 파일 삭제 (NCP Object Storage)
    */
-  async deleteFile(filepath: string): Promise<void> {
-    try {
-      if (existsSync(filepath)) {
-        unlinkSync(filepath);
-      }
-    } catch (error) {
-      // 파일 삭제 실패는 로그만 남기고 에러를 던지지 않음
-      console.error('파일 삭제 실패:', error);
-    }
+  async deleteFile(s3Key: string): Promise<void> {
+    await this.ncpStorageService.deleteFile(s3Key);
   }
 
   /**
-   * 파일 URL을 실제 파일 경로로 변환
+   * 파일 URL에서 S3 Key 추출
+   * NCP URL: https://kr.object.ncloudstorage.com/living-craft/images/filename.jpg
+   * -> S3 Key: images/filename.jpg
    */
   getFilePathFromUrl(url: string): string {
-    // /uploads/images/filename.jpg -> ./uploads/images/filename.jpg
-    const relativePath = url.replace('/uploads/', '');
-    return join(this.uploadPath, relativePath);
+    const bucketName = this.configService.get<string>('app.ncp.bucketName');
+
+    // 로컬 URL 형식인 경우 (하위 호환성)
+    if (url.startsWith('/uploads/')) {
+      return url.replace('/uploads/', '');
+    }
+
+    // NCP URL에서 S3 Key 추출
+    try {
+      const urlObj = new URL(url);
+      const pathWithBucket = urlObj.pathname.substring(1); // 맨 앞 '/' 제거
+      return pathWithBucket.replace(`${bucketName}/`, '');
+    } catch (error) {
+      console.error('URL 파싱 실패:', error);
+      // URL 파싱 실패 시 그대로 반환
+      return url;
+    }
   }
 
   /**
@@ -140,26 +157,7 @@ export class FilesService {
   }
 
   /**
-   * 업로드 디렉토리 생성
-   */
-  private ensureUploadDirectories(): void {
-    const directories = [
-      'images',
-      'services',
-      'portfolio',
-      'reviews',
-      'documents',
-      'temp',
-    ];
-
-    directories.forEach((dir) => {
-      const dirPath = join(this.uploadPath, dir);
-      FileUtil.ensureDirectoryExists(dirPath);
-    });
-  }
-
-  /**
-   * 문서 파일 업로드 (리사이징 없이 원본 그대로 저장)
+   * 문서 파일 업로드 (NCP Object Storage, 리사이징 없이 원본 그대로 저장)
    */
   async uploadDocument(
     file: Express.Multer.File,
@@ -173,20 +171,21 @@ export class FilesService {
       );
     }
 
-    const uploadDir = join(this.uploadPath, 'documents');
-    FileUtil.ensureDirectoryExists(uploadDir);
-
     const filename = FileUtil.generateUniqueFilename(file.originalname);
-    const filepath = join(uploadDir, filename);
+    const s3Key = `documents/${filename}`;
 
     try {
-      // 문서 파일은 리사이징 없이 원본 그대로 저장
-      writeFileSync(filepath, file.buffer);
+      // 문서 파일은 리사이징 없이 원본 그대로 NCP에 업로드
+      const url = await this.ncpStorageService.uploadFile(
+        file.buffer,
+        s3Key,
+        file.mimetype,
+      );
 
       return {
         filename,
-        path: filepath,
-        url: `/uploads/documents/${filename}`,
+        path: s3Key,
+        url,
       };
     } catch (error) {
       throw new BadRequestException(
@@ -219,5 +218,24 @@ export class FilesService {
     const tempDir = join(this.uploadPath, 'temp');
     console.log('Cleaning up temp files in:', tempDir);
     // 실제 구현에서는 fs.readdir과 stat을 사용하여 파일 생성일 확인 후 삭제
+  }
+
+  /**
+   * 업로드 디렉토리 생성
+   */
+  private ensureUploadDirectories(): void {
+    const directories = [
+      'images',
+      'services',
+      'portfolio',
+      'reviews',
+      'documents',
+      'temp',
+    ];
+
+    directories.forEach((dir) => {
+      const dirPath = join(this.uploadPath, dir);
+      FileUtil.ensureDirectoryExists(dirPath);
+    });
   }
 }

@@ -55,7 +55,9 @@ export class ServicesController {
     type: [ServiceAdminListItemDto],
   })
   @ApiResponse({ status: 401, description: '인증 실패' })
-  async findAllForAdmin(): Promise<SuccessResponseDto<ServiceAdminListItemDto[]>> {
+  async findAllForAdmin(): Promise<
+    SuccessResponseDto<ServiceAdminListItemDto[]>
+  > {
     const services = await this.servicesService.findAllForAdmin();
     return new SuccessResponseDto('서비스 목록 조회에 성공했습니다.', services);
   }
