@@ -10,6 +10,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import {
   ApiTags,
   ApiOperation,
@@ -98,7 +99,7 @@ export class AdminPromotionsController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('icon'))
+  @UseInterceptors(FileInterceptor('icon', { storage: memoryStorage() }))
   @ApiOperation({ summary: '프로모션 생성' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -132,7 +133,7 @@ export class AdminPromotionsController {
   }
 
   @Post(':id/update')
-  @UseInterceptors(FileInterceptor('icon'))
+  @UseInterceptors(FileInterceptor('icon', { storage: memoryStorage() }))
   @ApiOperation({ summary: '프로모션 수정' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

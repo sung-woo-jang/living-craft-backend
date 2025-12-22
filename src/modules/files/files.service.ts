@@ -91,6 +91,25 @@ export class FilesService {
     const s3Key = `${subfolder}/${filename}`;
 
     try {
+      // 파일 버퍼 확인
+      if (!file.buffer) {
+        console.error('파일 버퍼가 없습니다:', {
+          fieldname: file.fieldname,
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          path: file.path,
+        });
+        throw new Error('파일 버퍼가 없습니다. 메모리 스토리지를 사용해주세요.');
+      }
+
+      console.log('이미지 처리 시작:', {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        bufferLength: file.buffer?.length,
+      });
+
       // 원본 이미지 메타데이터 분석
       const metadata = await sharp(file.buffer).metadata();
       const originalWidth = metadata.width || 0;
@@ -158,7 +177,17 @@ export class FilesService {
         url,
       };
     } catch (error) {
-      console.error('이미지 처리 실패:', error);
+      console.error('이미지 처리 실패:', {
+        error: error.message,
+        stack: error.stack,
+        file: {
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          hasBuffer: !!file.buffer,
+          bufferLength: file.buffer?.length,
+        },
+      });
       throw new BadRequestException(
         ERROR_MESSAGES.FILES.IMAGE_PROCESSING_ERROR,
       );
