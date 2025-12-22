@@ -26,6 +26,7 @@ import { ReviewsModule } from '@modules/reviews/reviews.module';
 import { PortfoliosModule } from '@modules/portfolios/portfolios.module';
 import { AddressModule } from '@modules/address/address.module';
 import { FilmOptimizerModule } from '@modules/film-optimizer/film-optimizer.module';
+import { PromotionsModule } from '@modules/promotions/promotions.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { FilmOptimizerModule } from '@modules/film-optimizer/film-optimizer.modu
     PortfoliosModule,
     AddressModule,
     FilmOptimizerModule,
+    PromotionsModule,
   ],
   providers: [
     // Global Exception Filter
