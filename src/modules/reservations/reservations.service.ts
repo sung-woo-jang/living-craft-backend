@@ -26,6 +26,7 @@ import {
 } from './dto/response';
 import { ServicesService } from '@modules/services/services.service';
 import { SettingsService } from '@modules/settings/settings.service';
+import { FilesService } from '@modules/files/files.service';
 import { OperatingType } from '@modules/settings/entities';
 import { ScheduleMode } from '@modules/services/entities/service-schedule.entity';
 import { ReservationCodeUtil } from '@common/utils/reservation-code.util';
@@ -49,6 +50,7 @@ export class ReservationsService {
     private readonly reservationRepository: Repository<Reservation>,
     private readonly servicesService: ServicesService,
     private readonly settingsService: SettingsService,
+    private readonly filesService: FilesService,
   ) {}
 
   /**
@@ -56,6 +58,7 @@ export class ReservationsService {
    */
   async create(
     dto: CreateReservationDto,
+    photoFiles: Express.Multer.File[],
     customerId: number,
   ): Promise<CreateReservationResponseDto> {
     // 서비스 존재 확인
@@ -64,6 +67,21 @@ export class ReservationsService {
     );
     if (!service || !service.isActive) {
       throw new BadRequestException(ERROR_MESSAGES.RESERVATION.INVALID_SERVICE);
+    }
+
+    // 파일 업로드 처리
+    let photoUrls: string[] | null = null;
+    if (photoFiles && photoFiles.length > 0) {
+      try {
+        const uploadResults = await Promise.all(
+          photoFiles.map((file) =>
+            this.filesService.uploadImage(file, 'reservations'),
+          ),
+        );
+        photoUrls = uploadResults.map((result) => result.url);
+      } catch (error) {
+        throw new BadRequestException(`파일 업로드 실패: ${error.message}`);
+      }
     }
 
     // 예약번호 생성
@@ -82,31 +100,39 @@ export class ReservationsService {
     );
 
     // 예약 생성
-    const reservation = this.reservationRepository.create({
-      reservationNumber,
-      customerId,
-      serviceId: parseInt(dto.serviceId),
-      estimateDate,
-      estimateTime: dto.estimateTime,
-      constructionDate: null, // 관리자가 나중에 지정
-      constructionTime: null, // 관리자가 나중에 지정
-      address: dto.address,
-      detailAddress: dto.detailAddress,
-      customerName: dto.customerName,
-      customerPhone: dto.customerPhone,
-      memo: dto.memo || null,
-      photos: dto.photos || null,
-      status: ReservationStatus.PENDING,
-    });
+    try {
+      const reservation = this.reservationRepository.create({
+        reservationNumber,
+        customerId,
+        serviceId: parseInt(dto.serviceId),
+        estimateDate,
+        estimateTime: dto.estimateTime,
+        constructionDate: null, // 관리자가 나중에 지정
+        constructionTime: null, // 관리자가 나중에 지정
+        address: dto.address,
+        detailAddress: dto.detailAddress,
+        customerName: dto.customerName,
+        customerPhone: dto.customerPhone,
+        memo: dto.memo || null,
+        photos: photoUrls,
+        status: ReservationStatus.PENDING,
+      });
 
-    const saved = await this.reservationRepository.save(reservation);
+      const saved = await this.reservationRepository.save(reservation);
 
-    return {
-      id: saved.id.toString(),
-      reservationNumber: saved.reservationNumber,
-      status: saved.status,
-      createdAt: saved.createdAt.toISOString(),
-    };
+      return {
+        id: saved.id.toString(),
+        reservationNumber: saved.reservationNumber,
+        status: saved.status,
+        createdAt: saved.createdAt.toISOString(),
+      };
+    } catch (error) {
+      // 실패 시 업로드된 파일 롤백
+      if (photoUrls && photoUrls.length > 0) {
+        await this.cleanupUploadedFiles(photoUrls);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -626,5 +652,22 @@ export class ReservationsService {
       unavailableDates,
       maxDate,
     };
+  }
+
+  /**
+   * 업로드된 파일 정리 (롤백용)
+   */
+  private async cleanupUploadedFiles(urls: string[]): Promise<void> {
+    try {
+      await Promise.all(
+        urls.map((url) => {
+          const s3Key = this.filesService.getFilePathFromUrl(url);
+          return this.filesService.deleteFile(s3Key);
+        }),
+      );
+    } catch (error) {
+      console.error('파일 정리 중 오류 발생:', error);
+      // 에러를 던지지 않음 (메인 트랜잭션 실패가 더 중요)
+    }
   }
 }

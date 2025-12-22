@@ -74,22 +74,6 @@ export class CreatePortfolioDto {
   @Transform(({ value }) => value?.trim())
   detailedDescription: string;
 
-  @ApiProperty({
-    description: '이미지 URL 배열',
-    example: [
-      'https://example.com/images/portfolio1-1.jpg',
-      'https://example.com/images/portfolio1-2.jpg',
-    ],
-  })
-  @IsArray({
-    message: ERROR_MESSAGES.VALIDATION.IS_ARRAY('이미지 URL'),
-  })
-  @IsString({
-    each: true,
-    message: ERROR_MESSAGES.VALIDATION.ARRAY_ITEM_STRING('이미지 URL'),
-  })
-  images: string[];
-
   @ApiPropertyOptional({
     description: '태그 배열',
     example: ['카페', '모던', '인테리어필름'],

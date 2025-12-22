@@ -14,6 +14,7 @@ import {
   MyReviewListResponseDto,
 } from './dto/response';
 import { Reservation, ReservationStatus } from '@modules/reservations/entities';
+import { FilesService } from '@modules/files/files.service';
 import { ERROR_MESSAGES } from '@common/constants';
 
 @Injectable()
@@ -23,6 +24,7 @@ export class ReviewsService {
     private readonly reviewRepository: Repository<Review>,
     @InjectRepository(Reservation)
     private readonly reservationRepository: Repository<Reservation>,
+    private readonly filesService: FilesService,
   ) {}
 
   /**
@@ -30,6 +32,7 @@ export class ReviewsService {
    */
   async create(
     dto: CreateReviewDto,
+    imageFiles: Express.Multer.File[],
     customerId: number,
   ): Promise<CreateReviewResponseDto> {
     const reservationId = parseInt(dto.reservationId);
@@ -65,23 +68,47 @@ export class ReviewsService {
       throw new BadRequestException(ERROR_MESSAGES.REVIEW.ALREADY_REVIEWED);
     }
 
+    // 이미지 업로드 처리
+    let imageUrls: string[] | null = null;
+    if (imageFiles && imageFiles.length > 0) {
+      try {
+        const uploadResults = await Promise.all(
+          imageFiles.map((file) =>
+            this.filesService.uploadImage(file, 'reviews'),
+          ),
+        );
+        imageUrls = uploadResults.map((result) => result.url);
+      } catch (error) {
+        throw new BadRequestException(`이미지 업로드 실패: ${error.message}`);
+      }
+    }
+
     // 리뷰 생성
-    const review = this.reviewRepository.create({
-      reservationId,
-      customerId,
-      serviceId: reservation.serviceId,
-      rating: dto.rating,
-      comment: dto.comment,
-    });
+    try {
+      const review = this.reviewRepository.create({
+        reservationId,
+        customerId,
+        serviceId: reservation.serviceId,
+        rating: dto.rating,
+        comment: dto.comment,
+        images: imageUrls,
+      });
 
-    const saved = await this.reviewRepository.save(review);
+      const saved = await this.reviewRepository.save(review);
 
-    return {
-      id: saved.id.toString(),
-      rating: saved.rating,
-      comment: saved.comment,
-      createdAt: saved.createdAt.toISOString(),
-    };
+      return {
+        id: saved.id.toString(),
+        rating: saved.rating,
+        comment: saved.comment,
+        createdAt: saved.createdAt.toISOString(),
+      };
+    } catch (error) {
+      // 실패 시 업로드된 파일 롤백
+      if (imageUrls && imageUrls.length > 0) {
+        await this.cleanupUploadedFiles(imageUrls);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -182,5 +209,22 @@ export class ReviewsService {
     const middle = '*'.repeat(name.length - 2);
 
     return first + middle + last;
+  }
+
+  /**
+   * 업로드된 파일 정리 (롤백용)
+   */
+  private async cleanupUploadedFiles(urls: string[]): Promise<void> {
+    try {
+      await Promise.all(
+        urls.map((url) => {
+          const s3Key = this.filesService.getFilePathFromUrl(url);
+          return this.filesService.deleteFile(s3Key);
+        }),
+      );
+    } catch (error) {
+      console.error('파일 정리 중 오류 발생:', error);
+      // 에러를 던지지 않음 (메인 트랜잭션 실패가 더 중요)
+    }
   }
 }

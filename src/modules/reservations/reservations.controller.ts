@@ -7,12 +7,17 @@ import {
   Query,
   UseGuards,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Public } from '@common/decorators';
 import { SuccessResponseDto } from '@common/dto/response';
@@ -23,6 +28,7 @@ import {
   AvailableDatesDto,
   ReservationsQueryDto,
 } from './dto/request';
+import { CreateReservationMultipartDto } from './dto/request/create-reservation-multipart.dto';
 import {
   CreateReservationResponseDto,
   ReservationDetailDto,
@@ -79,8 +85,11 @@ export class ReservationsController {
 
   @Post('reservations')
   @UseGuards(CustomerJwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('photos', 5))
   @ApiBearerAuth()
   @ApiOperation({ summary: '예약 생성' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateReservationMultipartDto })
   @ApiResponse({
     status: 201,
     description: '예약 생성 성공',
@@ -89,9 +98,14 @@ export class ReservationsController {
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   async create(
     @Body() dto: CreateReservationDto,
+    @UploadedFiles() photos: Express.Multer.File[],
     @CurrentCustomer() customer: ICurrentCustomer,
   ): Promise<SuccessResponseDto<CreateReservationResponseDto>> {
-    const result = await this.reservationsService.create(dto, customer.id);
+    const result = await this.reservationsService.create(
+      dto,
+      photos,
+      customer.id,
+    );
     return new SuccessResponseDto('예약이 생성되었습니다.', result);
   }
 

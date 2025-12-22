@@ -65,4 +65,12 @@ export class Review extends BaseEntity {
   })
   @Column({ type: 'text' })
   comment: string;
+
+  @ApiProperty({
+    description: '리뷰 이미지 URL 목록',
+    example: ['https://kr.object.ncloudstorage.com/living-craft/reviews/image1.jpg'],
+    nullable: true,
+  })
+  @Column({ type: 'simple-array', nullable: true })
+  images: string[] | null;
 }

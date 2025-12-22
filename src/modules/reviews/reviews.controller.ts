@@ -1,14 +1,27 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Public } from '@common/decorators';
 import { SuccessResponseDto } from '@common/dto/response';
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto, ReviewsQueryDto } from './dto/request';
+import { CreateReviewMultipartDto } from './dto/request/create-review-multipart.dto';
 import {
   CreateReviewResponseDto,
   ReviewListResponseDto,
@@ -42,8 +55,11 @@ export class ReviewsController {
 
   @Post('reviews')
   @UseGuards(CustomerJwtAuthGuard)
+  @UseInterceptors(FilesInterceptor('images', 5))
   @ApiBearerAuth()
   @ApiOperation({ summary: '리뷰 작성' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: CreateReviewMultipartDto })
   @ApiResponse({
     status: 201,
     description: '리뷰 작성 성공',
@@ -53,9 +69,14 @@ export class ReviewsController {
   @ApiResponse({ status: 403, description: '권한 없음' })
   async create(
     @Body() dto: CreateReviewDto,
+    @UploadedFiles() imageFiles: Express.Multer.File[],
     @CurrentCustomer() customer: ICurrentCustomer,
   ): Promise<SuccessResponseDto<CreateReviewResponseDto>> {
-    const result = await this.reviewsService.create(dto, customer.id);
+    const result = await this.reviewsService.create(
+      dto,
+      imageFiles,
+      customer.id,
+    );
     return new SuccessResponseDto('리뷰가 작성되었습니다.', result);
   }
 

@@ -2,7 +2,6 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsArray,
   Matches,
   MaxLength,
 } from 'class-validator';
@@ -135,18 +134,4 @@ export class CreateReservationDto {
   })
   @Transform(({ value }) => value?.trim())
   memo?: string;
-
-  @ApiPropertyOptional({
-    description: '첨부 사진 URL 목록',
-    example: ['https://example.com/photo1.jpg'],
-  })
-  @IsOptional()
-  @IsArray({
-    message: ERROR_MESSAGES.VALIDATION.IS_ARRAY(FIELD_NAMES.photos),
-  })
-  @IsString({
-    each: true,
-    message: ERROR_MESSAGES.VALIDATION.ARRAY_ITEM_STRING(FIELD_NAMES.photos),
-  })
-  photos?: string[];
 }
