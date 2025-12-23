@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   IsNull,
@@ -17,16 +13,15 @@ import {
   ReorderPromotionsDto,
   UpdatePromotionDto,
 } from './dto';
-import { FilesService } from '@modules/files/files.service';
-
-const PROMOTION_ICON_SIZE = 112; // 2x 해상도 (표시: 56x56)
+import { Icon } from '@modules/icons/entities/icon.entity';
 
 @Injectable()
 export class PromotionsService {
   constructor(
     @InjectRepository(Promotion)
     private readonly promotionRepository: Repository<Promotion>,
-    private readonly filesService: FilesService,
+    @InjectRepository(Icon)
+    private readonly iconRepository: Repository<Icon>,
   ) {}
 
   // ============================================
@@ -96,26 +91,14 @@ export class PromotionsService {
   /**
    * 프로모션 생성
    */
-  async create(
-    dto: CreatePromotionDto,
-    iconFile?: Express.Multer.File,
-  ): Promise<Promotion> {
-    let iconUrl: string | undefined;
+  async create(dto: CreatePromotionDto): Promise<Promotion> {
+    // 아이콘 존재 여부 확인
+    const icon = await this.iconRepository.findOne({
+      where: { id: dto.iconId },
+    });
 
-    // 아이콘 이미지 업로드 (112x112 정사각형)
-    if (iconFile) {
-      try {
-        const uploadResult = await this.filesService.uploadImage(
-          iconFile,
-          'promotions',
-          PROMOTION_ICON_SIZE,
-        );
-        iconUrl = uploadResult.url;
-      } catch (error) {
-        throw new BadRequestException(
-          `아이콘 이미지 업로드 실패: ${error.message}`,
-        );
-      }
+    if (!icon) {
+      throw new NotFoundException('아이콘을 찾을 수 없습니다.');
     }
 
     // 다음 정렬 순서 계산
@@ -125,76 +108,56 @@ export class PromotionsService {
     });
     const nextSortOrder = dto.sortOrder ?? (lastPromotion?.sortOrder ?? 0) + 1;
 
-    try {
-      const promotion = this.promotionRepository.create({
-        title: dto.title,
-        subtitle: dto.subtitle,
-        iconUrl,
-        linkUrl: dto.linkUrl,
-        linkType: dto.linkType,
-        startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-        endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-        isActive: dto.isActive ?? true,
-        sortOrder: nextSortOrder,
-      });
+    const promotion = this.promotionRepository.create({
+      title: dto.title,
+      subtitle: dto.subtitle,
+      iconId: dto.iconId,
+      iconBgColor: dto.iconBgColor,
+      iconColor: dto.iconColor,
+      linkUrl: dto.linkUrl,
+      linkType: dto.linkType,
+      startDate: dto.startDate ? new Date(dto.startDate) : undefined,
+      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      isActive: dto.isActive ?? true,
+      sortOrder: nextSortOrder,
+    });
 
-      return this.promotionRepository.save(promotion);
-    } catch (error) {
-      // 실패 시 업로드된 이미지 삭제
-      if (iconUrl) {
-        await this.cleanupUploadedFile(iconUrl);
-      }
-      throw error;
-    }
+    return this.promotionRepository.save(promotion);
   }
 
   /**
    * 프로모션 수정
    */
-  async update(
-    id: number,
-    dto: UpdatePromotionDto,
-    iconFile?: Express.Multer.File,
-  ): Promise<Promotion> {
+  async update(id: number, dto: UpdatePromotionDto): Promise<Promotion> {
     const promotion = await this.findById(id);
-    const oldIconUrl = promotion.iconUrl;
 
-    try {
-      // 새 아이콘 이미지가 있으면 업로드
-      if (iconFile) {
-        const uploadResult = await this.filesService.uploadImage(
-          iconFile,
-          'promotions',
-          PROMOTION_ICON_SIZE,
-        );
-        promotion.iconUrl = uploadResult.url;
+    // 아이콘이 변경되면 존재 여부 확인
+    if (dto.iconId !== undefined) {
+      const icon = await this.iconRepository.findOne({
+        where: { id: dto.iconId },
+      });
 
-        // 기존 이미지 삭제
-        if (oldIconUrl) {
-          await this.cleanupUploadedFile(oldIconUrl);
-        }
+      if (!icon) {
+        throw new NotFoundException('아이콘을 찾을 수 없습니다.');
       }
-
-      // 필드 업데이트
-      if (dto.title !== undefined) promotion.title = dto.title;
-      if (dto.subtitle !== undefined) promotion.subtitle = dto.subtitle;
-      if (dto.linkUrl !== undefined) promotion.linkUrl = dto.linkUrl;
-      if (dto.linkType !== undefined) promotion.linkType = dto.linkType;
-      if (dto.startDate !== undefined)
-        promotion.startDate = dto.startDate ? new Date(dto.startDate) : null;
-      if (dto.endDate !== undefined)
-        promotion.endDate = dto.endDate ? new Date(dto.endDate) : null;
-      if (dto.isActive !== undefined) promotion.isActive = dto.isActive;
-      if (dto.sortOrder !== undefined) promotion.sortOrder = dto.sortOrder;
-
-      return this.promotionRepository.save(promotion);
-    } catch (error) {
-      // 실패 시 새 이미지만 정리
-      if (iconFile && promotion.iconUrl !== oldIconUrl) {
-        await this.cleanupUploadedFile(promotion.iconUrl);
-      }
-      throw error;
+      promotion.iconId = dto.iconId;
     }
+
+    // 필드 업데이트
+    if (dto.title !== undefined) promotion.title = dto.title;
+    if (dto.subtitle !== undefined) promotion.subtitle = dto.subtitle;
+    if (dto.iconBgColor !== undefined) promotion.iconBgColor = dto.iconBgColor;
+    if (dto.iconColor !== undefined) promotion.iconColor = dto.iconColor;
+    if (dto.linkUrl !== undefined) promotion.linkUrl = dto.linkUrl;
+    if (dto.linkType !== undefined) promotion.linkType = dto.linkType;
+    if (dto.startDate !== undefined)
+      promotion.startDate = dto.startDate ? new Date(dto.startDate) : null;
+    if (dto.endDate !== undefined)
+      promotion.endDate = dto.endDate ? new Date(dto.endDate) : null;
+    if (dto.isActive !== undefined) promotion.isActive = dto.isActive;
+    if (dto.sortOrder !== undefined) promotion.sortOrder = dto.sortOrder;
+
+    return this.promotionRepository.save(promotion);
   }
 
   /**
@@ -202,12 +165,6 @@ export class PromotionsService {
    */
   async delete(id: number): Promise<void> {
     const promotion = await this.findById(id);
-
-    // 아이콘 이미지 삭제
-    if (promotion.iconUrl) {
-      await this.cleanupUploadedFile(promotion.iconUrl);
-    }
-
     await this.promotionRepository.remove(promotion);
   }
 
@@ -232,21 +189,5 @@ export class PromotionsService {
 
     await Promise.all(updates);
     return this.findAll();
-  }
-
-  // ============================================
-  // Private Helpers
-  // ============================================
-
-  /**
-   * 업로드된 파일 정리
-   */
-  private async cleanupUploadedFile(url: string): Promise<void> {
-    try {
-      const s3Key = this.filesService.getFilePathFromUrl(url);
-      await this.filesService.deleteFile(s3Key);
-    } catch (error) {
-      console.error('파일 정리 중 오류 발생:', error);
-    }
   }
 }

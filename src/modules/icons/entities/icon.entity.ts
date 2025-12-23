@@ -2,6 +2,7 @@ import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from '@common/entities/base.entity';
 import { IconType } from '../enums/icon-type.enum';
 import { Service } from '@modules/services/entities/service.entity';
+import { Promotion } from '@modules/promotions/entities/promotion.entity';
 
 /**
  * 아이콘 엔티티
@@ -33,4 +34,10 @@ export class Icon extends BaseEntity {
    */
   @OneToMany(() => Service, (service) => service.icon)
   services: Service[];
+
+  /**
+   * 이 아이콘을 사용하는 프로모션 목록
+   */
+  @OneToMany(() => Promotion, (promotion) => promotion.icon)
+  promotions: Promotion[];
 }

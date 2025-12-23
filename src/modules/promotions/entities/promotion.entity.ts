@@ -1,6 +1,7 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BaseEntity } from '@common/entities/base.entity';
+import { Icon } from '@modules/icons/entities/icon.entity';
 
 export enum PromotionLinkType {
   EXTERNAL = 'external',
@@ -23,12 +24,30 @@ export class Promotion extends BaseEntity {
   @Column({ length: 200, nullable: true })
   subtitle: string;
 
-  @ApiPropertyOptional({
-    description: '아이콘 이미지 URL',
-    example: 'https://example.com/promo-icon.webp',
+  @ApiProperty({
+    description: '아이콘 ID',
+    example: 1,
   })
-  @Column({ name: 'icon_url', nullable: true })
-  iconUrl: string;
+  @Column({ name: 'icon_id' })
+  iconId: number;
+
+  @ManyToOne(() => Icon, { eager: true, onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'icon_id' })
+  icon: Icon;
+
+  @ApiProperty({
+    description: '아이콘 배경색',
+    example: '#E3F2FD',
+  })
+  @Column({ name: 'icon_bg_color', length: 10 })
+  iconBgColor: string;
+
+  @ApiProperty({
+    description: '아이콘 색상',
+    example: '#1976D2',
+  })
+  @Column({ name: 'icon_color', length: 10 })
+  iconColor: string;
 
   @ApiPropertyOptional({
     description: '링크 URL',

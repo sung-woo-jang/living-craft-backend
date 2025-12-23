@@ -5,6 +5,7 @@ import {
   IsBoolean,
   IsEnum,
   IsNumber,
+  IsNotEmpty,
   MaxLength,
   Matches,
   Min,
@@ -40,6 +41,51 @@ export class CreatePromotionDto {
   })
   @Transform(({ value }) => value?.trim())
   subtitle?: string;
+
+  @ApiProperty({
+    description: '아이콘 ID',
+    example: 1,
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY('아이콘 ID'),
+  })
+  @IsNumber(
+    {},
+    {
+      message: ERROR_MESSAGES.VALIDATION.IS_NUMBER('아이콘 ID'),
+    },
+  )
+  iconId: number;
+
+  @ApiProperty({
+    description: '아이콘 배경색 (HEX)',
+    example: '#E3F2FD',
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY('아이콘 배경색'),
+  })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING('아이콘 배경색'),
+  })
+  @Matches(/^#[0-9A-Fa-f]{6}$/, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_COLOR_FORMAT,
+  })
+  iconBgColor: string;
+
+  @ApiProperty({
+    description: '아이콘 색상 (HEX)',
+    example: '#1976D2',
+  })
+  @IsNotEmpty({
+    message: ERROR_MESSAGES.VALIDATION.IS_NOT_EMPTY('아이콘 색상'),
+  })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING('아이콘 색상'),
+  })
+  @Matches(/^#[0-9A-Fa-f]{6}$/, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_COLOR_FORMAT,
+  })
+  iconColor: string;
 
   @ApiPropertyOptional({
     description: '링크 URL',

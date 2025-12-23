@@ -6,18 +6,12 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
-  UseInterceptors,
-  UploadedFile,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { memoryStorage } from 'multer';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiConsumes,
-  ApiBody,
 } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@common/dto/response/success-response.dto';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
@@ -99,70 +93,26 @@ export class AdminPromotionsController {
   }
 
   @Post()
-  @UseInterceptors(FileInterceptor('icon', { storage: memoryStorage() }))
   @ApiOperation({ summary: '프로모션 생성' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: '친구 초대하고 함께 쿠폰 받기' },
-        subtitle: {
-          type: 'string',
-          example: '이용하는 친구 초대하고 할인 쿠폰 받기!',
-        },
-        linkUrl: { type: 'string', example: 'https://example.com' },
-        linkType: { type: 'string', enum: ['external', 'internal'] },
-        startDate: { type: 'string', example: '2024-01-01' },
-        endDate: { type: 'string', example: '2024-12-31' },
-        isActive: { type: 'boolean', example: true },
-        sortOrder: { type: 'number', example: 1 },
-        icon: { type: 'string', format: 'binary' },
-      },
-      required: ['title'],
-    },
-  })
   @ApiResponse({ status: 201, description: '생성 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
+  @ApiResponse({ status: 404, description: '아이콘을 찾을 수 없음' })
   async create(
     @Body() dto: CreatePromotionDto,
-    @UploadedFile() iconFile: Express.Multer.File,
   ): Promise<SuccessResponseDto<Promotion>> {
-    const result = await this.promotionsService.create(dto, iconFile);
+    const result = await this.promotionsService.create(dto);
     return new SuccessResponseDto('프로모션이 생성되었습니다.', result);
   }
 
   @Post(':id/update')
-  @UseInterceptors(FileInterceptor('icon', { storage: memoryStorage() }))
   @ApiOperation({ summary: '프로모션 수정' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: '친구 초대하고 함께 쿠폰 받기' },
-        subtitle: {
-          type: 'string',
-          example: '이용하는 친구 초대하고 할인 쿠폰 받기!',
-        },
-        linkUrl: { type: 'string', example: 'https://example.com' },
-        linkType: { type: 'string', enum: ['external', 'internal'] },
-        startDate: { type: 'string', example: '2024-01-01' },
-        endDate: { type: 'string', example: '2024-12-31' },
-        isActive: { type: 'boolean', example: true },
-        sortOrder: { type: 'number', example: 1 },
-        icon: { type: 'string', format: 'binary' },
-      },
-    },
-  })
   @ApiResponse({ status: 200, description: '수정 성공' })
-  @ApiResponse({ status: 404, description: '프로모션을 찾을 수 없음' })
+  @ApiResponse({ status: 404, description: '프로모션 또는 아이콘을 찾을 수 없음' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdatePromotionDto,
-    @UploadedFile() iconFile: Express.Multer.File,
   ): Promise<SuccessResponseDto<Promotion>> {
-    const result = await this.promotionsService.update(id, dto, iconFile);
+    const result = await this.promotionsService.update(id, dto);
     return new SuccessResponseDto('프로모션이 수정되었습니다.', result);
   }
 
