@@ -1,10 +1,19 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from '@common/decorators';
 import { SuccessResponseDto } from '@common/dto/response';
 import { IconsService } from './icons.service';
 import { IconType } from './enums/icon-type.enum';
-import { IconListDto } from '@modules/icons/dto';
+import { IconListDto, CreateIconDto, UpdateIconDto } from '@modules/icons/dto';
+import { Icon } from './entities/icon.entity';
 
 @Controller('icons')
 @ApiTags('아이콘')
@@ -48,5 +57,52 @@ export class IconsController {
   ): Promise<SuccessResponseDto<IconListDto[]>> {
     const icons = await this.iconsService.findAll(type, search, limit);
     return new SuccessResponseDto('아이콘 목록 조회에 성공했습니다.', icons);
+  }
+
+  @Post('admin')
+  @ApiOperation({
+    summary: '아이콘 생성 (관리자)',
+    description: '새로운 아이콘을 생성합니다. 중복된 이름은 허용되지 않습니다.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: '아이콘 생성 성공',
+    type: Icon,
+  })
+  @ApiResponse({
+    status: 400,
+    description: '중복된 아이콘 이름',
+  })
+  async createIcon(
+    @Body() dto: CreateIconDto,
+  ): Promise<SuccessResponseDto<Icon>> {
+    const icon = await this.iconsService.createIcon(dto);
+    return new SuccessResponseDto('아이콘이 생성되었습니다.', icon);
+  }
+
+  @Post('admin/:id/update')
+  @ApiOperation({
+    summary: '아이콘 수정 (관리자)',
+    description: '아이콘 정보를 수정합니다. 중복된 이름은 허용되지 않습니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '아이콘 수정 성공',
+    type: Icon,
+  })
+  @ApiResponse({
+    status: 404,
+    description: '아이콘을 찾을 수 없음',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '중복된 아이콘 이름',
+  })
+  async updateIcon(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateIconDto,
+  ): Promise<SuccessResponseDto<Icon>> {
+    const icon = await this.iconsService.updateIcon(id, dto);
+    return new SuccessResponseDto('아이콘이 수정되었습니다.', icon);
   }
 }

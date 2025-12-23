@@ -23,4 +23,10 @@ export class IconListDto {
     example: IconType.FILL,
   })
   type: IconType;
+
+  @ApiProperty({
+    description: '생성일',
+    example: '2024-01-15T10:30:00.000Z',
+  })
+  createdAt: Date;
 }
