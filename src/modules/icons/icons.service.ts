@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { Icon } from './entities/icon.entity';
 import { IconType } from './enums/icon-type.enum';
-import { IconListDto } from './dto/response/icon-list.dto';
+import { IconListDto, IconListPaginatedDto } from './dto/response';
 import { CreateIconDto, UpdateIconDto } from './dto';
 
 @Injectable()
@@ -18,16 +18,18 @@ export class IconsService {
   ) {}
 
   /**
-   * 아이콘 목록 조회
+   * 아이콘 목록 조회 (페이지네이션 지원)
    * @param type 아이콘 타입 필터 (선택)
    * @param search 아이콘 이름 검색 (선택)
    * @param limit 최대 결과 개수 (기본: 100, 최대: 500)
+   * @param offset 건너뛸 개수 (기본: 0)
    */
   async findAll(
     type?: IconType,
     search?: string,
     limit?: number,
-  ): Promise<IconListDto[]> {
+    offset?: number,
+  ): Promise<IconListPaginatedDto> {
     const where: any = {};
 
     if (type) {
@@ -40,19 +42,30 @@ export class IconsService {
 
     // limit 검증 (기본: 100, 최대: 500)
     const take = Math.min(limit || 100, 500);
+    const skip = offset || 0;
 
-    const icons = await this.iconRepository.find({
+    // 전체 개수와 데이터를 동시에 조회
+    const [icons, total] = await this.iconRepository.findAndCount({
       where,
       order: { name: 'ASC' },
       take,
+      skip,
     });
 
-    return icons.map((icon) => ({
+    const items = icons.map((icon) => ({
       id: icon.id,
       name: icon.name,
       type: icon.type,
       createdAt: icon.createdAt,
     }));
+
+    return {
+      items,
+      total,
+      count: items.length,
+      limit: take,
+      offset: skip,
+    };
   }
 
   /**

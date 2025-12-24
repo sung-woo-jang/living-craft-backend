@@ -12,7 +12,12 @@ import { Public } from '@common/decorators';
 import { SuccessResponseDto } from '@common/dto/response';
 import { IconsService } from './icons.service';
 import { IconType } from './enums/icon-type.enum';
-import { IconListDto, CreateIconDto, UpdateIconDto } from '@modules/icons/dto';
+import {
+  IconListDto,
+  IconListPaginatedDto,
+  CreateIconDto,
+  UpdateIconDto,
+} from '@modules/icons/dto';
 import { Icon } from './entities/icon.entity';
 
 @Controller('icons')
@@ -23,9 +28,9 @@ export class IconsController {
   @Get()
   @Public()
   @ApiOperation({
-    summary: '아이콘 목록 조회',
+    summary: '아이콘 목록 조회 (페이지네이션)',
     description:
-      '등록된 모든 아이콘을 조회합니다. 타입별 필터링 및 이름 검색 가능.',
+      '등록된 모든 아이콘을 페이지네이션으로 조회합니다. 타입별 필터링 및 이름 검색 가능.',
   })
   @ApiQuery({
     name: 'type',
@@ -45,18 +50,25 @@ export class IconsController {
     type: Number,
     description: '최대 결과 개수 (기본: 100, 최대: 500)',
   })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    type: Number,
+    description: '건너뛸 개수 (기본: 0)',
+  })
   @ApiResponse({
     status: 200,
     description: '아이콘 목록 조회 성공',
-    type: [IconListDto],
+    type: IconListPaginatedDto,
   })
   async findAll(
     @Query('type') type?: IconType,
     @Query('search') search?: string,
     @Query('limit') limit?: number,
-  ): Promise<SuccessResponseDto<IconListDto[]>> {
-    const icons = await this.iconsService.findAll(type, search, limit);
-    return new SuccessResponseDto('아이콘 목록 조회에 성공했습니다.', icons);
+    @Query('offset') offset?: number,
+  ): Promise<SuccessResponseDto<IconListPaginatedDto>> {
+    const result = await this.iconsService.findAll(type, search, limit, offset);
+    return new SuccessResponseDto('아이콘 목록 조회에 성공했습니다.', result);
   }
 
   @Post('admin')
