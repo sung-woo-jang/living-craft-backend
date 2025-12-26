@@ -104,6 +104,7 @@ export class AdminServicesService {
       description: dto.description,
       iconId: icon.id,
       iconBgColor: dto.iconBgColor,
+      iconColor: dto.iconColor,
       duration: dto.duration,
       requiresTimeSelection: dto.requiresTimeSelection,
       sortOrder,
@@ -168,6 +169,7 @@ export class AdminServicesService {
     }
 
     if (dto.iconBgColor !== undefined) service.iconBgColor = dto.iconBgColor;
+    if (dto.iconColor !== undefined) service.iconColor = dto.iconColor;
     if (dto.duration !== undefined) service.duration = dto.duration;
     if (dto.requiresTimeSelection !== undefined)
       service.requiresTimeSelection = dto.requiresTimeSelection;

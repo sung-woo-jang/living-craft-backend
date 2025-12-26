@@ -210,6 +210,7 @@ export const FIELD_NAMES = {
   duration: '소요 시간',
   iconName: '아이콘 이름',
   iconBgColor: '배경색',
+  iconColor: '아이콘 색상',
   requiresTimeSelection: '시간 선택 필요 여부',
 
   // 리뷰

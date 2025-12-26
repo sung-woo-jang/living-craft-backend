@@ -138,6 +138,12 @@ export class ServiceAdminDetailDto {
   iconBgColor: string;
 
   @ApiProperty({
+    description: '아이콘 색상 (HEX)',
+    example: '#424242',
+  })
+  iconColor: string;
+
+  @ApiProperty({
     description: '작업 소요 시간',
     example: '하루 종일',
   })

@@ -104,6 +104,18 @@ export class CreateServiceDto {
   iconBgColor: string;
 
   @ApiProperty({
+    description: '아이콘 색상 (HEX 색상 코드)',
+    example: '#424242',
+  })
+  @IsString({
+    message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.iconColor),
+  })
+  @Matches(/^#[0-9A-Fa-f]{6}$/, {
+    message: ERROR_MESSAGES.VALIDATION.INVALID_COLOR_FORMAT,
+  })
+  iconColor: string;
+
+  @ApiProperty({
     description: '작업 소요 시간',
     example: '하루 종일',
   })

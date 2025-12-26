@@ -120,6 +120,7 @@ export class ServicesService {
       description: service.description,
       iconName: service.icon?.name ?? '',
       iconBgColor: service.iconBgColor,
+      iconColor: service.iconColor,
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,
       isActive: service.isActive,
@@ -175,6 +176,7 @@ export class ServicesService {
           }
         : { id: 0, name: '', type: IconType.FILL, createdAt: new Date() },
       iconBgColor: service.iconBgColor,
+      iconColor: service.iconColor,
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,
       isActive: service.isActive,
@@ -205,6 +207,7 @@ export class ServicesService {
         description: dto.description,
         iconId: dto.iconId,
         iconBgColor: dto.iconBgColor,
+        iconColor: dto.iconColor,
         duration: dto.duration,
         requiresTimeSelection: dto.requiresTimeSelection,
         sortOrder: dto.sortOrder ?? 0,
@@ -295,6 +298,8 @@ export class ServicesService {
       if (dto.iconId !== undefined) updateData.iconId = dto.iconId;
       if (dto.iconBgColor !== undefined)
         updateData.iconBgColor = dto.iconBgColor;
+      if (dto.iconColor !== undefined)
+        updateData.iconColor = dto.iconColor;
       if (dto.duration !== undefined) updateData.duration = dto.duration;
       if (dto.requiresTimeSelection !== undefined)
         updateData.requiresTimeSelection = dto.requiresTimeSelection;
@@ -473,6 +478,7 @@ export class ServicesService {
         createdAt: service.icon.createdAt,
       },
       iconBgColor: service.iconBgColor,
+      iconColor: service.iconColor,
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,
       isActive: service.isActive,
@@ -651,6 +657,7 @@ export class ServicesService {
         createdAt: service.icon.createdAt,
       },
       iconBgColor: service.iconBgColor,
+      iconColor: service.iconColor,
       duration: service.duration,
       requiresTimeSelection: service.requiresTimeSelection,
       serviceableRegions,
