@@ -47,19 +47,19 @@ export class Service extends BaseEntity {
   @JoinColumn({ name: 'icon_id' })
   icon: Icon;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: '아이콘 배경색 (HEX)',
     example: '#E3F2FD',
   })
-  @Column({ name: 'icon_bg_color', length: 10 })
-  iconBgColor: string;
+  @Column({ name: 'icon_bg_color', length: 10, nullable: true })
+  iconBgColor: string | null;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: '아이콘 색상 (HEX)',
     example: '#424242',
   })
-  @Column({ name: 'icon_color', length: 10 })
-  iconColor: string;
+  @Column({ name: 'icon_color', length: 10, nullable: true })
+  iconColor: string | null;
 
   @ApiProperty({
     description: '작업 소요 시간',

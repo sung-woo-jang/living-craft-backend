@@ -70,23 +70,28 @@ export class AdminCreateServiceDto {
   })
   iconName: string;
 
-  @ApiProperty({ description: '아이콘 배경색 (HEX)', example: '#E3F2FD' })
+  @ApiPropertyOptional({
+    description: '아이콘 배경색 (HEX)',
+    example: '#E3F2FD',
+  })
+  @IsOptional()
   @IsString({
     message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.iconBgColor),
   })
   @MaxLength(10, {
     message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(FIELD_NAMES.iconBgColor, 10),
   })
-  iconBgColor: string;
+  iconBgColor?: string | null;
 
-  @ApiProperty({ description: '아이콘 색상 (HEX)', example: '#424242' })
+  @ApiPropertyOptional({ description: '아이콘 색상 (HEX)', example: '#424242' })
+  @IsOptional()
   @IsString({
     message: ERROR_MESSAGES.VALIDATION.IS_STRING(FIELD_NAMES.iconColor),
   })
   @MaxLength(10, {
     message: ERROR_MESSAGES.VALIDATION.MAX_LENGTH(FIELD_NAMES.iconColor, 10),
   })
-  iconColor: string;
+  iconColor?: string | null;
 
   @ApiProperty({ description: '작업 소요 시간', example: '하루 종일' })
   @IsString({
