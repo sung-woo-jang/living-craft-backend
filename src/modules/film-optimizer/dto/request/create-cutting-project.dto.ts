@@ -4,12 +4,33 @@ import {
   IsBoolean,
   IsOptional,
   IsArray,
+  IsObject,
   MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+/**
+ * 고정 위치 DTO
+ */
+class FixedPositionInputDto {
+  @IsNumber()
+  x: number;
+
+  @IsNumber()
+  y: number;
+
+  @IsNumber()
+  width: number;
+
+  @IsNumber()
+  height: number;
+
+  @IsBoolean()
+  rotated: boolean;
+}
 
 /**
  * 재단 조각 입력 DTO
@@ -50,6 +71,31 @@ export class CuttingPieceInputDto {
   @IsString({ message: '라벨은 문자열이어야 합니다.' })
   @MaxLength(100, { message: '라벨은 100자를 초과할 수 없습니다.' })
   label?: string;
+
+  @ApiPropertyOptional({
+    description: '재단 완료 여부',
+    example: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: '완료 여부는 boolean이어야 합니다.' })
+  isCompleted?: boolean;
+
+  @ApiPropertyOptional({
+    description: '완료된 조각의 고정 위치',
+    example: { x: 0, y: 0, width: 500, height: 400, rotated: false },
+  })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => FixedPositionInputDto)
+  fixedPosition?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotated: boolean;
+  };
 }
 
 /**

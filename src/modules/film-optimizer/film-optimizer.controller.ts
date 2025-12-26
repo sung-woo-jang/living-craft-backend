@@ -23,6 +23,7 @@ import {
   UpdateCuttingProjectDto,
   AddPiecesDto,
   UpdatePieceDto,
+  TogglePieceCompleteDto,
 } from './dto/request';
 import {
   FilmListItemDto,
@@ -276,10 +277,12 @@ export class FilmOptimizerController {
   async togglePieceComplete(
     @Param('projectId', ParseIntPipe) projectId: number,
     @Param('pieceId', ParseIntPipe) pieceId: number,
+    @Body() dto: TogglePieceCompleteDto,
   ): Promise<SuccessResponseDto<CuttingPieceResponseDto>> {
     const piece = await this.filmOptimizerService.togglePieceComplete(
       projectId,
       pieceId,
+      dto.fixedPosition,
     );
     return new SuccessResponseDto('재단 완료 상태가 변경되었습니다.', piece);
   }

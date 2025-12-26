@@ -47,6 +47,18 @@ export class CuttingPieceResponseDto {
   })
   isCompleted: boolean;
 
+  @ApiPropertyOptional({
+    description: '완료된 조각의 고정 위치',
+    example: { x: 0, y: 0, width: 500, height: 400, rotated: false },
+  })
+  fixedPosition: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotated: boolean;
+  } | null;
+
   @ApiProperty({
     description: '생성일시',
     example: '2024-01-15T10:30:00.000Z',

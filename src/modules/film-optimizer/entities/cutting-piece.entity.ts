@@ -59,4 +59,17 @@ export class CuttingPiece extends BaseEntity {
   })
   @Column({ name: 'is_completed', default: false })
   isCompleted: boolean;
+
+  @ApiPropertyOptional({
+    description: '완료된 조각의 고정 위치 (패킹 결과에서의 위치)',
+    example: { x: 0, y: 0, width: 500, height: 400, rotated: false },
+  })
+  @Column({ name: 'fixed_position', type: 'jsonb', nullable: true })
+  fixedPosition: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    rotated: boolean;
+  } | null;
 }

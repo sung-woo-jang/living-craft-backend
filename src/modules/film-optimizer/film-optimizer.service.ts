@@ -183,6 +183,8 @@ export class FilmOptimizerService {
           quantity: piece.quantity ?? 1,
           label: piece.label,
           sortOrder: index,
+          isCompleted: piece.isCompleted ?? false,
+          fixedPosition: piece.fixedPosition ?? null,
         }),
       );
       await this.pieceRepository.save(pieces);
@@ -270,6 +272,8 @@ export class FilmOptimizerService {
         quantity: piece.quantity ?? 1,
         label: piece.label,
         sortOrder: maxSortOrder + 1 + index,
+        isCompleted: piece.isCompleted ?? false,
+        fixedPosition: piece.fixedPosition ?? null,
       }),
     );
 
@@ -317,10 +321,20 @@ export class FilmOptimizerService {
 
   /**
    * 재단 완료 토글
+   * @param projectId 프로젝트 ID
+   * @param pieceId 조각 ID
+   * @param fixedPosition 완료 시 고정 위치 (선택적)
    */
   async togglePieceComplete(
     projectId: number,
     pieceId: number,
+    fixedPosition?: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      rotated: boolean;
+    },
   ): Promise<CuttingPieceResponseDto> {
     const piece = await this.pieceRepository.findOne({
       where: { id: pieceId, projectId },
@@ -331,6 +345,14 @@ export class FilmOptimizerService {
     }
 
     piece.isCompleted = !piece.isCompleted;
+
+    // 완료로 전환 시 fixedPosition 저장, 미완료로 전환 시 null로 초기화
+    if (piece.isCompleted && fixedPosition) {
+      piece.fixedPosition = fixedPosition;
+    } else if (!piece.isCompleted) {
+      piece.fixedPosition = null;
+    }
+
     const updatedPiece = await this.pieceRepository.save(piece);
 
     return this.toPieceResponseDto(updatedPiece);
@@ -409,6 +431,7 @@ export class FilmOptimizerService {
       label: piece.label,
       sortOrder: piece.sortOrder,
       isCompleted: piece.isCompleted,
+      fixedPosition: piece.fixedPosition ?? null,
       createdAt: piece.createdAt,
     };
   }
