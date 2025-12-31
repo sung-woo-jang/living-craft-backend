@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { FileUtil } from '@common/utils/file.util';
@@ -27,31 +27,13 @@ export class FilesService {
 
   /**
    * Multer 설정 반환
+   * 메모리 스토리지 사용 (file.buffer 제공)
    */
-  getMulterOptions(subfolder = 'general'): MulterOptions {
+  getMulterOptions(): MulterOptions {
     return {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadDir = join(this.uploadPath, subfolder);
-          FileUtil.ensureDirectoryExists(uploadDir);
-          cb(null, uploadDir);
-        },
-        filename: (req, file, cb) => {
-          const uniqueName = FileUtil.generateUniqueFilename(file.originalname);
-          cb(null, uniqueName);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
-        const allowedTypes = [
-          '.jpg',
-          '.jpeg',
-          '.png',
-          '.gif',
-          '.webp',
-          '.pdf',
-          '.doc',
-          '.docx',
-        ];
+        const allowedTypes = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 
         if (FileUtil.isAllowedFileType(file.originalname, allowedTypes)) {
           cb(null, true);

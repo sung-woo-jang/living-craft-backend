@@ -17,6 +17,7 @@ import { FilesService } from './files.service';
 import { SuccessBaseResponseDto } from '@common/dto/response/success-base-response.dto';
 import { SwaggerBaseApply } from '@common/decorators/swagger-base-apply.decorator';
 import { ERROR_MESSAGES } from '@common/constants';
+import { UploadReservationPhotosResponseDto } from './dto/response';
 
 @ApiTags('파일 테스트')
 @Controller('files')
@@ -70,5 +71,44 @@ export class FilesController {
       '테스트 파일들을 업로드했습니다.',
       results,
     );
+  }
+
+  @Post('reservations/upload-photos')
+  @UseInterceptors(FilesInterceptor('photos', 5))
+  @ApiOperation({
+    summary: '예약용 사진 업로드',
+    description:
+      '예약 생성 전 사진을 사전 업로드합니다. 최대 5장까지 업로드 가능합니다.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({
+    status: 201,
+    type: UploadReservationPhotosResponseDto,
+    description: '사진 업로드 성공',
+  })
+  @ApiResponse({ status: 400, description: '잘못된 요청' })
+  async uploadReservationPhotos(
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException(ERROR_MESSAGES.FILES.NOT_SELECTED);
+    }
+    if (files.length > 5) {
+      throw new BadRequestException(
+        '사진은 최대 5장까지 업로드할 수 있습니다.',
+      );
+    }
+
+    const uploadResults = await Promise.all(
+      files.map((file) => this.filesService.uploadImage(file, 'reservations')),
+    );
+
+    const photos = uploadResults.map((result) => ({
+      filename: result.filename,
+      path: result.path,
+      url: result.url,
+    }));
+
+    return new SuccessBaseResponseDto('사진을 업로드했습니다.', { photos });
   }
 }
