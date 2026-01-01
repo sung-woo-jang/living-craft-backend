@@ -6,6 +6,7 @@ import { ReservationsService } from './reservations.service';
 import { ServicesModule } from '@modules/services/services.module';
 import { SettingsModule } from '@modules/settings/settings.module';
 import { FilesModule } from '@modules/files/files.module';
+import { CustomersModule } from '@modules/customers/customers.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { FilesModule } from '@modules/files/files.module';
     ServicesModule,
     SettingsModule,
     FilesModule,
+    CustomersModule,
   ],
   controllers: [ReservationsController],
   providers: [ReservationsService],

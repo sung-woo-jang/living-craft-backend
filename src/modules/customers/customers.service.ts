@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Customer } from './entities';
@@ -50,6 +50,25 @@ export class CustomersService {
   async findByTossUserId(tossUserId: string): Promise<Customer | null> {
     return this.customerRepository.findOne({
       where: { tossUserId },
+    });
+  }
+
+  /**
+   * 개발 환경용 고객 조회
+   * 환경 변수 DEV_CUSTOMER_ID가 있으면 해당 고객 조회,
+   * 없으면 toss_user_id가 있는 첫 번째 고객 조회
+   */
+  async findDevCustomer(): Promise<Customer | null> {
+    const devCustomerId = this.configService.get<number>('DEV_CUSTOMER_ID');
+
+    if (devCustomerId) {
+      return this.findById(devCustomerId);
+    }
+
+    // toss_user_id가 있는 첫 번째 고객 조회
+    return this.customerRepository.findOne({
+      where: { tossUserId: Not(IsNull()) },
+      order: { id: 'ASC' },
     });
   }
 
