@@ -23,6 +23,22 @@ export class AdminReservationsService {
   ) {}
 
   /**
+   * 예약 상세 조회 (관리자)
+   */
+  async findOne(id: number): Promise<Reservation> {
+    const reservation = await this.reservationRepository.findOne({
+      where: { id },
+      relations: ['service', 'customer'],
+    });
+
+    if (!reservation) {
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
+    }
+
+    return reservation;
+  }
+
+  /**
    * 전체 예약 목록 조회 (관리자)
    */
   async findAll(

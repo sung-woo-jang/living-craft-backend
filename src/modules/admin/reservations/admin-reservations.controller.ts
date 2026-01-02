@@ -51,6 +51,17 @@ export class AdminReservationsController {
     return new SuccessResponseDto('예약 목록 조회에 성공했습니다.', result);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: '예약 상세 조회' })
+  @ApiResponse({ status: 200, description: '조회 성공' })
+  @ApiResponse({ status: 404, description: '예약을 찾을 수 없음' })
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<SuccessResponseDto<any>> {
+    const result = await this.adminReservationsService.findOne(id);
+    return new SuccessResponseDto('예약 조회에 성공했습니다.', result);
+  }
+
   @Post(':id/status')
   @ApiOperation({ summary: '예약 상태 변경' })
   @ApiResponse({ status: 200, description: '상태 변경 성공' })

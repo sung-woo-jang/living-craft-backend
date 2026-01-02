@@ -5,18 +5,23 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindOptionsWhere } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/request/create-user.dto';
-import { UpdateUserDto } from './dto/request/update-user.dto';
-import { UsersQueryDto } from './dto/request/users-query.dto';
+import {
+  UsersQueryDto,
+  UpdateUserDto,
+  CreateUserDto,
+} from '@modules/admin/users/dto';
 import { ERROR_MESSAGES } from '@common/constants';
+import { UserRole } from '@common/enums';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
   // 사용자 생성
@@ -184,6 +189,25 @@ export class UsersService {
   async updateLastLogin(id: number): Promise<void> {
     await this.userRepository.update(id, {
       lastLoginAt: new Date(),
+    });
+  }
+
+  /**
+   * 개발 환경용 사용자 조회
+   * JwtAuthGuard에서 개발 환경 우회 시 사용
+   */
+  async findDevUser(): Promise<User | null> {
+    const devUserId = this.configService.get<number>('DEV_USER_ID');
+
+    if (devUserId) {
+      return this.findUserById(devUserId);
+    }
+
+    // SUPERADMIN 역할의 첫 번째 사용자 조회
+    return this.userRepository.findOne({
+      where: { role: UserRole.SUPERADMIN },
+      order: { id: 'ASC' },
+      select: ['id', 'uuid', 'email', 'role', 'status'],
     });
   }
 }

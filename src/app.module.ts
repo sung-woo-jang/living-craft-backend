@@ -18,6 +18,7 @@ import { FilesModule } from '@modules/files/files.module';
 import { HealthModule } from '@modules/health/health.module';
 import { IconsModule } from '@modules/icons/icons.module';
 import { AdminModule } from '@modules/admin/admin.module';
+import { UsersModule } from '@modules/admin/users/users.module';
 import { CustomersModule } from '@modules/customers/customers.module';
 import { ServicesModule } from '@modules/services/services.module';
 import { SettingsModule } from '@modules/settings/settings.module';
@@ -49,6 +50,7 @@ import { PromotionsModule } from '@modules/promotions/promotions.module';
     FilesModule,
     HealthModule,
     IconsModule,
+    UsersModule, // 전역 JwtAuthGuard에서 UsersService 사용
     AdminModule,
     CustomersModule,
     ServicesModule,

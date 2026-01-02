@@ -21,5 +21,6 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AdminCustomersModule,
     DashboardModule,
   ],
+  exports: [UsersModule], // JwtAuthGuard에서 UsersService 사용
 })
 export class AdminModule {}
