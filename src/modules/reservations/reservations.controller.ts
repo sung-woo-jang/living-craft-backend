@@ -27,6 +27,7 @@ import {
   AvailableTimesDto,
   AvailableDatesDto,
   ReservationsQueryDto,
+  UpdateReservationStatusDto,
 } from './dto/request';
 import { CreateReservationMultipartDto } from './dto/request/create-reservation-multipart.dto';
 import {
@@ -165,5 +166,25 @@ export class ReservationsController {
       query,
     );
     return new SuccessResponseDto('내 예약 목록 조회에 성공했습니다.', result);
+  }
+
+  @Post('admin/reservations/:id/status')
+  @ApiOperation({ summary: '[관리자] 예약 상태 변경' })
+  @ApiResponse({
+    status: 201,
+    description: '상태 변경 성공',
+    type: ReservationDetailDto,
+  })
+  @ApiResponse({ status: 400, description: '잘못된 상태 전환' })
+  @ApiResponse({ status: 404, description: '예약을 찾을 수 없음' })
+  async updateReservationStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateReservationStatusDto,
+  ): Promise<SuccessResponseDto<ReservationDetailDto>> {
+    const result = await this.reservationsService.updateStatus(
+      id,
+      dto.status,
+    );
+    return new SuccessResponseDto('예약 상태가 변경되었습니다.', result);
   }
 }

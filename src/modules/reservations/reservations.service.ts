@@ -460,6 +460,60 @@ export class ReservationsService {
   }
 
   /**
+   * 예약 상태 변경 (관리자용)
+   */
+  async updateStatus(id: number, newStatus: ReservationStatus): Promise<ReservationDetailDto> {
+    const reservation = await this.reservationRepository.findOne({
+      where: { id },
+      relations: ['service'],
+    });
+
+    if (!reservation) {
+      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
+    }
+
+    // 상태 전환 유효성 검사
+    this.validateStatusTransition(reservation.status, newStatus);
+
+    if (newStatus === ReservationStatus.CONFIRMED) {
+      reservation.confirmedAt = new Date();
+    }
+
+    reservation.status = newStatus;
+    const saved = await this.reservationRepository.save(reservation);
+
+    return this.toReservationDetailDto(saved);
+  }
+
+  /**
+   * 상태 전환 유효성 검사
+   */
+  private validateStatusTransition(
+    currentStatus: ReservationStatus,
+    newStatus: ReservationStatus,
+  ): void {
+    const validTransitions: Record<ReservationStatus, ReservationStatus[]> = {
+      [ReservationStatus.PENDING]: [
+        ReservationStatus.CONFIRMED,
+        ReservationStatus.CANCELLED,
+      ],
+      [ReservationStatus.CONFIRMED]: [
+        ReservationStatus.COMPLETED,
+        ReservationStatus.CANCELLED,
+      ],
+      [ReservationStatus.COMPLETED]: [],
+      [ReservationStatus.CANCELLED]: [],
+    };
+
+    const allowedTransitions = validTransitions[currentStatus];
+    if (!allowedTransitions.includes(newStatus)) {
+      throw new BadRequestException(
+        `${currentStatus} 상태에서는 ${newStatus}로 변경할 수 없습니다.`,
+      );
+    }
+  }
+
+  /**
    * Reservation을 ReservationDetailDto로 변환
    */
   private toReservationDetailDto(

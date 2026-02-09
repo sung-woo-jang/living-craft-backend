@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation, ReservationStatus } from '@modules/reservations/entities';
@@ -10,7 +6,6 @@ import {
   AdminReservationsQueryDto,
   UpdateReservationStatusDto,
   AdminReservationStatusUpdate,
-  ScheduleConstructionDto,
 } from './dto/request';
 import { AdminReservationListResponseDto } from './dto/response';
 import { ERROR_MESSAGES } from '@common/constants';
@@ -126,9 +121,9 @@ export class AdminReservationsService {
     const now = new Date();
 
     switch (dto.status) {
-      case AdminReservationStatusUpdate.ESTIMATE_CONFIRMED:
-        reservation.status = ReservationStatus.ESTIMATE_CONFIRMED;
-        reservation.estimateConfirmedAt = now;
+      case AdminReservationStatusUpdate.CONFIRMED:
+        reservation.status = ReservationStatus.CONFIRMED;
+        reservation.confirmedAt = now;
         break;
       case AdminReservationStatusUpdate.COMPLETED:
         reservation.status = ReservationStatus.COMPLETED;
@@ -138,37 +133,6 @@ export class AdminReservationsService {
         reservation.cancelledAt = now;
         break;
     }
-
-    await this.reservationRepository.save(reservation);
-  }
-
-  /**
-   * 시공 일정 지정 (관리자)
-   * 견적 확정(ESTIMATE_CONFIRMED) 상태에서만 시공 일정 지정 가능
-   */
-  async scheduleConstruction(
-    id: number,
-    dto: ScheduleConstructionDto,
-  ): Promise<void> {
-    const reservation = await this.reservationRepository.findOne({
-      where: { id },
-    });
-
-    if (!reservation) {
-      throw new NotFoundException(ERROR_MESSAGES.RESERVATION.NOT_FOUND);
-    }
-
-    // 견적 확정 상태에서만 시공 일정 지정 가능
-    if (reservation.status !== ReservationStatus.ESTIMATE_CONFIRMED) {
-      throw new BadRequestException(
-        '견적 확정 상태에서만 시공 일정을 지정할 수 있습니다.',
-      );
-    }
-
-    reservation.constructionDate = new Date(dto.constructionDate);
-    reservation.constructionTime = dto.constructionTime || null;
-    reservation.constructionScheduledAt = new Date();
-    reservation.status = ReservationStatus.CONSTRUCTION_SCHEDULED;
 
     await this.reservationRepository.save(reservation);
   }

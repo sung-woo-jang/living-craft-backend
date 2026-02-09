@@ -23,7 +23,6 @@ import { AdminReservationsService } from './admin-reservations.service';
 import {
   AdminReservationsQueryDto,
   UpdateReservationStatusDto,
-  ScheduleConstructionDto,
 } from './dto/request';
 import { AdminReservationListResponseDto } from './dto/response';
 
@@ -83,22 +82,5 @@ export class AdminReservationsController {
   ): Promise<SuccessResponseDto<void>> {
     await this.adminReservationsService.cancel(id);
     return new SuccessResponseDto('예약이 취소되었습니다.');
-  }
-
-  @Post(':id/schedule-construction')
-  @ApiOperation({
-    summary: '시공 일정 지정',
-    description:
-      '견적 확정(estimate_confirmed) 상태의 예약에 시공 일정을 지정합니다.',
-  })
-  @ApiResponse({ status: 200, description: '시공 일정 지정 성공' })
-  @ApiResponse({ status: 400, description: '견적 확정 상태가 아님' })
-  @ApiResponse({ status: 404, description: '예약을 찾을 수 없음' })
-  async scheduleConstruction(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: ScheduleConstructionDto,
-  ): Promise<SuccessResponseDto<void>> {
-    await this.adminReservationsService.scheduleConstruction(id, dto);
-    return new SuccessResponseDto('시공 일정이 지정되었습니다.');
   }
 }

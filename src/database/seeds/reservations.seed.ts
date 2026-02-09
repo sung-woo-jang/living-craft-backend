@@ -40,7 +40,7 @@ export async function createReservations(): Promise<void> {
   // 상태 분포 배열 (50건)
   const statusDistribution = [
     ...Array(10).fill(ReservationStatus.PENDING), // 20%
-    ...Array(15).fill(ReservationStatus.ESTIMATE_CONFIRMED), // 30%
+    ...Array(15).fill(ReservationStatus.CONFIRMED), // 30%
     ...Array(20).fill(ReservationStatus.COMPLETED), // 40%
     ...Array(5).fill(ReservationStatus.CANCELLED), // 10%
   ];
@@ -171,7 +171,7 @@ export async function createReservations(): Promise<void> {
     `   - PENDING: ${reservations.filter((r) => r.status === ReservationStatus.PENDING).length}`,
   );
   console.log(
-    `   - ESTIMATE_CONFIRMED: ${reservations.filter((r) => r.status === ReservationStatus.ESTIMATE_CONFIRMED).length}`,
+    `   - CONFIRMED: ${reservations.filter((r) => r.status === ReservationStatus.CONFIRMED).length}`,
   );
   console.log(
     `   - COMPLETED: ${reservations.filter((r) => r.status === ReservationStatus.COMPLETED).length}`,
