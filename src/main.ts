@@ -8,7 +8,8 @@ import { AppModule } from './app.module';
 import { CustomValidationPipe } from '@common/pipes';
 
 // Explicitly load environment variables
-dotenv.config();
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
+dotenv.config({ path: envFile });
 
 /**
  * 고객용 API만 포함하는 필터링 함수
@@ -70,10 +71,19 @@ async function bootstrap() {
   const environment = configService.get<string>('app.environment');
 
   // CORS 설정
+  const corsOrigins = process.env.CORS_ORIGINS || '';
+  const allowedOrigins = corsOrigins
+    ? corsOrigins.split(',').map(origin => origin.trim())
+    : [];
+
+  console.log('🌍 CORS_ORIGINS:', process.env.CORS_ORIGINS);
+  console.log('🌍 Allowed Origins:', allowedOrigins);
+  console.log('🌍 Environment:', environment);
+
   app.enableCors({
-    origin: environment === 'development' ? true : ['https://yourdomain.com'],
+    origin: true, // 임시로 모든 Origin 허용
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
